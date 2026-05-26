@@ -1,12 +1,10 @@
-# Contract Documents
+# 계약 문서
 
-Contract documents define behavior, not downstream policy.
+계약 문서는 동작을 정의하지 Downstream 정책을 정의하지 않는다.
 
-These documents describe the current core contracts that `evidence-toolchain`
-should preserve as code evolves. They are intentionally domain-neutral. They
-name what each object may carry, what it may decide, and what it must not decide.
+이 문서들은 code가 evolve하더라도 `evidence-toolchain`이 보존해야 하는 현재 core contract를 설명합니다. 의도적으로 domain-neutral하게 작성하며, 각 object가 무엇을 담을 수 있는지, 무엇을 판단할 수 있는지, 무엇을 판단해서는 안 되는지를 이름 붙입니다.
 
-## Read Order
+## 읽는 순서
 
 1. [Evidence Document](evidence-document.md)
 2. [Declared Input](declared-input.md)
@@ -14,26 +12,25 @@ name what each object may carry, what it may decide, and what it must not decide
 4. [Evidence Check](evidence-check.md)
 5. [Evidence Report](evidence-report.md)
 
-## Contract Rule
+## 계약 규칙
 
-The core contracts may describe evidence-processing state:
+Core contract는 evidence-processing state를 설명할 수 있습니다.
 
 - document identity
-- requested or declared inputs
-- extracted candidate fields
+- requested 또는 declared input
+- extracted candidate field
 - provenance
 - confidence
-- issues
-- review triggers
-- support, contradiction, missing, or uncertainty states
+- issue
+- review trigger
+- support, contradiction, missing, uncertainty state
 
-They must not encode downstream authority:
+Core contract는 Downstream authority를 encode하면 안 됩니다.
 
 - final domain approval
-- legal or compliance sufficiency
+- legal 또는 compliance sufficiency
 - publication approval
-- commit or receipt authority
-- audit ledger decisions
+- commit 또는 receipt authority
+- audit ledger decision
 
-Downstream consumers may translate these contracts into their own policy or
-workflow language through adapters.
+Downstream consumer는 adapter를 통해 이 contract를 자기 policy 또는 workflow language로 번역할 수 있습니다.

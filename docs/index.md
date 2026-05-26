@@ -14,8 +14,8 @@
 6. [Failure Modes](failure-modes.md)
 7. [Adapter Boundary](adapter-boundary.md)
 8. [Synthetic Evidence Testkit](synthetic-evidence.md)
-9. [Contract Documents](contracts/README.md)
-10. [Testing Strategy](testing/README.md)
+9. [계약 문서](contracts/README.md)
+10. [테스트 전략](testing/README.md)
 
 ## 프로젝트 입장
 

@@ -37,15 +37,15 @@ def test_contract_docs_are_indexed_and_define_allowed_boundaries():
     assert contracts_index.exists()
 
     contracts_text = contracts_index.read_text(encoding="utf-8")
-    assert "Contract documents define behavior, not downstream policy." in contracts_text
+    assert "계약 문서는 동작을 정의하지 Downstream 정책을 정의하지 않는다." in contracts_text
     assert "contracts/README.md" in docs_index
 
     for filename in contract_docs:
         path = Path("docs/contracts") / filename
         assert path.exists(), f"missing {path}"
         text = path.read_text(encoding="utf-8")
-        assert "May" in text
-        assert "Must not" in text
+        assert "포함할 수 있는 것" in text
+        assert "해서는 안 되는 일" in text
         assert "Downstream" in text
 
 
@@ -61,16 +61,16 @@ def test_testing_strategy_docs_are_indexed_and_preserve_test_authority():
     assert testing_index.exists()
 
     testing_text = testing_index.read_text(encoding="utf-8")
-    assert "Testing documents describe verification strategy, not runtime authority." in testing_text
+    assert "테스트 문서는 검증 전략을 설명하지 runtime authority를 정의하지 않는다." in testing_text
     assert "testing/README.md" in docs_index
 
     for filename in strategy_docs:
         path = Path("docs/testing") / filename
         assert path.exists(), f"missing {path}"
         text = path.read_text(encoding="utf-8")
-        assert "Strong assertions" in text
-        assert "Weak assertions" in text
-        assert "Must not" in text
+        assert "강하게 assert할 것" in text
+        assert "freeze하지 말아야 할 것" in text
+        assert "해서는 안 되는 일" in text
 
 
 def test_generated_case_bundle_contract_is_indexed_and_scope_limited():
@@ -86,7 +86,7 @@ def test_generated_case_bundle_contract_is_indexed_and_scope_limited():
     assert "expected.json" in text
     assert "Ground truth" in text
     assert "Expected toolchain behavior" in text
-    assert "Must not" in text
+    assert "해서는 안 되는 일" in text
     assert "Downstream" in text
 
 

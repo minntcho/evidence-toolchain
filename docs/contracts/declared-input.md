@@ -1,36 +1,30 @@
-# Declared Input Contract
+# Declared Input 계약
 
-A `DeclaredInput` represents a value, field, or question the caller wants to
-compare with evidence.
+`DeclaredInput`은 caller가 evidence와 비교하려는 value, field, 또는 question을 나타냅니다.
 
-The name may change as the implementation evolves, but the responsibility should
-stay stable: it is the caller-side value or request that evidence may support,
-contradict, fail to find, or leave uncertain.
+구현이 evolve하면서 이름은 바뀔 수 있지만 책임은 안정적으로 유지되어야 합니다. 이것은 evidence가 support, contradict, fail to find, uncertain으로 남길 수 있는 caller-side value 또는 request입니다.
 
-## May
+## 포함할 수 있는 것
 
-A declared input may carry:
+Declared input은 다음을 담을 수 있습니다.
 
 - input id
 - requested field name
 - declared value
 - declared unit
-- declared period or date
+- declared period 또는 date
 - source system metadata
-- optional matching hints
+- optional matching hint
 - optional required evidence type
 
-It may be absent when the caller only wants open-ended extraction.
+Caller가 open-ended extraction만 원할 때는 declared input이 없을 수 있습니다.
 
-## Must not
+## 해서는 안 되는 일
 
-A declared input must not carry final downstream approval.
+Declared input은 final Downstream approval을 담으면 안 됩니다.
 
-It must not say that a value is committed, policy-sufficient, legally accepted,
-or ready for publication. Those states belong to Downstream systems.
+Value가 committed되었는지, policy-sufficient한지, legally accepted인지, ready for publication인지 말하면 안 됩니다. 그런 state는 Downstream system에 속합니다.
 
-## Relationship To Evidence
+## Evidence와의 관계
 
-Evidence may support, contradict, miss, or leave the declared input uncertain.
-The declared input itself is not evidence. It is the value being checked against
-evidence.
+Evidence는 declared input을 support, contradict, miss, uncertain으로 남길 수 있습니다. Declared input 자체는 evidence가 아닙니다. Evidence와 대조되는 checked value입니다.

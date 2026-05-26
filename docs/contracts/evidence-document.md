@@ -1,34 +1,29 @@
-# Evidence Document Contract
+# Evidence Document 계약
 
-An `EvidenceDocument` is the neutral wrapper around source material before any
-downstream judgment.
+`EvidenceDocument`는 Downstream judgment가 일어나기 전 source material을 감싸는 중립적인 wrapper입니다.
 
-It describes what was received and what is known about that material. It does not
-describe whether the material is sufficient under any policy.
+이 contract는 무엇을 받았고 그 material에 대해 무엇을 알고 있는지 설명합니다. 어떤 policy 아래에서 material이 충분한지는 설명하지 않습니다.
 
-## May
+## 포함할 수 있는 것
 
-An evidence document may carry:
+Evidence document는 다음을 담을 수 있습니다.
 
 - document id
 - file name
 - media type
 - file hash
 - source metadata
-- page or image count
-- document text when available
-- caller-provided target fields
-- observed document-kind hints
+- page 또는 image count
+- 가능한 경우 document text
+- caller-provided target field
+- observed document-kind hint
 
-## Must not
+## 해서는 안 되는 일
 
-An evidence document must not carry final validation state.
+Evidence document는 final validation state를 담으면 안 됩니다.
 
-It must not say that a claim is approved, that a declared value is committed, or
-that a Downstream policy has been satisfied.
+Claim이 approved되었는지, declared value가 committed되었는지, Downstream policy가 satisfied되었는지 말하면 안 됩니다.
 
-## Relationship To Observation
+## Observation과의 관계
 
-Observation is derived from the evidence document. The document stores input
-identity and material facts; observation records condition, quality, and routing
-signals discovered by the toolchain.
+Observation은 evidence document에서 파생됩니다. Document는 input identity와 material fact를 저장하고, observation은 toolchain이 발견한 condition, quality, routing signal을 기록합니다.

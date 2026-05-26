@@ -1,12 +1,10 @@
-# Generated Case Bundle Contract
+# Generated Case Bundle 계약
 
-Generated case bundles are the committed test target for synthetic evidence
-generation. The generator may use manifests, renderers, or helper models
-internally, but tests should first depend on the files it produces.
+Generated case bundle은 synthetic evidence generation이 commit하는 test target입니다. Generator는 내부적으로 manifest, renderer, helper model을 사용할 수 있지만, test는 먼저 generator가 produced한 file에 의존해야 합니다.
 
-## Artifact shape
+## Artifact 구조
 
-Each generated case should produce one case directory:
+각 generated case는 하나의 case directory를 만들어야 합니다.
 
 ```text
 generated/<case_id>/
@@ -14,9 +12,7 @@ generated/<case_id>/
 `-- expected.json
 ```
 
-The case directory is the smallest complete generated artifact. It keeps the
-input material and the comparison target together so tests can run the same path
-a real consumer would run:
+Case directory는 가장 작은 complete generated artifact입니다. Input material과 comparison target을 함께 두어 test가 real consumer가 실행할 path와 같은 path를 실행할 수 있게 합니다.
 
 ```text
 manifest
@@ -30,25 +26,17 @@ manifest
 
 ## Evidence file
 
-`evidence.<ext>` is the file that the toolchain reads.
+`evidence.<ext>`는 toolchain이 읽는 file입니다.
 
-For the first generator foundation, `evidence.txt` is acceptable as a control
-fixture because it can carry deterministic metadata and content without adding a
-PDF, OCR, or image dependency. Later milestones may add `evidence.pdf`,
-`evidence.jpg`, `evidence.png`, or spreadsheet formats one format family at a
-time.
+첫 generator foundation에서는 `evidence.txt`를 control fixture로 사용하는 것이 허용됩니다. PDF, OCR, image dependency를 추가하지 않고 deterministic metadata와 content를 담을 수 있기 때문입니다. 이후 milestone에서는 `evidence.pdf`, `evidence.jpg`, `evidence.png`, spreadsheet format을 format family별 slice로 추가할 수 있습니다.
 
-The extension is part of the test surface. Tool selection often depends on the
-container, media type, and document condition, so new file formats should be
-introduced as separate slices rather than bundled into one broad generator
-rewrite.
+Extension은 test surface의 일부입니다. Tool selection은 container, media type, document condition에 자주 의존하므로, 새 file format은 하나의 broad generator rewrite에 묶기보다 separate slice로 도입해야 합니다.
 
 ## Expected file
 
-`expected.json` is the test oracle for the generated case.
+`expected.json`은 generated case의 test oracle입니다.
 
-It should describe the generated artifact, Ground truth, and Expected toolchain
-behavior without asking the core package to make Downstream decisions.
+이 file은 generated artifact, Ground truth, Expected toolchain behavior를 설명해야 합니다. Core package가 Downstream decision을 내리게 해서는 안 됩니다.
 
 Minimum shape:
 
@@ -83,41 +71,34 @@ Minimum shape:
 }
 ```
 
-Ground truth is the synthetic world's known value. Expected toolchain behavior
-is what the evidence toolchain should observe, plan, extract, issue, or send to
-review. Keeping those sections separate prevents synthetic truth from becoming
-automatic trust.
+Ground truth는 synthetic world가 알고 있는 value입니다. Expected toolchain behavior는 evidence toolchain이 observe, plan, extract, issue, 또는 review로 보내야 하는 behavior입니다. 이 둘을 분리하면 synthetic truth가 automatic trust가 되는 일을 막습니다.
 
-## Strong assertions
+## 강하게 assert할 것
 
-Tests may strongly assert:
+Test는 다음을 강하게 assert할 수 있습니다.
 
 - generated case directory existence
 - `evidence.<ext>` existence
 - `expected.json` existence
 - stable `case_id`
-- expected artifact format and media type
-- Ground truth and Expected toolchain behavior separation
-- selected capabilities, fallbacks, and issues for the current format slice
+- expected artifact format과 media type
+- Ground truth와 Expected toolchain behavior separation
+- 현재 format slice에 대한 selected capability, fallback, issue
 
-## Weak assertions
+## freeze하지 말아야 할 것
 
-Tests should avoid freezing:
+Test는 다음을 freeze하지 말아야 합니다.
 
-- exact line wrapping in generated evidence files
-- cosmetic names inside synthetic documents
-- final renderer internals
-- future PDF, image, or spreadsheet generation libraries
-- Downstream adapter schemas
+- generated evidence file의 exact line wrapping
+- synthetic document 안의 cosmetic name
+- final renderer internal
+- future PDF, image, spreadsheet generation library
+- Downstream adapter schema
 
-## Must not
+## 해서는 안 되는 일
 
-Generated case bundles must not become core runtime authority.
+Generated case bundle은 core runtime authority가 되면 안 됩니다.
 
-The core package may read `evidence.<ext>` in tests, but it must not import the
-synthetic generator or treat `expected.json` as a runtime policy source.
+Core package는 test에서 `evidence.<ext>`를 읽을 수 있지만, synthetic generator를 import하거나 `expected.json`을 runtime policy source로 취급하면 안 됩니다.
 
-`expected.json` may say that OCR, table extraction, or manual review is expected.
-It must not say that a business claim is finally valid, committed, reportable,
-or policy-approved. Those Downstream judgments belong to adapters, validators,
-or review workflows outside the core package.
+`expected.json`은 OCR, table extraction, manual review가 expected라고 말할 수 있습니다. 하지만 business claim이 finally valid, committed, reportable, policy-approved하다고 말하면 안 됩니다. 그런 Downstream judgment는 core package 밖의 adapter, validator, review workflow에 속합니다.
