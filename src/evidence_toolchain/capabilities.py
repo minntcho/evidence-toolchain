@@ -34,13 +34,18 @@ class ManualReviewCapabilityRunner:
 
     def run(self, step: EvidenceStep, state: EvidenceRunState) -> EvidenceToolResult:
         reason = step.reason or "manual_review_requested"
+        outputs = {
+            "reason": reason,
+            "document_id": state.document.document_id,
+        }
+        source_capability = step.metadata.get("source_capability")
+        if source_capability is not None:
+            outputs["source_capability"] = source_capability
+
         return EvidenceToolResult(
             capability="manual_review_request",
             status="review_requested",
-            outputs={
-                "reason": reason,
-                "document_id": state.document.document_id,
-            },
+            outputs=outputs,
         )
 
 
