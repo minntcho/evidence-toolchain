@@ -22,8 +22,8 @@ def test_report_artifact_preserves_run_resume_event_timeline(tmp_path):
                 "ETC-quality: medium",
                 "ETC-text_layer: false",
                 "",
-                "Diesel quantity: 42.0 L",
-                "Total: 62.58",
+                "디젤 수량: 42.0 L",
+                "합계: 62.58",
             ]
         ),
         encoding="utf-8",

@@ -10,7 +10,7 @@ def test_manual_review_capability_runner_records_review_interrupt(tmp_path):
                 "ETC-case_id: unsupported_case",
                 "ETC-quality: unknown",
                 "",
-                "Unknown evidence document",
+                "알 수 없는 증거 문서",
             ]
         ),
         encoding="utf-8",
@@ -57,7 +57,7 @@ def test_manual_review_runner_leaves_automated_capabilities_pending(tmp_path):
                 "ETC-quality: clean",
                 "ETC-text_layer: true",
                 "",
-                "Usage 6.4 MWh",
+                "사용량 6.4 MWh",
             ]
         ),
         encoding="utf-8",

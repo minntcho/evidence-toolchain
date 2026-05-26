@@ -17,8 +17,8 @@ def test_resume_processes_manual_review_fallback_with_source_lineage(tmp_path):
                 "ETC-quality: medium",
                 "ETC-text_layer: false",
                 "",
-                "Diesel quantity: 42.0 L",
-                "Total: 62.58",
+                "디젤 수량: 42.0 L",
+                "합계: 62.58",
             ]
         ),
         encoding="utf-8",

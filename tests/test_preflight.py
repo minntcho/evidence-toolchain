@@ -15,8 +15,8 @@ def test_preflight_extracts_cheap_document_signals(tmp_path):
                 "ETC-text_layer: false",
                 "ETC-signals: rotated",
                 "",
-                "Synthetic rotated scanned utility bill",
-                "Usage 6.4 MWh",
+                "회전된 합성 스캔 유틸리티 청구서",
+                "사용량 6.4 MWh",
             ]
         ),
         encoding="utf-8",
@@ -34,7 +34,7 @@ def test_preflight_extracts_cheap_document_signals(tmp_path):
     assert payload["has_text_layer"] is False
     assert payload["signals"] == ["rotated"]
     assert payload["detected_rotation"] is True
-    assert payload["sample_text"] == "Synthetic rotated scanned utility bill\nUsage 6.4 MWh"
+    assert payload["sample_text"] == "회전된 합성 스캔 유틸리티 청구서\n사용량 6.4 MWh"
     json.dumps(payload)
 
 
@@ -51,7 +51,7 @@ def test_local_runner_records_preflight_before_observation(tmp_path):
                 "ETC-quality: clean",
                 "ETC-text_layer: true",
                 "",
-                "Usage 6.4 MWh",
+                "사용량 6.4 MWh",
             ]
         ),
         encoding="utf-8",
@@ -68,4 +68,4 @@ def test_local_runner_records_preflight_before_observation(tmp_path):
         "plan_created",
     ]
     assert state.events[1].payload["format"] == "txt"
-    assert state.to_dict()["preflight"]["sample_text"] == "Usage 6.4 MWh"
+    assert state.to_dict()["preflight"]["sample_text"] == "사용량 6.4 MWh"

@@ -12,7 +12,7 @@ def test_rule_observation_router_matches_existing_planner(tmp_path):
                 "ETC-quality: clean",
                 "ETC-text_layer: true",
                 "",
-                "Usage 6.4 MWh",
+                "사용량 6.4 MWh",
             ]
         ),
         encoding="utf-8",
@@ -37,7 +37,7 @@ def test_local_runner_accepts_router_port_for_model_assisted_routing(tmp_path):
 
     class StaticModelRouter:
         def route(self, document, preflight):
-            assert preflight.sample_text == "Usage 6.4 MWh"
+            assert preflight.sample_text == "사용량 6.4 MWh"
             return EvidenceToolPlan(
                 document_id=document.document_id,
                 observation=EvidenceObservation(
@@ -64,7 +64,7 @@ def test_local_runner_accepts_router_port_for_model_assisted_routing(tmp_path):
                 "ETC-quality: clean",
                 "ETC-text_layer: true",
                 "",
-                "Usage 6.4 MWh",
+                "사용량 6.4 MWh",
             ]
         ),
         encoding="utf-8",

@@ -15,7 +15,7 @@ def test_static_capability_runner_executes_supported_pending_steps(tmp_path):
                 "ETC-quality: clean",
                 "ETC-text_layer: true",
                 "",
-                "Usage 6.4 MWh",
+                "사용량 6.4 MWh",
             ]
         ),
         encoding="utf-8",
@@ -87,7 +87,7 @@ def test_run_document_can_execute_all_steps_with_static_runner(tmp_path):
                 "ETC-quality: clean",
                 "ETC-text_layer: true",
                 "",
-                "Usage 6.4 MWh",
+                "사용량 6.4 MWh",
             ]
         ),
         encoding="utf-8",

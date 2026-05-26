@@ -11,7 +11,7 @@
     "activity": "diesel",
     "amount": 42.0,
     "unit": "L",
-    "supplier": "Sample Fuel Station"
+    "supplier": "샘플 주유소"
   },
   "expected_behavior": {
     "plan_includes": ["ocr_extract", "receipt_extract"],

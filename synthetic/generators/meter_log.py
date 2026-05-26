@@ -17,6 +17,7 @@ def render_meter_log(manifest: SyntheticCaseManifest) -> str:
             manifest.title,
             degradation_note(manifest),
             "",
+            f"기록 출처: {truth['supplier']}",
             "수기 계량기 기록",
             "일자        시작값      종료값      사용량",
             f"{truth['period']}  10420       11600       {truth['amount']} {truth['unit']}",

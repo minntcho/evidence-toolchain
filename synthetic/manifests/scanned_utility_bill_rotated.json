@@ -11,7 +11,7 @@
     "activity": "electricity",
     "amount": 6.4,
     "unit": "MWh",
-    "supplier": "Korea Electric Utility"
+    "supplier": "한국전력 예시"
   },
   "expected_behavior": {
     "plan_includes": ["ocr_extract", "table_structure_extract", "utility_bill_extract"],
