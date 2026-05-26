@@ -88,3 +88,23 @@ def test_generated_case_bundle_contract_is_indexed_and_scope_limited():
     assert "Expected toolchain behavior" in text
     assert "Must not" in text
     assert "Downstream" in text
+
+
+def test_orchestration_boundary_doc_is_indexed_and_framework_neutral():
+    doc_path = Path("docs/orchestration-boundary.md")
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+    readme = Path("README.md").read_text(encoding="utf-8")
+
+    assert doc_path.exists()
+    assert "orchestration-boundary.md" in docs_index
+    assert "Orchestration boundary" in readme
+
+    text = doc_path.read_text(encoding="utf-8")
+    assert "orchestration-neutral evidence semantics" in text
+    assert "local runner" in text
+    assert "framework adapters" in text
+    assert "EvidenceRunState" in text
+    assert "EvidenceEvent" in text
+    assert "CheckpointStore" in text
+    assert "Must not" in text
+    assert "Downstream" in text
