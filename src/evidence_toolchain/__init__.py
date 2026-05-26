@@ -5,6 +5,7 @@ from evidence_toolchain.capabilities import (
     CapabilityRunner,
     EvidenceCapability,
     ManualReviewCapabilityRunner,
+    StaticCapabilityRunner,
 )
 from evidence_toolchain.observations import EvidenceObservation, observe_document
 from evidence_toolchain.planner import EvidenceToolPlan, plan_document
@@ -15,7 +16,7 @@ from evidence_toolchain.reports import (
     write_evidence_report,
 )
 from evidence_toolchain.routers import ObservationRouter, RuleObservationRouter
-from evidence_toolchain.runners import run_document
+from evidence_toolchain.runners import run_capability_steps, run_document
 from evidence_toolchain.runtime import (
     EvidenceEvent,
     EvidenceRunState,
@@ -36,6 +37,7 @@ __all__ = [
     "EvidenceToolPlan",
     "CapabilityRunner",
     "ManualReviewCapabilityRunner",
+    "StaticCapabilityRunner",
     "ObservationRouter",
     "RuleObservationRouter",
     "observe_document",
@@ -43,5 +45,6 @@ __all__ = [
     "preflight_document",
     "emit_evidence_report",
     "write_evidence_report",
+    "run_capability_steps",
     "run_document",
 ]
