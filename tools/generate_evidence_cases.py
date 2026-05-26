@@ -20,17 +20,17 @@ DEFAULT_CASES = [
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate synthetic evidence cases.")
+    parser = argparse.ArgumentParser(description="synthetic evidence case를 생성합니다.")
     parser.add_argument(
         "--output-dir",
         default="tests/fixtures/generated",
-        help="Directory for generated documents and expected manifests.",
+        help="생성된 evidence document와 expected manifest를 저장할 디렉터리.",
     )
     parser.add_argument(
         "case_ids",
         nargs="*",
         default=DEFAULT_CASES,
-        help="Synthetic case ids to generate.",
+        help="생성할 synthetic case id.",
     )
     args = parser.parse_args()
 
@@ -42,7 +42,7 @@ def main() -> int:
 
     for item in generated:
         print(f"{item.case_id}: {item.document_path}")
-    print(f"generated {len(generated)} evidence cases")
+    print(f"evidence case {len(generated)}개 생성")
     return 0
 
 

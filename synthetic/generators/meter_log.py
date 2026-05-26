@@ -17,10 +17,10 @@ def render_meter_log(manifest: SyntheticCaseManifest) -> str:
             manifest.title,
             degradation_note(manifest),
             "",
-            "Handwritten meter log",
-            "Date        Opening     Closing     Usage",
+            "수기 계량기 기록",
+            "일자        시작값      종료값      사용량",
             f"{truth['period']}  10420       11600       {truth['amount']} {truth['unit']}",
             "",
-            "Operator initials appear handwritten.",
+            "운영자 이니셜은 수기로 보입니다.",
         ]
     )

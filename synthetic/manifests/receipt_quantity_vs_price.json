@@ -1,7 +1,7 @@
 {
   "case_id": "receipt_quantity_vs_price",
   "document_kind": "receipt",
-  "title": "Synthetic fuel receipt with quantity and price risk",
+  "title": "수량과 가격 혼동 위험이 있는 합성 연료 영수증",
   "quality": "medium",
   "text_layer": false,
   "signals": ["possible_unit_confusion", "quantity_vs_price_confusion"],

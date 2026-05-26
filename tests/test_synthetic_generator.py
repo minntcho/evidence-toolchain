@@ -19,7 +19,7 @@ def test_generate_evidence_cases_writes_documents_and_expected_manifests(tmp_pat
         text=True,
     )
 
-    assert "generated 3 evidence cases" in result.stdout
+    assert "evidence case 3개 생성" in result.stdout
 
     utility_dir = output_dir / "utility_bill_basic"
     utility_doc = utility_dir / "evidence.txt"
@@ -27,6 +27,11 @@ def test_generate_evidence_cases_writes_documents_and_expected_manifests(tmp_pat
     assert utility_dir.exists()
     assert utility_doc.exists()
     assert utility_expected.exists()
+    utility_text = utility_doc.read_text(encoding="utf-8")
+    assert "Synthetic utility bill" not in utility_text
+    assert "합성 유틸리티 청구서" in utility_text
+    assert "공급자:" in utility_text
+    assert "사용량 표" in utility_text
 
     payload = json.loads(utility_expected.read_text(encoding="utf-8"))
     assert payload["case_id"] == "utility_bill_basic"
@@ -48,6 +53,22 @@ def test_generate_evidence_cases_writes_documents_and_expected_manifests(tmp_pat
         "table_structure_extract",
         "utility_bill_extract",
     ]
+
+
+def test_generate_evidence_cases_help_is_korean():
+    result = subprocess.run(
+        [
+            sys.executable,
+            "tools/generate_evidence_cases.py",
+            "--help",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "synthetic evidence case를 생성합니다" in result.stdout
+    assert "생성할 synthetic case id" in result.stdout
 
 
 def test_synthetic_package_does_not_import_core_pipeline_modules():

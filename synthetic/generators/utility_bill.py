@@ -17,12 +17,12 @@ def render_utility_bill(manifest: SyntheticCaseManifest) -> str:
             manifest.title,
             degradation_note(manifest),
             "",
-            f"Supplier: {truth['supplier']}",
-            f"Site: {truth['site']}",
-            f"Service period: {truth['period']}",
+            f"공급자: {truth['supplier']}",
+            f"사업장: {truth['site']}",
+            f"서비스 기간: {truth['period']}",
             "",
-            "Usage table",
-            "Activity          Amount      Unit",
+            "사용량 표",
+            "활동              수량        단위",
             f"{truth['activity']}       {truth['amount']}       {truth['unit']}",
         ]
     )
