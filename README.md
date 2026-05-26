@@ -55,8 +55,8 @@ python tools/generate_evidence_cases.py
 python -m pytest -q
 ```
 
-The generated files land under `tests/fixtures/generated/` by default. They are
-development fixtures, not runtime state.
+The generated case bundles land under `tests/fixtures/generated/` by default.
+They are development fixtures, not runtime state.
 
 ## North star
 

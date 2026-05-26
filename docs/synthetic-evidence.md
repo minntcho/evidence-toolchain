@@ -78,10 +78,12 @@ Generate selected cases:
 python tools/generate_evidence_cases.py utility_bill_basic handwritten_meter_log
 ```
 
-By default, generated documents and expected manifests are written to:
+By default, generated case bundles are written to:
 
 ```text
-tests/fixtures/generated/
+tests/fixtures/generated/<case_id>/
++-- evidence.txt
+`-- expected.json
 ```
 
 That directory is ignored by git. Manifests and generator code are the committed
