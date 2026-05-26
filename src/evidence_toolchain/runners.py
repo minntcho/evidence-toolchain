@@ -149,13 +149,7 @@ def run_capability_steps(
         completed.append(replace(step, status=_step_status_from_result(result.status)))
         tool_results.append(result)
         if result.status == "review_requested":
-            interrupts.append(
-                {
-                    "type": "manual_review",
-                    "capability": result.capability,
-                    "reason": result.outputs.get("reason", "manual_review_requested"),
-                }
-            )
+            interrupts.append(_manual_review_payload(result, include_type=True))
 
         current = replace(
             current,
@@ -188,10 +182,7 @@ def run_capability_steps(
                     run_id=current.run_id,
                     sequence=len(current.events) + 1,
                     event_type="review_requested",
-                    payload={
-                        "capability": result.capability,
-                        "reason": result.outputs.get("reason", "manual_review_requested"),
-                    },
+                    payload=_manual_review_payload(result),
                 )
             )
 
@@ -214,6 +205,23 @@ def _failed_result_from_exception(
         status="failed",
         errors=(f"{type(error).__name__}: {error}",),
     )
+
+
+def _manual_review_payload(
+    result: EvidenceToolResult,
+    *,
+    include_type: bool = False,
+) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "capability": result.capability,
+        "reason": result.outputs.get("reason", "manual_review_requested"),
+    }
+    if include_type:
+        payload["type"] = "manual_review"
+    source_capability = result.outputs.get("source_capability")
+    if source_capability is not None:
+        payload["source_capability"] = source_capability
+    return payload
 
 
 def _record_capability_result_event(
