@@ -1,0 +1,21 @@
+{
+  "case_id": "scanned_utility_bill_rotated",
+  "document_kind": "utility_bill",
+  "title": "Synthetic rotated scanned utility bill",
+  "quality": "rotated_scan",
+  "text_layer": false,
+  "signals": ["rotated"],
+  "ground_truth": {
+    "site": "OCH-01",
+    "period": "2025-03",
+    "activity": "electricity",
+    "amount": 6.4,
+    "unit": "MWh",
+    "supplier": "Korea Electric Utility"
+  },
+  "expected_behavior": {
+    "plan_includes": ["ocr_extract", "table_structure_extract", "utility_bill_extract"],
+    "fallbacks_include": ["manual_review_request"],
+    "issues_include": ["rotated_document"]
+  }
+}

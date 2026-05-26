@@ -42,6 +42,19 @@ A downstream system may decide that extracted evidence supports, contradicts, or
 - [Capability registry](docs/capability-registry.md)
 - [Failure modes](docs/failure-modes.md)
 - [Adapter boundary](docs/adapter-boundary.md)
+- [Synthetic evidence testkit](docs/synthetic-evidence.md)
+
+## Development quickstart
+
+Generate the default synthetic evidence cases and run tests:
+
+```bash
+python tools/generate_evidence_cases.py
+python -m pytest -q
+```
+
+The generated files land under `tests/fixtures/generated/` by default. They are
+development fixtures, not runtime state.
 
 ## North star
 
@@ -61,4 +74,13 @@ Tools extract.
 Reports preserve.
 Adapters translate.
 Downstream systems judge.
+```
+
+For testing, this repository also includes a synthetic evidence testkit:
+
+```text
+Synthetic manifests define truth and expected behavior.
+Generators materialize sample evidence documents.
+Tests verify observation, planning, issues, and import boundaries.
+Core runtime does not import the synthetic testkit.
 ```

@@ -11,6 +11,7 @@ The repository is an independent evidence document processing engine. Its job is
 3. [Capability Registry](capability-registry.md)
 4. [Failure Modes](failure-modes.md)
 5. [Adapter Boundary](adapter-boundary.md)
+6. [Synthetic Evidence Testkit](synthetic-evidence.md)
 
 ## Project stance
 
@@ -61,3 +62,26 @@ Should a public report be published?
 ```
 
 Those decisions belong to downstream systems.
+
+## Testkit boundary
+
+The repository includes a synthetic evidence testkit for development and tests.
+The testkit may generate fake utility bills, receipts, meter logs, degraded
+documents, and expected behavior manifests. It is not part of the core runtime.
+
+Allowed:
+
+```text
+tests -> synthetic generator -> generated files
+tests -> evidence_toolchain
+CLI/dev tool -> synthetic generator -> generated files
+```
+
+Not allowed:
+
+```text
+evidence_toolchain core -> synthetic generator
+```
+
+Synthetic fixtures are an experiment surface for routing, extraction, and
+failure-mode behavior. They do not authorize downstream validation judgments.
