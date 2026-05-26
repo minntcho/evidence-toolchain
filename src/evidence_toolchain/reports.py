@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import json
+import re
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from evidence_toolchain.artifacts import EvidenceDocument
 from evidence_toolchain.planner import EvidenceToolPlan
@@ -65,6 +68,24 @@ def emit_evidence_report(state: EvidenceRunState) -> EvidenceReport:
         interrupts=[_to_json_compatible(interrupt) for interrupt in state.interrupts],
         recommended_next_action=_recommended_next_action(state),
     )
+
+
+def write_evidence_report(report: EvidenceReport, output_dir: str | Path) -> Path:
+    report_dir = Path(output_dir)
+    report_dir.mkdir(parents=True, exist_ok=True)
+    report_path = (
+        report_dir / f"{_safe_artifact_stem(report.document_id)}.evidence-report.json"
+    )
+    report_path.write_text(
+        json.dumps(report.to_dict(), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return report_path
+
+
+def _safe_artifact_stem(value: str) -> str:
+    stem = re.sub(r"[^A-Za-z0-9_.-]+", "_", value).strip("._-")
+    return stem or "evidence-report"
 
 
 def _recommended_next_action(state: EvidenceRunState) -> str | None:
