@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 from evidence_toolchain.artifacts import EvidenceDocument
+from evidence_toolchain.capabilities import CapabilityRunner
 from evidence_toolchain.planner import EvidenceToolPlan
 from evidence_toolchain.preflight import EvidencePreflight, preflight_document
 from evidence_toolchain.routers import ObservationRouter, RuleObservationRouter
@@ -12,6 +15,7 @@ def run_document(
     *,
     run_id: str | None = None,
     router: ObservationRouter | None = None,
+    capability_runner: CapabilityRunner | None = None,
 ) -> EvidenceRunState:
     """Run the reference local flow through observation and planning."""
 
@@ -31,6 +35,9 @@ def run_document(
 
     for event in _initial_events(resolved_run_id, document, preflight, plan):
         state = state.record_event(event)
+
+    if capability_runner is not None:
+        state = _run_supported_capabilities(state, capability_runner)
 
     return state
 
@@ -101,3 +108,75 @@ def _initial_events(
             },
         ),
     )
+
+
+def _run_supported_capabilities(
+    state: EvidenceRunState,
+    capability_runner: CapabilityRunner,
+) -> EvidenceRunState:
+    pending: list[EvidenceStep] = []
+    completed = list(state.completed_steps)
+    tool_results = list(state.tool_results)
+    interrupts = list(state.interrupts)
+    current = state
+
+    for step in state.pending_steps:
+        if not capability_runner.can_run(step, current):
+            pending.append(step)
+            continue
+
+        current = current.record_event(
+            EvidenceEvent(
+                run_id=current.run_id,
+                sequence=len(current.events) + 1,
+                event_type="capability_started",
+                payload={
+                    "capability": step.capability,
+                    "reason": step.reason,
+                },
+            )
+        )
+        result = capability_runner.run(step, current)
+        completed.append(replace(step, status="completed"))
+        tool_results.append(result)
+        if result.status == "review_requested":
+            interrupts.append(
+                {
+                    "type": "manual_review",
+                    "capability": result.capability,
+                    "reason": result.outputs.get("reason", "manual_review_requested"),
+                }
+            )
+
+        current = replace(
+            current,
+            completed_steps=tuple(completed),
+            pending_steps=tuple(pending),
+            tool_results=tuple(tool_results),
+            interrupts=tuple(interrupts),
+        )
+        current = current.record_event(
+            EvidenceEvent(
+                run_id=current.run_id,
+                sequence=len(current.events) + 1,
+                event_type="capability_completed",
+                payload={
+                    "capability": result.capability,
+                    "status": result.status,
+                },
+            )
+        )
+        if result.status == "review_requested":
+            current = current.record_event(
+                EvidenceEvent(
+                    run_id=current.run_id,
+                    sequence=len(current.events) + 1,
+                    event_type="review_requested",
+                    payload={
+                        "capability": result.capability,
+                        "reason": result.outputs.get("reason", "manual_review_requested"),
+                    },
+                )
+            )
+
+    return replace(current, pending_steps=tuple(pending))

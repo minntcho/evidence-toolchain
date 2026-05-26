@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Protocol
+
+from evidence_toolchain.runtime import EvidenceRunState, EvidenceStep, EvidenceToolResult
 
 
 @dataclass(frozen=True)
@@ -10,6 +13,34 @@ class EvidenceCapability:
     strengths: list[str] = field(default_factory=list)
     limitations: list[str] = field(default_factory=list)
     fallbacks: list[str] = field(default_factory=list)
+
+
+class CapabilityRunner(Protocol):
+    """Runs supported capability steps against an evidence run state."""
+
+    def can_run(self, step: EvidenceStep, state: EvidenceRunState) -> bool:
+        ...
+
+    def run(self, step: EvidenceStep, state: EvidenceRunState) -> EvidenceToolResult:
+        ...
+
+
+class ManualReviewCapabilityRunner:
+    """Requests human review without pretending automated extraction succeeded."""
+
+    def can_run(self, step: EvidenceStep, state: EvidenceRunState) -> bool:
+        return step.capability == "manual_review_request"
+
+    def run(self, step: EvidenceStep, state: EvidenceRunState) -> EvidenceToolResult:
+        reason = step.reason or "manual_review_requested"
+        return EvidenceToolResult(
+            capability="manual_review_request",
+            status="review_requested",
+            outputs={
+                "reason": reason,
+                "document_id": state.document.document_id,
+            },
+        )
 
 
 CAPABILITY_REGISTRY: dict[str, EvidenceCapability] = {
