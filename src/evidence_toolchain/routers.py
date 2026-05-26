@@ -8,7 +8,7 @@ from evidence_toolchain.preflight import EvidencePreflight
 
 
 class ObservationRouter(Protocol):
-    """Framework-neutral router port for observation and tool planning."""
+    """observation과 tool planning을 연결하는 framework-neutral router port입니다."""
 
     def route(
         self,
@@ -19,7 +19,7 @@ class ObservationRouter(Protocol):
 
 
 class RuleObservationRouter:
-    """Deterministic router that preserves the current rule planner behavior."""
+    """현재 rule planner 동작을 보존하는 deterministic router입니다."""
 
     def route(
         self,

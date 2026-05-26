@@ -13,4 +13,6 @@ def render_document(manifest: SyntheticCaseManifest) -> str:
         return render_receipt(manifest)
     if manifest.document_kind == "meter_log":
         return render_meter_log(manifest)
-    raise ValueError(f"Unsupported synthetic document kind: {manifest.document_kind}")
+    raise ValueError(
+        f"지원하지 않는 synthetic document kind입니다: {manifest.document_kind}"
+    )

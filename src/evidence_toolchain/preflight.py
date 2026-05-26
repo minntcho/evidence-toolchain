@@ -7,7 +7,7 @@ from evidence_toolchain.artifacts import EvidenceDocument
 
 @dataclass(frozen=True)
 class EvidencePreflight:
-    """Cheap document signals gathered before semantic observation."""
+    """의미 관찰 전에 수집하는 가벼운 문서 신호입니다."""
 
     document_id: str
     file_name: str

@@ -1,4 +1,4 @@
-"""Synthetic evidence testkit for development and tests."""
+"""개발과 테스트를 위한 synthetic evidence testkit입니다."""
 
 from synthetic.generator import GeneratedCase, generate_case
 from synthetic.manifests import SyntheticCaseManifest, load_manifest, load_manifests

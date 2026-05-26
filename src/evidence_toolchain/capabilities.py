@@ -17,7 +17,7 @@ class EvidenceCapability:
 
 
 class CapabilityRunner(Protocol):
-    """Runs supported capability steps against an evidence run state."""
+    """evidence run state에서 지원되는 capability step을 실행합니다."""
 
     def can_run(self, step: EvidenceStep, state: EvidenceRunState) -> bool:
         ...
@@ -27,7 +27,7 @@ class CapabilityRunner(Protocol):
 
 
 class ManualReviewCapabilityRunner:
-    """Requests human review without pretending automated extraction succeeded."""
+    """자동 추출 성공처럼 꾸미지 않고 human review를 요청합니다."""
 
     def can_run(self, step: EvidenceStep, state: EvidenceRunState) -> bool:
         return step.capability == "manual_review_request"
@@ -45,7 +45,7 @@ class ManualReviewCapabilityRunner:
 
 
 class StaticCapabilityRunner:
-    """Deterministic runner for tests, dry runs, and fixture-backed execution."""
+    """테스트, dry run, fixture 기반 실행을 위한 deterministic runner입니다."""
 
     def __init__(
         self,
@@ -61,7 +61,7 @@ class StaticCapabilityRunner:
 
     def run(self, step: EvidenceStep, state: EvidenceRunState) -> EvidenceToolResult:
         if step.capability is None:
-            raise ValueError("EvidenceStep must include a capability name.")
+            raise ValueError("EvidenceStep에는 capability name이 필요합니다.")
 
         result = self._results[step.capability]
         if isinstance(result, EvidenceToolResult):
@@ -77,63 +77,63 @@ class StaticCapabilityRunner:
 CAPABILITY_REGISTRY: dict[str, EvidenceCapability] = {
     "docling_parse": EvidenceCapability(
         name="docling_parse",
-        purpose="Parse born-digital documents with text, layout, and tables.",
+        purpose="text, layout, table이 있는 born-digital 문서를 파싱합니다.",
         strengths=["born_digital_pdf", "tables"],
         limitations=["bad_scans", "handwriting"],
         fallbacks=["ocr_extract", "table_structure_extract"],
     ),
     "ocr_extract": EvidenceCapability(
         name="ocr_extract",
-        purpose="Extract text from scanned or photographed documents.",
+        purpose="스캔 또는 촬영된 문서에서 text를 추출합니다.",
         strengths=["scanned_documents", "receipt_photos"],
         limitations=["digit_confusion", "lost_table_relationships"],
         fallbacks=["vision_extract", "manual_review_request"],
     ),
     "table_structure_extract": EvidenceCapability(
         name="table_structure_extract",
-        purpose="Recover table cells, headers, and row relationships.",
+        purpose="table cell, header, row 관계를 복구합니다.",
         strengths=["usage_tables", "line_items"],
         limitations=["merged_cells", "multi_page_tables"],
         fallbacks=["manual_review_request"],
     ),
     "utility_bill_extract": EvidenceCapability(
         name="utility_bill_extract",
-        purpose="Extract candidate fields from utility bills.",
+        purpose="utility bill에서 후보 field를 추출합니다.",
         strengths=["billing_period", "usage_amount", "usage_unit"],
         limitations=["bill_date_vs_service_period", "estimated_readings"],
         fallbacks=["manual_review_request"],
     ),
     "receipt_extract": EvidenceCapability(
         name="receipt_extract",
-        purpose="Extract candidate transaction fields from receipts.",
+        purpose="receipt에서 후보 transaction field를 추출합니다.",
         strengths=["merchant", "transaction_total", "line_items"],
         limitations=["quantity_vs_price_confusion"],
         fallbacks=["manual_review_request"],
     ),
     "handwriting_read": EvidenceCapability(
         name="handwriting_read",
-        purpose="Read handwritten fields or handwritten logs.",
+        purpose="수기 field나 수기 log를 읽습니다.",
         strengths=["handwritten_numbers", "handwritten_dates"],
         limitations=["low_trust_handwritten_evidence"],
         fallbacks=["manual_review_request"],
     ),
     "meter_photo_read": EvidenceCapability(
         name="meter_photo_read",
-        purpose="Read visible values from physical meter photos.",
+        purpose="물리 meter 사진에서 보이는 값을 읽습니다.",
         strengths=["visible_meter_reading"],
         limitations=["site_meter_mapping_required"],
         fallbacks=["manual_review_request"],
     ),
     "vision_extract": EvidenceCapability(
         name="vision_extract",
-        purpose="Use visual reasoning where text extraction is insufficient.",
+        purpose="text extraction만으로 부족한 경우 visual reasoning을 사용합니다.",
         strengths=["screenshots", "photos", "poor_layout_recovery"],
         limitations=["must_ground_visible_regions"],
         fallbacks=["manual_review_request"],
     ),
     "manual_review_request": EvidenceCapability(
         name="manual_review_request",
-        purpose="Preserve unresolved uncertainty for human review.",
+        purpose="해소되지 않은 불확실성을 human review로 보존합니다.",
         strengths=["ambiguous_or_high_risk_documents"],
         limitations=["not_automated_extraction"],
         fallbacks=[],

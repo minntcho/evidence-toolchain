@@ -7,7 +7,7 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class EvidenceDocument:
-    """Neutral wrapper around source material before downstream judgment."""
+    """downstream 판단 전에 원본 자료를 중립적으로 감싸는 문서 객체입니다."""
 
     document_id: str
     path: Path
