@@ -1,31 +1,31 @@
-# Failure Modes
+# Failure mode
 
-Failure modes are first-class outputs.
+Failure mode는 first-class output입니다.
 
-`evidence-toolchain` should not turn uncertain extraction into confident-looking answers. When the document, tool, or result is weak, that weakness should be preserved as a structured issue.
+`evidence-toolchain`은 uncertain extraction을 confident-looking answer로 바꾸면 안 됩니다. Document, tool, result가 약하다면 그 약점을 structured issue로 보존해야 합니다.
 
-## Why failure modes matter
+## Failure mode가 중요한 이유
 
-Evidence documents are messy:
+Evidence document는 지저분합니다.
 
-- scanned bills
-- blurry receipt photos
-- handwritten logs
-- screenshots
-- broken tables
-- ambiguous units
-- cropped images
-- multiple candidate values
-- mixed date concepts
+- scanned bill
+- blurry receipt photo
+- handwritten log
+- screenshot
+- broken table
+- ambiguous unit
+- cropped image
+- multiple candidate value
+- mixed date concept
 - unknown document source
 
-A useful evidence system must explain what went wrong and what should happen next.
+유용한 evidence system은 무엇이 잘못되었는지, 다음에 무엇을 해야 하는지 설명해야 합니다.
 
-## Issue categories
+## Issue category
 
-### Document quality issues
+### Document quality issue
 
-Examples:
+예시:
 
 ```text
 unreadable_document
@@ -37,9 +37,9 @@ missing_pages
 unsupported_media_type
 ```
 
-### OCR and text issues
+### OCR and text issue
 
-Examples:
+예시:
 
 ```text
 ocr_low_confidence
@@ -49,7 +49,7 @@ missing_text_layer
 text_layer_incomplete
 ```
 
-Common confusions:
+흔한 confusion:
 
 ```text
 0 vs O
@@ -60,9 +60,9 @@ MWh vs mWh
 comma vs decimal point
 ```
 
-### Layout and table issues
+### Layout and table issue
 
-Examples:
+예시:
 
 ```text
 ambiguous_reading_order
@@ -73,9 +73,9 @@ header_association_unclear
 line_item_association_unclear
 ```
 
-### Field extraction issues
+### Field extraction issue
 
-Examples:
+예시:
 
 ```text
 field_not_found
@@ -87,9 +87,9 @@ billing_period_vs_invoice_date_confusion
 subtotal_vs_total_confusion
 ```
 
-### Evidence trust issues
+### Evidence trust issue
 
-Examples:
+예시:
 
 ```text
 low_trust_handwritten_evidence
@@ -101,9 +101,9 @@ screenshot_without_source
 single_transaction_not_period_total
 ```
 
-### Review issues
+### Review issue
 
-Examples:
+예시:
 
 ```text
 manual_review_required
@@ -115,7 +115,7 @@ review_required_for_missing_period
 
 ## Issue severity
 
-Initial severity levels:
+초기 severity level:
 
 ```text
 info
@@ -125,9 +125,9 @@ blocking
 
 ### `info`
 
-The issue should be visible but does not stop the report from being useful.
+Issue는 visible해야 하지만 report가 useful한 것을 막지는 않습니다.
 
-Example:
+예시:
 
 ```text
 needs_unit_normalization
@@ -135,9 +135,9 @@ needs_unit_normalization
 
 ### `warning`
 
-The extraction may still be usable, but a downstream consumer should treat it carefully.
+Extraction은 여전히 usable할 수 있지만 Downstream consumer는 조심해서 다뤄야 합니다.
 
-Example:
+예시:
 
 ```text
 multiple_candidate_values
@@ -145,9 +145,9 @@ multiple_candidate_values
 
 ### `blocking`
 
-The report should not be treated as extraction-ready without fallback or review.
+Report는 fallback 또는 review 없이 extraction-ready로 다뤄지면 안 됩니다.
 
-Example:
+예시:
 
 ```text
 unreadable_document
@@ -156,7 +156,7 @@ field_not_found
 
 ## Failure handling pattern
 
-The system should follow this pattern:
+System은 다음 pattern을 따라야 합니다.
 
 ```text
 capture issue
@@ -165,7 +165,7 @@ preserve both original failure and fallback result
 emit review request if uncertainty remains
 ```
 
-Example:
+예시:
 
 ```text
 docling_parse reports ambiguous table structure
@@ -175,11 +175,11 @@ docling_parse reports ambiguous table structure
 -> request manual review for target field
 ```
 
-## Terminal failures
+## Terminal failure
 
-Some failures should stop automated extraction.
+일부 failure는 automated extraction을 멈춰야 합니다.
 
-Examples:
+예시:
 
 ```text
 unsupported_media_type
@@ -188,13 +188,13 @@ unreadable_document
 no_visible_evidence_content
 ```
 
-A terminal failure should still emit an `EvidenceReport` with issue details. Empty extraction without explanation is not acceptable.
+Terminal failure도 issue detail을 포함한 `EvidenceReport`를 emit해야 합니다. 설명 없는 empty extraction은 허용되지 않습니다.
 
 ## Non-goal
 
-Failure modes should not become downstream policy verdicts.
+Failure mode는 Downstream policy verdict가 되면 안 됩니다.
 
-Allowed:
+허용:
 
 ```text
 This field was not found.
@@ -202,7 +202,7 @@ This value has low OCR confidence.
 This document appears handwritten and needs review.
 ```
 
-Not allowed:
+금지:
 
 ```text
 This business claim is invalid.
@@ -210,4 +210,4 @@ This reporting row must be rejected.
 This evidence is legally sufficient.
 ```
 
-Downstream systems can map issues into their own policy, hazard, review, or rejection semantics.
+Downstream system은 issue를 자기 policy, hazard, review, rejection semantic으로 map할 수 있습니다.

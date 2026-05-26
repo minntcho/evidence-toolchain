@@ -108,3 +108,47 @@ def test_orchestration_boundary_doc_is_indexed_and_framework_neutral():
     assert "CheckpointStore" in text
     assert "해서는 안 되는 일" in text
     assert "Downstream" in text
+
+
+def test_supporting_architecture_docs_are_localized_and_indexed():
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+    readme = Path("README.md").read_text(encoding="utf-8")
+
+    expectations = {
+        "docs/evidence-routing.md": [
+            "증거 라우팅",
+            "먼저 관찰한다",
+            "최종 validation judgment를 내리면 안 됩니다",
+        ],
+        "docs/capability-registry.md": [
+            "Capability registry",
+            "Capability는 단순한 function이 아닙니다",
+            "문서화된 한계가 없는 capability",
+        ],
+        "docs/failure-modes.md": [
+            "Failure mode",
+            "Failure mode는 first-class output입니다",
+            "Downstream policy verdict가 되면 안 됩니다",
+        ],
+        "docs/adapter-boundary.md": [
+            "Adapter 경계",
+            "Core package는 독립적으로 유지되어야 합니다",
+            "Core는 최종 validation status를 결정하면 안 됩니다",
+        ],
+        "docs/synthetic-evidence.md": [
+            "Synthetic evidence testkit",
+            "Synthetic case는 runtime authority를 정의하지 않습니다",
+            "truth와 expected behavior를 분리합니다",
+        ],
+    }
+
+    for doc_path, anchors in expectations.items():
+        path = Path(doc_path)
+        assert path.exists(), f"missing {path}"
+        assert path.name in docs_index
+        for anchor in anchors:
+            assert anchor in path.read_text(encoding="utf-8")
+
+    assert "Capability registry" in readme
+    assert "Adapter 경계" in readme
+    assert "Synthetic evidence testkit" in readme

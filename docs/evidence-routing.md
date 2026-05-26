@@ -1,52 +1,52 @@
-# Evidence Routing
+# 증거 라우팅
 
-Evidence routing is the core reason this repository exists.
+Evidence routing은 이 저장소가 존재하는 핵심 이유입니다.
 
-The system should not assume that one parser is enough. Evidence documents may be clean PDFs, scanned bills, receipt photos, screenshots, spreadsheets, forms, handwritten logs, or mixed documents.
+System은 parser 하나로 충분하다고 가정하면 안 됩니다. Evidence document는 clean PDF, scanned bill, receipt photo, screenshot, spreadsheet, form, handwritten log, mixed document일 수 있습니다.
 
-The router decides which capabilities should be attempted for a given document.
+Router는 주어진 document에 어떤 capability를 시도할지 결정합니다.
 
-## Routing principle
+## Routing 원칙
 
 ```text
-Look first.
-Plan tools second.
-Extract third.
-Report uncertainty always.
+먼저 관찰한다.
+그 다음 tool을 계획한다.
+세 번째로 추출한다.
+항상 uncertainty를 report한다.
 ```
 
-This prevents a Docling-first or OCR-first architecture from becoming a hidden bottleneck.
+이 원칙은 Docling-first 또는 OCR-first architecture가 숨은 bottleneck이 되는 일을 막습니다.
 
-## Inputs
+## Input
 
-Routing can use:
+Routing은 다음을 사용할 수 있습니다.
 
 - file metadata
 - media type
 - page count
-- image dimensions
+- image dimension
 - text layer availability
-- OCR probe results
-- visual inspection results
-- caller-requested target fields
+- OCR probe result
+- visual inspection result
+- caller-requested target field
 - previously known document source
-- document quality signals
+- document quality signal
 
 ## Output
 
-The router emits an `EvidenceToolPlan`.
+Router는 `EvidenceToolPlan`을 emit합니다.
 
-A plan should include:
+Plan은 다음을 포함해야 합니다.
 
 - observed document class
-- selected capabilities
-- reason for each selected capability
-- fallback capabilities
-- expected outputs
-- blocking conditions
-- review triggers
+- selected capability
+- 각 selected capability의 reason
+- fallback capability
+- expected output
+- blocking condition
+- review trigger
 
-Example:
+예시:
 
 ```json
 {
@@ -75,7 +75,7 @@ Example:
 }
 ```
 
-## Routing examples
+## Routing 예시
 
 ### Born-digital utility bill
 
@@ -171,37 +171,37 @@ Possible terminal issue:
 - unreadable_document
 ```
 
-## Router implementations
+## Router implementation
 
-The repository should support multiple router implementations.
+이 저장소는 여러 router implementation을 지원해야 합니다.
 
 ### Rule router
 
-A deterministic router based on file metadata and cheap probes.
+File metadata와 cheap probe에 기반한 deterministic router입니다.
 
-Good for:
+적합한 경우:
 
-- reproducible tests
+- reproducible test
 - baseline behavior
 - offline execution
-- controlled enterprise environments
+- controlled enterprise environment
 
 ### Model router
 
-A router that uses a classifier, LLM, or VLM to inspect document condition and propose tool plans.
+Classifier, LLM, VLM으로 document condition을 inspect하고 tool plan을 propose하는 router입니다.
 
-Good for:
+적합한 경우:
 
 - messy evidence
-- unknown document formats
-- mixed scans and screenshots
+- unknown document format
+- mixed scan과 screenshot
 - early exploration
 
 ### Hybrid router
 
-A deterministic skeleton with model-assisted observation.
+Model-assisted observation을 가진 deterministic skeleton입니다.
 
-This is likely the safest default long term:
+장기적으로 가장 안전한 default일 가능성이 큽니다.
 
 ```text
 rules determine allowed capabilities
@@ -209,11 +209,11 @@ model observes document condition
 rules compile observation into a bounded tool plan
 ```
 
-## Router constraints
+## Router 제약
 
-The router may choose tools. It may not make final validation judgments.
+Router는 tool을 선택할 수 있습니다. 최종 validation judgment를 내리면 안 됩니다.
 
-Allowed:
+허용:
 
 ```text
 This document needs OCR and table extraction.
@@ -221,7 +221,7 @@ The amount field is ambiguous.
 Manual review should be requested.
 ```
 
-Not allowed:
+금지:
 
 ```text
 The declared business value is finally valid.
@@ -231,11 +231,11 @@ This evidence is sufficient under every policy.
 
 ## Failure-aware routing
 
-Tool failure should not be hidden.
+Tool failure는 숨겨지면 안 됩니다.
 
-If a capability fails, the system should preserve the failure and decide whether to try a fallback.
+Capability가 실패하면 system은 failure를 보존하고 fallback을 시도할지 결정해야 합니다.
 
-Example:
+예시:
 
 ```text
 docling_parse failed to recover table structure
@@ -243,4 +243,4 @@ docling_parse failed to recover table structure
 -> if results still conflict, emit ambiguous_table_structure issue
 ```
 
-This makes the system robust without pretending that every document can be solved automatically.
+이 방식은 모든 document를 자동으로 solve할 수 있는 척하지 않으면서 system을 robust하게 만듭니다.

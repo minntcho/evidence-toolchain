@@ -1,18 +1,18 @@
-# Adapter Boundary
+# Adapter 경계
 
-The core package should stay independent.
+Core package는 독립적으로 유지되어야 합니다.
 
-Adapters may translate `EvidenceReport` into a downstream system's language, but downstream concepts must not define the core model.
+Adapter는 `EvidenceReport`를 Downstream system의 언어로 번역할 수 있습니다. 하지만 Downstream concept가 core model을 정의해서는 안 됩니다.
 
-## Dependency direction
+## 의존 방향
 
-Preferred:
+선호:
 
 ```text
 consumer -> evidence-toolchain
 ```
 
-Also acceptable:
+허용:
 
 ```text
 orchestrator
@@ -20,7 +20,7 @@ orchestrator
   -> downstream validator
 ```
 
-Avoid:
+피해야 할 방향:
 
 ```text
 evidence-toolchain -> specific downstream validator
@@ -28,7 +28,7 @@ evidence-toolchain -> specific downstream validator
 
 ## Core language
 
-Core terms should remain neutral:
+Core term은 중립적으로 유지되어야 합니다.
 
 ```text
 EvidenceDocument
@@ -41,11 +41,11 @@ EvidenceIssue
 EvidenceReport
 ```
 
-These terms describe document processing and extraction.
+이 용어들은 document processing과 extraction을 설명합니다.
 
 ## Downstream language
 
-Downstream systems may use stronger terms:
+Downstream system은 더 강한 용어를 사용할 수 있습니다.
 
 ```text
 claim
@@ -60,9 +60,9 @@ receipt
 audit ledger
 ```
 
-Those terms belong outside the core package unless the repository later defines a clearly separate optional adapter package.
+이 용어들은 repository가 나중에 clearly separate optional adapter package를 정의하지 않는 한 core package 밖에 속합니다.
 
-## Adapter examples
+## Adapter 예시
 
 ### Generic JSON adapter
 
@@ -70,7 +70,7 @@ Those terms belong outside the core package unless the repository later defines 
 EvidenceReport -> JSON
 ```
 
-For APIs, CLIs, batch jobs, and dashboards.
+API, CLI, batch job, dashboard를 위한 adapter입니다.
 
 ### Review UI adapter
 
@@ -78,7 +78,7 @@ For APIs, CLIs, batch jobs, and dashboards.
 EvidenceReport -> review task
 ```
 
-For human review queues.
+Human review queue를 위한 adapter입니다.
 
 ### Domain validator adapter
 
@@ -86,7 +86,7 @@ For human review queues.
 EvidenceReport -> domain-specific declared-input comparison payload
 ```
 
-For LCA, ESG, ERP, or audit systems.
+LCA, ESG, ERP, audit system을 위한 adapter입니다.
 
 ### Compiler adapter
 
@@ -94,11 +94,11 @@ For LCA, ESG, ERP, or audit systems.
 EvidenceReport -> compiler-specific evidence claim candidates
 ```
 
-This kind of adapter is allowed, but it must remain optional. The core package should not import the compiler.
+이 adapter는 허용되지만 optional이어야 합니다. Core package는 compiler를 import하면 안 됩니다.
 
-## Boundary rule
+## 경계 규칙
 
-The core may say:
+Core는 다음처럼 말할 수 있습니다.
 
 ```text
 The document contains an extracted field candidate:
@@ -111,32 +111,32 @@ The document contains an extracted field candidate:
 - issue: needs_unit_normalization
 ```
 
-A downstream adapter may translate that into:
+Downstream adapter는 이것을 다음처럼 번역할 수 있습니다.
 
 ```text
 Evidence claim candidate for electricity usage.
 ```
 
-A downstream validator may then compare it with declared input:
+Downstream validator는 그 다음 declared input과 비교할 수 있습니다.
 
 ```text
 6400 kWh == 6.4 MWh
 ```
 
-But the core should not decide the final validation status.
+하지만 Core는 최종 validation status를 결정하면 안 됩니다.
 
-## Why this matters
+## 이 경계가 중요한 이유
 
-If the core learns one downstream system's authority model too early, it becomes a plugin instead of a reusable engine.
+Core가 너무 이른 시점에 한 Downstream system의 authority model을 배우면, reusable engine이 아니라 plugin이 됩니다.
 
-The repository should be useful for:
+이 저장소는 다음 용도에 유용해야 합니다.
 
 - direct CLI extraction
-- standalone APIs
-- review dashboards
+- standalone API
+- review dashboard
 - LCA/ESG intake
 - invoice processing
 - internal audit tooling
-- future compilers or validators
+- future compiler 또는 validator
 
-Keeping adapters outside the core preserves that option.
+Adapter를 core 밖에 두면 이 선택지가 보존됩니다.
