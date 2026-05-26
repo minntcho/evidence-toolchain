@@ -13,6 +13,7 @@ freeze implementation details that can change as extraction tools improve.
 1. [Synthetic Evidence Cases](synthetic-evidence-cases.md)
 2. [Router and Planner Test Strategy](router-planner-test-strategy.md)
 3. [Failure Mode Test Strategy](failure-mode-test-strategy.md)
+4. [Generated Case Bundle Contract](generated-case-bundle-contract.md)
 
 ## Test Authority Rule
 

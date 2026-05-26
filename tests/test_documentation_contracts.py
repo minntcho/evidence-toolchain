@@ -71,3 +71,20 @@ def test_testing_strategy_docs_are_indexed_and_preserve_test_authority():
         assert "Strong assertions" in text
         assert "Weak assertions" in text
         assert "Must not" in text
+
+
+def test_generated_case_bundle_contract_is_indexed_and_scope_limited():
+    doc_path = Path("docs/testing/generated-case-bundle-contract.md")
+    testing_index = Path("docs/testing/README.md").read_text(encoding="utf-8")
+
+    assert doc_path.exists()
+    assert "generated-case-bundle-contract.md" in testing_index
+
+    text = doc_path.read_text(encoding="utf-8")
+    assert "case directory" in text
+    assert "evidence.<ext>" in text
+    assert "expected.json" in text
+    assert "Ground truth" in text
+    assert "Expected toolchain behavior" in text
+    assert "Must not" in text
+    assert "Downstream" in text
