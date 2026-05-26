@@ -1,0 +1,21 @@
+{
+  "case_id": "utility_bill_basic",
+  "document_kind": "utility_bill",
+  "title": "Synthetic utility bill",
+  "quality": "clean",
+  "text_layer": true,
+  "signals": [],
+  "ground_truth": {
+    "site": "OCH-01",
+    "period": "2025-03",
+    "activity": "electricity",
+    "amount": 6.4,
+    "unit": "MWh",
+    "supplier": "Korea Electric Utility"
+  },
+  "expected_behavior": {
+    "plan_includes": ["docling_parse", "table_structure_extract", "utility_bill_extract"],
+    "fallbacks_include": [],
+    "issues_include": []
+  }
+}

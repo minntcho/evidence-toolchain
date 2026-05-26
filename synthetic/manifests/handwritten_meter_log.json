@@ -1,0 +1,21 @@
+{
+  "case_id": "handwritten_meter_log",
+  "document_kind": "meter_log",
+  "title": "Synthetic handwritten meter log",
+  "quality": "handwritten",
+  "text_layer": false,
+  "signals": ["handwriting_present"],
+  "ground_truth": {
+    "site": "OCH-01",
+    "period": "2025-03",
+    "activity": "metered_water",
+    "amount": 1180,
+    "unit": "m3",
+    "supplier": "Internal Meter Log"
+  },
+  "expected_behavior": {
+    "plan_includes": ["handwriting_read", "table_structure_extract"],
+    "fallbacks_include": ["manual_review_request"],
+    "issues_include": ["low_trust_handwritten_evidence"]
+  }
+}
