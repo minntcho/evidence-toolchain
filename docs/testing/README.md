@@ -13,7 +13,7 @@ Test는 toolchain의 역할을 정의하는 behavior를 보호해야 합니다. 
 3. [Failure Mode Test Strategy](failure-mode-test-strategy.md)
 4. [Generated Case Bundle Contract](generated-case-bundle-contract.md)
 
-## Test authority 규칙
+## 테스트 authority 규칙
 
 Test는 synthetic world와 fixture document의 expected behavior를 정의할 수 있습니다. 하지만 real Downstream decision을 위한 runtime authority가 되어서는 안 됩니다.
 

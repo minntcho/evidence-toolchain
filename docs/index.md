@@ -10,10 +10,10 @@
 2. [아키텍처](architecture.md)
 3. [증거 라우팅](evidence-routing.md)
 4. [오케스트레이션 경계](orchestration-boundary.md)
-5. [Capability registry](capability-registry.md)
-6. [Failure mode](failure-modes.md)
+5. [Capability 레지스트리](capability-registry.md)
+6. [실패 모드](failure-modes.md)
 7. [Adapter 경계](adapter-boundary.md)
-8. [Synthetic evidence testkit](synthetic-evidence.md)
+8. [합성 증거 테스트킷](synthetic-evidence.md)
 9. [계약 문서](contracts/README.md)
 10. [테스트 전략](testing/README.md)
 
@@ -67,9 +67,9 @@ public report를 publish해야 하는가?
 
 이 결정들은 Downstream system의 책임입니다.
 
-## Testkit boundary
+## 테스트킷 경계
 
-이 저장소는 개발과 테스트를 위한 synthetic evidence testkit을 포함합니다. testkit은 가짜 utility bill, receipt, meter log, degraded document, expected behavior manifest를 생성할 수 있습니다. testkit은 core runtime의 일부가 아닙니다.
+이 저장소는 개발과 테스트를 위한 합성 증거 테스트킷을 포함합니다. testkit은 가짜 utility bill, receipt, meter log, degraded document, expected behavior manifest를 생성할 수 있습니다. testkit은 core runtime의 일부가 아닙니다.
 
 허용:
 

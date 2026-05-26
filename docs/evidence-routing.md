@@ -6,7 +6,7 @@ System은 parser 하나로 충분하다고 가정하면 안 됩니다. Evidence 
 
 Router는 주어진 document에 어떤 capability를 시도할지 결정합니다.
 
-## Routing 원칙
+## 라우팅 원칙
 
 ```text
 먼저 관찰한다.
@@ -17,7 +17,7 @@ Router는 주어진 document에 어떤 capability를 시도할지 결정합니�
 
 이 원칙은 Docling-first 또는 OCR-first architecture가 숨은 bottleneck이 되는 일을 막습니다.
 
-## Input
+## 입력
 
 Routing은 다음을 사용할 수 있습니다.
 
@@ -32,7 +32,7 @@ Routing은 다음을 사용할 수 있습니다.
 - previously known document source
 - document quality signal
 
-## Output
+## 출력
 
 Router는 `EvidenceToolPlan`을 emit합니다.
 
@@ -75,7 +75,7 @@ Plan은 다음을 포함해야 합니다.
 }
 ```
 
-## Routing 예시
+## 라우팅 예시
 
 ### Born-digital utility bill
 
@@ -171,7 +171,7 @@ Possible terminal issue:
 - unreadable_document
 ```
 
-## Router implementation
+## Router 구현
 
 이 저장소는 여러 router implementation을 지원해야 합니다.
 
@@ -229,7 +229,7 @@ This claim is approved for reporting.
 This evidence is sufficient under every policy.
 ```
 
-## Failure-aware routing
+## 실패 인식 라우팅
 
 Tool failure는 숨겨지면 안 됩니다.
 

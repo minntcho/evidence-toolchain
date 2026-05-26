@@ -1,4 +1,4 @@
-# Synthetic Evidence Case
+# 합성 증거 Case
 
 Synthetic evidence case는 개발을 위한 repeatable test world를 만듭니다.
 

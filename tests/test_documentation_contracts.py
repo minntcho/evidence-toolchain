@@ -1,4 +1,76 @@
+import re
 from pathlib import Path
+
+
+def _markdown_labels(*paths: str) -> set[str]:
+    labels: set[str] = set()
+    link_pattern = re.compile(r"\[([^\]]+)\]\([^)]+\)")
+    for path in paths:
+        text = Path(path).read_text(encoding="utf-8")
+        for line in text.splitlines():
+            if line.startswith("#"):
+                labels.add(line.lstrip("#").strip())
+            labels.update(link_pattern.findall(line))
+    return labels
+
+
+def test_document_heading_and_navigation_labels_are_korean():
+    labels = _markdown_labels(
+        "README.md",
+        "docs/index.md",
+        "docs/capability-registry.md",
+        "docs/failure-modes.md",
+        "docs/adapter-boundary.md",
+        "docs/evidence-routing.md",
+        "docs/orchestration-boundary.md",
+        "docs/synthetic-evidence.md",
+        "docs/contracts/evidence-check.md",
+        "docs/testing/generated-case-bundle-contract.md",
+        "docs/testing/failure-mode-test-strategy.md",
+        "docs/testing/README.md",
+        "docs/testing/synthetic-evidence-cases.md",
+        "synthetic/README.md",
+    )
+
+    expected_labels = {
+        "Capability 레지스트리",
+        "실패 모드",
+        "합성 증거 테스트킷",
+        "테스트킷 경계",
+        "라우팅 원칙",
+        "입력",
+        "출력",
+        "런타임 port",
+        "Evidence 파일",
+        "Expected 파일",
+        "Manifest 계약",
+        "Core 언어",
+        "Downstream 언어",
+        "실패 모드 테스트 전략",
+        "테스트 authority 규칙",
+        "Review semantics 규칙",
+    }
+    old_labels = {
+        "Capability registry",
+        "Failure mode",
+        "Synthetic evidence testkit",
+        "Testkit boundary",
+        "Routing 원칙",
+        "Input",
+        "Output",
+        "Runtime port",
+        "Evidence file",
+        "Expected file",
+        "Manifest contract",
+        "Core language",
+        "Downstream language",
+        "Failure Mode 테스트 전략",
+        "Test authority 규칙",
+        "Review semantics",
+    }
+
+    assert expected_labels <= labels
+    assert not (old_labels & labels)
 
 
 def test_purpose_and_boundaries_doc_is_indexed_and_domain_neutral():
@@ -121,13 +193,13 @@ def test_supporting_architecture_docs_are_localized_and_indexed():
             "최종 validation judgment를 내리면 안 됩니다",
         ],
         "docs/capability-registry.md": [
-            "Capability registry",
+            "Capability 레지스트리",
             "Capability는 단순한 function이 아닙니다",
             "문서화된 한계가 없는 capability",
         ],
         "docs/failure-modes.md": [
-            "Failure mode",
-            "Failure mode는 first-class output입니다",
+            "실패 모드",
+            "실패 모드는 first-class output입니다",
             "Downstream policy verdict가 되면 안 됩니다",
         ],
         "docs/adapter-boundary.md": [
@@ -136,7 +208,7 @@ def test_supporting_architecture_docs_are_localized_and_indexed():
             "Core는 최종 validation status를 결정하면 안 됩니다",
         ],
         "docs/synthetic-evidence.md": [
-            "Synthetic evidence testkit",
+            "합성 증거 테스트킷",
             "Synthetic case는 runtime authority를 정의하지 않습니다",
             "truth와 expected behavior를 분리합니다",
         ],
@@ -149,6 +221,6 @@ def test_supporting_architecture_docs_are_localized_and_indexed():
         for anchor in anchors:
             assert anchor in path.read_text(encoding="utf-8")
 
-    assert "Capability registry" in readme
+    assert "Capability 레지스트리" in readme
     assert "Adapter 경계" in readme
-    assert "Synthetic evidence testkit" in readme
+    assert "합성 증거 테스트킷" in readme
