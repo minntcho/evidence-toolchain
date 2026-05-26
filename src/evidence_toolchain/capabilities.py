@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import Any, Protocol
 
 from evidence_toolchain.runtime import EvidenceRunState, EvidenceStep, EvidenceToolResult
 
@@ -40,6 +41,36 @@ class ManualReviewCapabilityRunner:
                 "reason": reason,
                 "document_id": state.document.document_id,
             },
+        )
+
+
+class StaticCapabilityRunner:
+    """Deterministic runner for tests, dry runs, and fixture-backed execution."""
+
+    def __init__(
+        self,
+        outputs_by_capability: Mapping[
+            str,
+            Mapping[str, Any] | EvidenceToolResult,
+        ],
+    ) -> None:
+        self._results = dict(outputs_by_capability)
+
+    def can_run(self, step: EvidenceStep, state: EvidenceRunState) -> bool:
+        return step.capability in self._results
+
+    def run(self, step: EvidenceStep, state: EvidenceRunState) -> EvidenceToolResult:
+        if step.capability is None:
+            raise ValueError("EvidenceStep must include a capability name.")
+
+        result = self._results[step.capability]
+        if isinstance(result, EvidenceToolResult):
+            return result
+
+        return EvidenceToolResult(
+            capability=step.capability,
+            status="completed",
+            outputs=dict(result),
         )
 
 

@@ -37,7 +37,7 @@ def run_document(
         state = state.record_event(event)
 
     if capability_runner is not None:
-        state = _run_supported_capabilities(state, capability_runner)
+        state = run_capability_steps(state, capability_runner)
 
     return state
 
@@ -110,7 +110,7 @@ def _initial_events(
     )
 
 
-def _run_supported_capabilities(
+def run_capability_steps(
     state: EvidenceRunState,
     capability_runner: CapabilityRunner,
 ) -> EvidenceRunState:
