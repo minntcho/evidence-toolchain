@@ -31,6 +31,7 @@ class EvidenceReport:
     completed_steps: list[dict[str, object]] = field(default_factory=list)
     tool_results: list[dict[str, object]] = field(default_factory=list)
     interrupts: list[dict[str, object]] = field(default_factory=list)
+    events: list[dict[str, object]] = field(default_factory=list)
     recommended_next_action: str | None = None
 
     def to_dict(self) -> dict[str, object]:
@@ -48,6 +49,7 @@ class EvidenceReport:
             "completed_steps": self.completed_steps,
             "tool_results": self.tool_results,
             "interrupts": self.interrupts,
+            "events": self.events,
             "recommended_next_action": self.recommended_next_action,
         }
 
@@ -66,6 +68,7 @@ def emit_evidence_report(state: EvidenceRunState) -> EvidenceReport:
         completed_steps=[step.to_dict() for step in state.completed_steps],
         tool_results=[result.to_dict() for result in state.tool_results],
         interrupts=[_to_json_compatible(interrupt) for interrupt in state.interrupts],
+        events=[event.to_dict() for event in state.events],
         recommended_next_action=_recommended_next_action(state),
     )
 

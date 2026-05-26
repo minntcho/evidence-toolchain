@@ -18,6 +18,7 @@ Evidence report는 다음을 포함할 수 있습니다.
 - confidence
 - issue
 - unresolved ambiguity
+- event timeline
 - recommended next action
 
 Recommended next action은 fallback capability를 시도하거나 case를 review로 보내는 일을 포함할 수 있습니다.
