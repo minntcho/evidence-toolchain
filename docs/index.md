@@ -1,15 +1,15 @@
-# Documentation Index
+# 문서 색인
 
-This directory defines the first architecture contract for `evidence-toolchain`.
+이 디렉터리는 `evidence-toolchain`의 첫 번째 architecture contract를 정의합니다.
 
-The repository is an independent evidence document processing engine. Its job is not to validate business claims directly. Its job is to turn messy evidence documents into structured, provenance-carrying reports that other systems can inspect.
+이 저장소는 독립적인 evidence document processing engine입니다. 이 저장소의 일은 business claim을 직접 validate하는 것이 아닙니다. 이 저장소의 일은 지저분한 evidence document를 다른 시스템이 검사할 수 있는 structured, provenance-carrying report로 바꾸는 것입니다.
 
-## Read first
+## 먼저 읽기
 
-1. [Purpose and Boundaries](purpose-and-boundaries.md)
-2. [Architecture](architecture.md)
-3. [Evidence Routing](evidence-routing.md)
-4. [Orchestration Boundary](orchestration-boundary.md)
+1. [목적과 경계](purpose-and-boundaries.md)
+2. [아키텍처](architecture.md)
+3. [증거 라우팅](evidence-routing.md)
+4. [오케스트레이션 경계](orchestration-boundary.md)
 5. [Capability Registry](capability-registry.md)
 6. [Failure Modes](failure-modes.md)
 7. [Adapter Boundary](adapter-boundary.md)
@@ -17,22 +17,22 @@ The repository is an independent evidence document processing engine. Its job is
 9. [Contract Documents](contracts/README.md)
 10. [Testing Strategy](testing/README.md)
 
-## Project stance
+## 프로젝트 입장
 
-`evidence-toolchain` should stay useful even when the downstream consumer changes.
+`evidence-toolchain`은 Downstream consumer가 바뀌어도 계속 유용해야 합니다.
 
-Examples of possible consumers:
+가능한 consumer 예시는 다음과 같습니다.
 
-- ESG or LCA validation systems
-- audit review dashboards
-- internal document QA tools
-- supplier evidence intake portals
-- batch extraction pipelines
-- domain-specific compilers or validators
+- ESG 또는 LCA validation system
+- audit review dashboard
+- internal document QA tool
+- supplier evidence intake portal
+- batch extraction pipeline
+- domain-specific compiler 또는 validator
 
-The core package should therefore avoid downstream-specific authority terms. It should emit neutral evidence outputs such as observations, plans, extraction results, fields, provenance, confidence, and issues.
+따라서 core package는 downstream-specific authority term을 피해야 합니다. core package는 observation, plan, extraction result, field, provenance, confidence, issue 같은 중립적인 evidence output을 내야 합니다.
 
-## Core flow
+## Core 흐름
 
 ```text
 EvidenceDocument
@@ -43,37 +43,35 @@ EvidenceDocument
 -> EvidenceReport
 ```
 
-## Design boundary
+## 설계 경계
 
-The repository may answer:
-
-```text
-What kind of document is this?
-What extraction strategy should be attempted?
-What fields were found?
-Where did each value come from?
-How reliable was the extraction?
-What issues or failure modes were observed?
-```
-
-The repository should not answer:
+이 저장소는 다음 질문에 답할 수 있습니다.
 
 ```text
-Is the declared business input finally valid?
-Can this value be committed?
-Is this evidence sufficient under a specific governance policy?
-Should a public report be published?
+이 문서는 어떤 종류의 문서인가?
+어떤 extraction strategy를 시도해야 하는가?
+어떤 field가 발견되었는가?
+각 value는 어디에서 왔는가?
+extraction은 얼마나 신뢰할 수 있는가?
+어떤 issue 또는 failure mode가 관찰되었는가?
 ```
 
-Those decisions belong to downstream systems.
+이 저장소는 다음 질문에 답해서는 안 됩니다.
+
+```text
+declared business input이 최종적으로 valid한가?
+이 value를 commit할 수 있는가?
+이 evidence가 특정 governance policy 아래에서 충분한가?
+public report를 publish해야 하는가?
+```
+
+이 결정들은 Downstream system의 책임입니다.
 
 ## Testkit boundary
 
-The repository includes a synthetic evidence testkit for development and tests.
-The testkit may generate fake utility bills, receipts, meter logs, degraded
-documents, and expected behavior manifests. It is not part of the core runtime.
+이 저장소는 개발과 테스트를 위한 synthetic evidence testkit을 포함합니다. testkit은 가짜 utility bill, receipt, meter log, degraded document, expected behavior manifest를 생성할 수 있습니다. testkit은 core runtime의 일부가 아닙니다.
 
-Allowed:
+허용:
 
 ```text
 tests -> synthetic generator -> generated files
@@ -81,11 +79,10 @@ tests -> evidence_toolchain
 CLI/dev tool -> synthetic generator -> generated files
 ```
 
-Not allowed:
+금지:
 
 ```text
 evidence_toolchain core -> synthetic generator
 ```
 
-Synthetic fixtures are an experiment surface for routing, extraction, and
-failure-mode behavior. They do not authorize downstream validation judgments.
+Synthetic fixture는 routing, extraction, failure-mode behavior를 실험하는 표면입니다. Synthetic fixture는 Downstream validation judgment를 authorize하지 않습니다.

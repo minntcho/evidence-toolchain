@@ -1,77 +1,75 @@
 # evidence-toolchain
 
-`evidence-toolchain` is an independent document-evidence processing engine.
+`evidence-toolchain`는 독립적인 document-evidence 처리 엔진입니다.
 
-It observes messy evidence documents, chooses an extraction strategy, runs document tools, and emits a neutral `EvidenceReport` that downstream systems can consume.
+이 프로젝트는 지저분한 증거 문서를 관찰하고, 추출 전략을 고른 뒤, document tool을 실행하고, Downstream 시스템이 소비할 수 있는 중립적인 `EvidenceReport`를 냅니다.
 
-The core idea is simple:
+핵심 흐름은 단순합니다.
 
 ```text
 Evidence document
--> observe document condition
--> plan tool usage
--> run extraction capabilities
--> consolidate extracted fields
--> emit EvidenceReport with provenance and issues
+-> 문서 상태 관찰
+-> tool 사용 계획 수립
+-> extraction capability 실행
+-> 추출된 field 통합
+-> provenance와 issue를 포함한 EvidenceReport 발행
 ```
 
-This repository is intentionally not tied to any single validator, LCA platform, ESG compiler, or downstream product.
+이 저장소는 특정 validator, LCA platform, ESG compiler, 또는 Downstream product에 묶이지 않습니다.
 
-## What this project should do
+## 이 프로젝트가 해야 하는 일
 
-- Inspect evidence documents before choosing tools.
-- Route documents to suitable capabilities such as document parsing, OCR, table extraction, vision extraction, handwriting extraction, barcode/QR reading, or manual review.
-- Extract candidate fields with page, bounding box, confidence, source span, and tool provenance where possible.
-- Preserve failure modes as structured issues instead of hiding them behind a best-effort answer.
-- Produce neutral outputs that can be used by many consumers.
+- tool을 고르기 전에 evidence document를 먼저 검사한다.
+- document parsing, OCR, table extraction, vision extraction, handwriting extraction, barcode/QR reading, manual review 같은 적절한 capability로 문서를 라우팅한다.
+- 가능한 경우 page, bounding box, confidence, source span, tool provenance를 포함해 candidate field를 추출한다.
+- failure mode를 best-effort 답변 뒤에 숨기지 않고 structured issue로 보존한다.
+- 여러 consumer가 사용할 수 있는 중립적인 output을 만든다.
 
-## What this project should not do
+## 이 프로젝트가 하지 말아야 할 일
 
-- It should not be the final validation authority.
-- It should not decide whether a business claim is true, compliant, or publishable.
-- It should not issue governance decisions, commit receipts, audit ledgers, or policy verdicts.
-- It should not make the core package depend on a specific downstream project.
+- 최종 validation authority가 되지 않는다.
+- business claim이 true, compliant, publishable한지 결정하지 않는다.
+- governance decision, commit receipt, audit ledger, policy verdict를 발행하지 않는다.
+- core package가 특정 Downstream project에 의존하게 만들지 않는다.
 
-A downstream system may decide that extracted evidence supports, contradicts, or fails to support a declared input. This project only prepares the evidence side of that judgment.
+Downstream system은 추출된 증거가 declared input을 지지하는지, 반박하는지, 또는 지지하지 못하는지 판단할 수 있습니다. 이 프로젝트는 그 판단의 evidence side만 준비합니다.
 
-## Initial documentation
+## 초기 문서
 
-- [Documentation index](docs/index.md)
-- [Purpose and boundaries](docs/purpose-and-boundaries.md)
-- [Architecture](docs/architecture.md)
-- [Evidence routing](docs/evidence-routing.md)
-- [Orchestration boundary](docs/orchestration-boundary.md)
+- [문서 색인](docs/index.md)
+- [목적과 경계](docs/purpose-and-boundaries.md)
+- [아키텍처](docs/architecture.md)
+- [증거 라우팅](docs/evidence-routing.md)
+- [오케스트레이션 경계](docs/orchestration-boundary.md)
 - [Capability registry](docs/capability-registry.md)
-- [Failure modes](docs/failure-modes.md)
-- [Adapter boundary](docs/adapter-boundary.md)
+- [Failure mode](docs/failure-modes.md)
+- [Adapter 경계](docs/adapter-boundary.md)
 - [Synthetic evidence testkit](docs/synthetic-evidence.md)
 
-## Development quickstart
+## 개발 빠른 시작
 
-Generate the default synthetic evidence cases and run tests:
+기본 synthetic evidence case를 생성하고 테스트를 실행합니다.
 
 ```bash
 python tools/generate_evidence_cases.py
 python -m pytest -q
 ```
 
-The generated case bundles land under `tests/fixtures/generated/` by default.
-They are development fixtures, not runtime state.
+생성된 case bundle은 기본적으로 `tests/fixtures/generated/` 아래에 놓입니다. 이 파일들은 runtime state가 아니라 development fixture입니다.
 
-## North star
+## 방향성
 
-The project should become a reusable evidence-document front end for
-domain-neutral evidence-input consistency:
+이 프로젝트는 도메인 중립적인 evidence-input consistency를 위한 재사용 가능한 evidence-document front end가 되어야 합니다.
 
 ```text
 requested or declared input
 + evidence documents
 -> evidence-toolchain
--> EvidenceReport with provenance, confidence, issues, and review triggers
+-> provenance, confidence, issue, review trigger를 포함한 EvidenceReport
 -> downstream validator, audit UI, review workflow, adapter, or domain compiler
 ```
 
-The safest design stance is:
+가장 안전한 설계 태도는 다음과 같습니다.
 
 ```text
 Tools extract.
@@ -80,11 +78,11 @@ Adapters translate.
 Downstream systems judge.
 ```
 
-For testing, this repository also includes a synthetic evidence testkit:
+테스트를 위해 이 저장소는 synthetic evidence testkit도 포함합니다.
 
 ```text
-Synthetic manifests define truth and expected behavior.
-Generators materialize sample evidence documents.
-Tests verify observation, planning, issues, and import boundaries.
-Core runtime does not import the synthetic testkit.
+Synthetic manifest가 truth와 expected behavior를 정의한다.
+Generator가 sample evidence document를 materialize한다.
+Test가 observation, planning, issue, import boundary를 검증한다.
+Core runtime은 synthetic testkit을 import하지 않는다.
 ```

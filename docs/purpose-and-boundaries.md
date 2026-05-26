@@ -1,17 +1,14 @@
-# Purpose and Boundaries
+# 목적과 경계
 
-`evidence-toolchain` is a domain-neutral evidence-input consistency engine.
+`evidence-toolchain`은 도메인 중립적인 증거-입력 일관성 엔진입니다.
 
-Its job is to help a caller compare requested or declared inputs with what can
-be observed and extracted from evidence documents. It preserves where values
-came from, how confident the extraction is, what failed, and whether review is
-needed.
+이 저장소의 일은 caller가 요청하거나 선언한 input을 evidence document에서 관찰하고 추출할 수 있는 내용과 비교할 수 있도록 돕는 것입니다. 값이 어디에서 왔는지, extraction confidence가 어느 정도인지, 무엇이 실패했는지, review가 필요한지를 보존합니다.
 
-It does not make final domain decisions.
+이 저장소는 최종 도메인 판단을 내리지 않는다.
 
-## Stable Purpose
+## 안정적인 목적
 
-The purpose is stable even when downstream domains change:
+목적은 Downstream domain이 바뀌어도 안정적으로 유지됩니다.
 
 ```text
 declared or requested input
@@ -22,44 +19,39 @@ declared or requested input
 -> consistency, provenance, issue, and review report
 ```
 
-The repository should stay useful for many consumers: intake systems, review
-queues, audit tools, domain validators, compilers, and other workflows that need
-evidence reports.
+이 저장소는 intake system, review queue, audit tool, domain validator, compiler, 그 밖에 evidence report가 필요한 workflow에서 유용해야 합니다.
 
-Consumer examples are examples, not core identity.
+소비자 예시는 예시일 뿐 코어 정체성이 아니다.
 
-## What The Core May Decide
+## Core가 판단할 수 있는 것
 
-The core may answer:
+Core는 다음에 답할 수 있습니다.
 
-- what kind of evidence document was observed
-- what extraction capabilities should be attempted
-- what candidate fields were found
-- where each candidate value came from
-- whether requested values are supported, contradicted, missing, or uncertain
-- what extraction issues or review triggers should be preserved
+- 어떤 종류의 evidence document가 관찰되었는가
+- 어떤 extraction capability를 시도해야 하는가
+- 어떤 candidate field가 발견되었는가
+- 각 candidate value가 어디에서 왔는가
+- requested value가 supported, contradicted, missing, uncertain 중 어디에 해당하는가
+- 어떤 extraction issue 또는 review trigger를 보존해야 하는가
 
-These answers are evidence-processing outputs. They are not final domain
-approval.
+이 답들은 evidence-processing output입니다. 최종 domain approval이 아닙니다.
 
-## What The Core Must Not Decide
+## Core가 판단해서는 안 되는 것
 
-The core must not answer:
+Core는 다음에 답해서는 안 됩니다.
 
-- whether a business, legal, compliance, scientific, or policy claim is finally
-  approved
-- whether a public report may be published
-- whether a domain-specific value should be committed as authoritative state
-- whether a downstream system should issue receipts, audit ledger entries, or
-  governance decisions
+- business, legal, compliance, scientific, policy claim이 최종적으로 approved인지
+- public report를 publish할 수 있는지
+- domain-specific value를 authoritative state로 commit해야 하는지
+- Downstream system이 receipt, audit ledger entry, governance decision을 발행해야 하는지
 
-Those decisions belong to downstream systems.
+이 결정들은 Downstream system의 책임입니다.
 
-## Neutral Naming Rule
+## 중립 명명 규칙
 
-Core terms stay neutral.
+코어 용어는 중립적으로 유지한다.
 
-Preferred core language:
+선호하는 core language:
 
 ```text
 EvidenceDocument
@@ -73,10 +65,9 @@ EvidenceCheck
 EvidenceReport
 ```
 
-Downstream or consumer-specific language should stay outside the core package
-unless it is clearly part of an optional adapter.
+Downstream 또는 consumer-specific language는 optional adapter의 일부라는 점이 분명하지 않다면 core package 밖에 머물러야 합니다.
 
-Examples of downstream language:
+Downstream language 예시:
 
 ```text
 claim
@@ -88,19 +79,18 @@ regulatory filing
 domain verdict
 ```
 
-## Adapter Boundary
+## Adapter 경계
 
-Adapters may translate an `EvidenceReport` into a consumer's language, but the
-consumer's authority model must not define the core model.
+Adapter는 `EvidenceReport`를 consumer의 언어로 번역할 수 있지만, consumer의 authority model이 core model을 정의해서는 안 됩니다.
 
-Allowed:
+허용:
 
 ```text
 consumer -> evidence-toolchain
 external orchestrator -> evidence-toolchain -> downstream validator
 ```
 
-Avoid:
+피해야 할 형태:
 
 ```text
 evidence-toolchain core -> specific downstream validator
@@ -108,15 +98,12 @@ evidence-toolchain core -> synthetic generator
 evidence-toolchain core -> policy or publication authority
 ```
 
-## North Star
+## 방향성
 
-The north star is:
+방향성은 다음과 같습니다.
 
 ```text
 domain-neutral evidence-input consistency, provenance, uncertainty, and failure reporting
 ```
 
-If a future feature strengthens that purpose without taking downstream authority,
-it belongs near the core. If it turns one consumer's policy, product workflow, or
-reporting decision into core behavior, it belongs in an adapter or downstream
-system.
+미래 기능이 Downstream authority를 가져오지 않으면서 이 목적을 강화한다면 core 가까이에 둘 수 있습니다. 반대로 한 consumer의 policy, product workflow, reporting decision을 core behavior로 만든다면 adapter 또는 Downstream system에 속합니다.
