@@ -37,6 +37,7 @@ A downstream system may decide that extracted evidence supports, contradicts, or
 ## Initial documentation
 
 - [Documentation index](docs/index.md)
+- [Purpose and boundaries](docs/purpose-and-boundaries.md)
 - [Architecture](docs/architecture.md)
 - [Evidence routing](docs/evidence-routing.md)
 - [Capability registry](docs/capability-registry.md)
@@ -58,13 +59,15 @@ development fixtures, not runtime state.
 
 ## North star
 
-The project should become a reusable evidence-document front end:
+The project should become a reusable evidence-document front end for
+domain-neutral evidence-input consistency:
 
 ```text
-receipts / invoices / utility bills / scans / handwritten logs / meter photos
+requested or declared input
++ evidence documents
 -> evidence-toolchain
--> EvidenceReport
--> downstream validator, audit UI, review workflow, or domain compiler
+-> EvidenceReport with provenance, confidence, issues, and review triggers
+-> downstream validator, audit UI, review workflow, adapter, or domain compiler
 ```
 
 The safest design stance is:
