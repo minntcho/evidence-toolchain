@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from evidence_toolchain.artifacts import EvidenceDocument
 from evidence_toolchain.planner import EvidenceToolPlan, plan_document
+from evidence_toolchain.preflight import EvidencePreflight, preflight_document
 from evidence_toolchain.runtime import EvidenceEvent, EvidenceRunState, EvidenceStep
 
 
@@ -13,17 +14,19 @@ def run_document(
     """Run the reference local flow through observation and planning."""
 
     resolved_run_id = run_id or document.document_id
+    preflight = preflight_document(document)
     plan = plan_document(document)
     state = EvidenceRunState(
         run_id=resolved_run_id,
         document=document,
+        preflight=preflight,
         observation=plan.observation,
         plan=plan,
         pending_steps=_pending_capability_steps(plan),
         issues=tuple(plan.issues),
     )
 
-    for event in _initial_events(resolved_run_id, document, plan):
+    for event in _initial_events(resolved_run_id, document, preflight, plan):
         state = state.record_event(event)
 
     return state
@@ -44,6 +47,7 @@ def _pending_capability_steps(plan: EvidenceToolPlan) -> tuple[EvidenceStep, ...
 def _initial_events(
     run_id: str,
     document: EvidenceDocument,
+    preflight: EvidencePreflight,
     plan: EvidenceToolPlan,
 ) -> tuple[EvidenceEvent, ...]:
     observation = plan.observation
@@ -61,6 +65,18 @@ def _initial_events(
         EvidenceEvent(
             run_id=run_id,
             sequence=2,
+            event_type="preflight_completed",
+            payload={
+                "format": preflight.format,
+                "media_type": preflight.media_type,
+                "has_text_layer": preflight.has_text_layer,
+                "signals": list(preflight.signals),
+                "detected_rotation": preflight.detected_rotation,
+            },
+        ),
+        EvidenceEvent(
+            run_id=run_id,
+            sequence=3,
             event_type="observation_created",
             payload={
                 "document_class": observation.document_class,
@@ -71,7 +87,7 @@ def _initial_events(
         ),
         EvidenceEvent(
             run_id=run_id,
-            sequence=3,
+            sequence=4,
             event_type="plan_created",
             payload={
                 "selected_capabilities": [

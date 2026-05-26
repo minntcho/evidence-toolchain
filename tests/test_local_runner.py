@@ -35,10 +35,11 @@ def test_local_runner_observes_and_plans_without_executing_capabilities(tmp_path
     ]
     assert [event.event_type for event in state.events] == [
         "document_received",
+        "preflight_completed",
         "observation_created",
         "plan_created",
     ]
-    assert [event.sequence for event in state.events] == [1, 2, 3]
+    assert [event.sequence for event in state.events] == [1, 2, 3, 4]
     assert [step.capability for step in state.pending_steps] == [
         "docling_parse",
         "table_structure_extract",
