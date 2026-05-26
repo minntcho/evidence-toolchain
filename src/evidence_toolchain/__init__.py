@@ -9,6 +9,7 @@ from evidence_toolchain.capabilities import (
 from evidence_toolchain.observations import EvidenceObservation, observe_document
 from evidence_toolchain.planner import EvidenceToolPlan, plan_document
 from evidence_toolchain.preflight import EvidencePreflight, preflight_document
+from evidence_toolchain.reports import EvidenceReport, emit_evidence_report
 from evidence_toolchain.routers import ObservationRouter, RuleObservationRouter
 from evidence_toolchain.runners import run_document
 from evidence_toolchain.runtime import (
@@ -24,6 +25,7 @@ __all__ = [
     "EvidenceEvent",
     "EvidenceObservation",
     "EvidencePreflight",
+    "EvidenceReport",
     "EvidenceRunState",
     "EvidenceStep",
     "EvidenceToolResult",
@@ -35,5 +37,6 @@ __all__ = [
     "observe_document",
     "plan_document",
     "preflight_document",
+    "emit_evidence_report",
     "run_document",
 ]
