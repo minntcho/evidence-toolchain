@@ -47,3 +47,27 @@ def test_contract_docs_are_indexed_and_define_allowed_boundaries():
         assert "May" in text
         assert "Must not" in text
         assert "Downstream" in text
+
+
+def test_testing_strategy_docs_are_indexed_and_preserve_test_authority():
+    strategy_docs = [
+        "synthetic-evidence-cases.md",
+        "router-planner-test-strategy.md",
+        "failure-mode-test-strategy.md",
+    ]
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+    testing_index = Path("docs/testing/README.md")
+
+    assert testing_index.exists()
+
+    testing_text = testing_index.read_text(encoding="utf-8")
+    assert "Testing documents describe verification strategy, not runtime authority." in testing_text
+    assert "testing/README.md" in docs_index
+
+    for filename in strategy_docs:
+        path = Path("docs/testing") / filename
+        assert path.exists(), f"missing {path}"
+        text = path.read_text(encoding="utf-8")
+        assert "Strong assertions" in text
+        assert "Weak assertions" in text
+        assert "Must not" in text

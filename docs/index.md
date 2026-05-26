@@ -14,6 +14,7 @@ The repository is an independent evidence document processing engine. Its job is
 6. [Adapter Boundary](adapter-boundary.md)
 7. [Synthetic Evidence Testkit](synthetic-evidence.md)
 8. [Contract Documents](contracts/README.md)
+9. [Testing Strategy](testing/README.md)
 
 ## Project stance
 
