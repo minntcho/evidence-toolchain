@@ -11,16 +11,18 @@ from synthetic.manifests import SyntheticCaseManifest
 @dataclass(frozen=True)
 class GeneratedCase:
     case_id: str
+    case_dir: Path
     document_path: Path
     expected_path: Path
 
 
 def generate_case(manifest: SyntheticCaseManifest, output_dir: str | Path) -> GeneratedCase:
     destination = Path(output_dir)
-    destination.mkdir(parents=True, exist_ok=True)
+    case_dir = destination / manifest.case_id
+    case_dir.mkdir(parents=True, exist_ok=True)
 
-    document_path = destination / f"{manifest.case_id}.txt"
-    expected_path = destination / f"{manifest.case_id}.expected.json"
+    document_path = case_dir / "evidence.txt"
+    expected_path = case_dir / "expected.json"
 
     document_path.write_text(render_document(manifest), encoding="utf-8")
     expected_path.write_text(
@@ -30,6 +32,7 @@ def generate_case(manifest: SyntheticCaseManifest, output_dir: str | Path) -> Ge
 
     return GeneratedCase(
         case_id=manifest.case_id,
+        case_dir=case_dir,
         document_path=document_path,
         expected_path=expected_path,
     )

@@ -30,11 +30,28 @@ class SyntheticCaseManifest:
         return {
             "case_id": self.case_id,
             "document_kind": self.document_kind,
+            "artifact": {
+                "path": "evidence.txt",
+                "format": "txt",
+                "media_type": "text/plain",
+                "document_kind": self.document_kind,
+            },
             "ground_truth": self.ground_truth,
+            "expected_observation": {
+                "document_class": self.document_kind,
+                "has_text_layer": self.text_layer,
+                "quality": self.quality,
+                "signals": self.signals,
+            },
             "expected_behavior": {
                 "plan_includes": self.expected_behavior.plan_includes,
                 "fallbacks_include": self.expected_behavior.fallbacks_include,
                 "issues_include": self.expected_behavior.issues_include,
+            },
+            "expected_plan": {
+                "selected_capabilities": self.expected_behavior.plan_includes,
+                "fallbacks": self.expected_behavior.fallbacks_include,
+                "issues": self.expected_behavior.issues_include,
             },
         }
 
