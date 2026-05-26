@@ -1,7 +1,7 @@
 {
   "case_id": "handwritten_meter_log",
   "document_kind": "meter_log",
-  "title": "Synthetic handwritten meter log",
+  "title": "합성 수기 계량기 기록",
   "quality": "handwritten",
   "text_layer": false,
   "signals": ["handwriting_present"],

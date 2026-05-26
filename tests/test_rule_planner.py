@@ -53,9 +53,14 @@ def test_generated_expected_manifest_keeps_truth_separate_from_behavior(tmp_path
 
     manifest = load_manifest("handwritten_meter_log")
     generated = generate_case(manifest, tmp_path)
+    document_text = generated.document_path.read_text(encoding="utf-8")
 
     payload = json.loads(Path(generated.expected_path).read_text(encoding="utf-8"))
 
+    assert "Synthetic handwritten meter log" not in document_text
+    assert "합성 수기 계량기 기록" in document_text
+    assert "적용된 synthetic degradation signal: handwriting_present." in document_text
+    assert "운영자 이니셜은 수기로 보입니다." in document_text
     assert "ground_truth" in payload
     assert "expected_behavior" in payload
     assert payload["ground_truth"]["amount"] == 1180

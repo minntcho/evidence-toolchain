@@ -1,7 +1,7 @@
 {
   "case_id": "scanned_utility_bill_rotated",
   "document_kind": "utility_bill",
-  "title": "Synthetic rotated scanned utility bill",
+  "title": "회전된 합성 스캔 유틸리티 청구서",
   "quality": "rotated_scan",
   "text_layer": false,
   "signals": ["rotated"],

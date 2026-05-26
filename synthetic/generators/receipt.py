@@ -17,10 +17,10 @@ def render_receipt(manifest: SyntheticCaseManifest) -> str:
             manifest.title,
             degradation_note(manifest),
             "",
-            f"Merchant: {truth['supplier']}",
-            f"Date: {truth['period']}-15",
-            f"Diesel quantity: {truth['amount']} {truth['unit']}",
-            "Unit price: 1.49",
-            "Total: 62.58",
+            f"가맹점: {truth['supplier']}",
+            f"일자: {truth['period']}-15",
+            f"디젤 수량: {truth['amount']} {truth['unit']}",
+            "단가: 1.49",
+            "합계: 62.58",
         ]
     )
