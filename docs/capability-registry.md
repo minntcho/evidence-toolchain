@@ -1,14 +1,14 @@
-# Capability Registry
+# Capability registry
 
-The capability registry is the catalog of extraction and inspection tools that the router may choose from.
+Capability registry는 router가 선택할 수 있는 extraction 및 inspection tool catalog입니다.
 
-A capability is not just a function. It is a declared unit of document-processing behavior with known inputs, outputs, strengths, limits, and failure modes.
+Capability는 단순한 function이 아닙니다. Known input, output, strength, limit, failure mode를 가진 declared unit of document-processing behavior입니다.
 
-## Why a registry exists
+## Registry가 필요한 이유
 
-Evidence documents are too varied for a single default parser.
+Evidence document는 하나의 default parser로 처리하기에는 너무 다양합니다.
 
-The registry lets the system ask:
+Registry는 system이 다음 질문을 하게 해 줍니다.
 
 ```text
 What can we try on this document?
@@ -20,7 +20,7 @@ When should this tool be followed by another tool?
 
 ## Capability record
 
-A registry entry should eventually describe:
+Registry entry는 나중에 다음을 설명해야 합니다.
 
 ```text
 name
@@ -35,7 +35,7 @@ fallback recommendations
 review triggers
 ```
 
-Example shape:
+예시 shape:
 
 ```json
 {
@@ -49,82 +49,82 @@ Example shape:
 }
 ```
 
-## Initial capability set
+## 초기 capability set
 
 ### `docling_parse`
 
-Use for structured document conversion.
+Structured document conversion에 사용합니다.
 
-Good candidates:
+좋은 candidate:
 
-- born-digital PDFs
-- utility bills with tables
-- invoices with clear text layer
-- office documents
-- table-heavy reports
+- born-digital PDF
+- table이 있는 utility bill
+- clear text layer가 있는 invoice
+- office document
+- table-heavy report
 
-Known limits:
+Known limit:
 
-- image-only scans may require OCR first
-- handwriting is not a safe default
-- complex tables may still need specialized table extraction
-- extracted structure is not a final business judgment
+- image-only scan은 OCR이 먼저 필요할 수 있다
+- handwriting에는 safe default가 아니다
+- complex table은 specialized table extraction이 여전히 필요할 수 있다
+- extracted structure는 final business judgment가 아니다
 
 ### `ocr_extract`
 
-Use for image or scan text extraction.
+Image 또는 scan text extraction에 사용합니다.
 
-Good candidates:
+좋은 candidate:
 
-- scanned PDFs
-- receipt photos
-- screenshots
-- photographed invoices
+- scanned PDF
+- receipt photo
+- screenshot
+- photographed invoice
 
-Known limits:
+Known limit:
 
-- digits and units can be confused
-- rotation, blur, glare, and crop boundaries can break extraction
-- OCR text alone often loses table relationships
+- digit와 unit이 confused될 수 있다
+- rotation, blur, glare, crop boundary가 extraction을 깨뜨릴 수 있다
+- OCR text만으로는 table relationship을 자주 잃는다
 
 ### `layout_kv_extract`
 
-Use for key-value extraction where field labels and values are positioned near each other.
+Field label과 value가 서로 가까이 배치된 key-value extraction에 사용합니다.
 
-Good candidates:
+좋은 candidate:
 
-- forms
-- invoices
-- receipts
-- bills
+- form
+- invoice
+- receipt
+- bill
 
-Known limits:
+Known limit:
 
-- repeated labels can produce wrong matches
-- nested table structures may confuse key-value pairing
-- field names are domain-dependent
+- repeated label은 wrong match를 만들 수 있다
+- nested table structure는 key-value pairing을 confuse할 수 있다
+- field name은 domain-dependent하다
 
 ### `table_structure_extract`
 
-Use for table reconstruction.
+Table reconstruction에 사용합니다.
 
-Good candidates:
+좋은 candidate:
 
-- usage tables
-- invoice line items
-- meter reading logs
-- monthly activity tables
+- usage table
+- invoice line item
+- meter reading log
+- monthly activity table
 
-Known limits:
+Known limit:
 
-- merged cells, multi-row headers, footnotes, and page breaks are risky
-- table geometry may be right while semantic field mapping is wrong
+- merged cell, multi-row header, footnote, page break는 risky하다
+- table geometry가 맞아도 semantic field mapping은 틀릴 수 있다
 
 ### `receipt_extract`
 
-Use for receipt-specific fields.
+Receipt-specific field에 사용합니다.
 
-Potential fields:
+Potential field:
 
 - transaction date
 - merchant
@@ -134,17 +134,17 @@ Potential fields:
 - amount
 - total
 
-Known limits:
+Known limit:
 
-- price and physical quantity may be confused
-- one receipt usually represents one transaction, not necessarily a reporting-period total
-- item names may need domain mapping
+- price와 physical quantity가 confused될 수 있다
+- receipt 하나는 보통 transaction 하나를 의미하며 reporting-period total이 아닐 수 있다
+- item name은 domain mapping이 필요할 수 있다
 
 ### `invoice_extract`
 
-Use for invoice-specific fields.
+Invoice-specific field에 사용합니다.
 
-Potential fields:
+Potential field:
 
 - supplier
 - invoice number
@@ -155,17 +155,17 @@ Potential fields:
 - amount
 - currency
 
-Known limits:
+Known limit:
 
-- invoice amount is not always activity amount
-- billing period may differ from invoice date
-- tax, fee, and subtotal rows can be misread as activity rows
+- invoice amount가 항상 activity amount는 아니다
+- billing period와 invoice date가 다를 수 있다
+- tax, fee, subtotal row가 activity row로 잘못 읽힐 수 있다
 
 ### `utility_bill_extract`
 
-Use for electricity, gas, water, steam, or similar utility bills.
+Electricity, gas, water, steam 같은 utility bill에 사용합니다.
 
-Potential fields:
+Potential field:
 
 - customer/site name
 - service address
@@ -175,86 +175,86 @@ Potential fields:
 - usage unit
 - supplier
 
-Known limits:
+Known limit:
 
-- bill date and service period differ
-- peak/off-peak rows may need aggregation
-- correction rows and estimates must be flagged
+- bill date와 service period가 다르다
+- peak/off-peak row는 aggregation이 필요할 수 있다
+- correction row와 estimate는 flag되어야 한다
 
 ### `meter_photo_read`
 
-Use for physical meter images.
+Physical meter image에 사용합니다.
 
-Potential fields:
+Potential field:
 
 - meter id
 - visible reading
-- unit if visible
-- timestamp if embedded or provided externally
+- visible한 경우 unit
+- embedded 또는 externally provided timestamp
 
-Known limits:
+Known limit:
 
-- a single reading is not a period usage amount
-- site-to-meter mapping is required elsewhere
-- glare, angle, and display type can make values ambiguous
+- single reading은 period usage amount가 아니다
+- site-to-meter mapping은 다른 곳에서 필요하다
+- glare, angle, display type이 value를 ambiguous하게 만들 수 있다
 
 ### `handwriting_read`
 
-Use for handwritten logs or handwritten fields.
+Handwritten log 또는 handwritten field에 사용합니다.
 
-Potential fields:
+Potential field:
 
-- dates
-- readings
-- quantities
-- names
-- signatures
+- date
+- reading
+- quantity
+- name
+- signature
 
-Known limits:
+Known limit:
 
-- should usually trigger review
-- values require stronger provenance and often cross-checking
-- overwritten or corrected values need explicit issues
+- 보통 review를 trigger해야 한다
+- value는 더 강한 provenance와 cross-checking이 필요하다
+- overwritten 또는 corrected value는 explicit issue가 필요하다
 
 ### `barcode_read`
 
-Use for barcodes or QR codes.
+Barcode 또는 QR code에 사용합니다.
 
-Potential fields:
+Potential field:
 
 - document id
 - supplier code
 - invoice/payment lookup reference
-- verification URL if available
+- 가능한 경우 verification URL
 
-Known limits:
+Known limit:
 
-- code contents may require external lookup
-- QR existence does not prove business value correctness
+- code content는 external lookup이 필요할 수 있다
+- QR 존재만으로 business value correctness가 증명되지는 않는다
 
 ### `vision_extract`
 
-Use when document state requires visual reasoning beyond text extraction.
+Text extraction을 넘어 visual reasoning이 필요한 document state에 사용합니다.
 
-Good candidates:
+좋은 candidate:
 
-- screenshots
-- photos
-- mixed visual documents
-- poor layout recovery cases
+- screenshot
+- photo
+- mixed visual document
+- poor layout recovery case
 
-Known limits:
+Known limit:
 
-- should not silently replace provenance-rich extraction
-- natural language answers must be grounded back to visible spans or regions where possible
+- provenance-rich extraction을 silently replace하면 안 된다
+- natural language answer는 가능한 경우 visible span 또는 region에 다시 grounded되어야 한다
 
 ### `manual_review_request`
 
-Use when automated extraction is insufficient, ambiguous, or high-risk.
+Automated extraction이 insufficient, ambiguous, high-risk일 때 사용합니다.
 
-This is a capability because review is part of the toolchain, not an afterthought.
+Review는 afterthought가 아니라 toolchain의 일부이기 때문에 이것도 capability입니다.
 
-It should preserve:
+보존해야 하는 것:
 
 - what needs review
 - why review was requested
@@ -263,13 +263,13 @@ It should preserve:
 
 ## Registry policy
 
-Adding a new capability should require documenting:
+새 capability를 추가할 때는 다음을 문서화해야 합니다.
 
-1. When to use it.
-2. When not to use it.
-3. What output it promises.
-4. What it cannot guarantee.
-5. What issues it may emit.
-6. What fallback or review path should follow failure.
+1. 언제 사용하는가.
+2. 언제 사용하지 않는가.
+3. 어떤 output을 promise하는가.
+4. 무엇을 guarantee할 수 없는가.
+5. 어떤 issue를 emit할 수 있는가.
+6. Failure 뒤에 어떤 fallback 또는 review path가 따라야 하는가.
 
-A capability without documented limits is not ready for default routing.
+문서화된 한계가 없는 capability는 default routing에 들어갈 준비가 된 것이 아닙니다.
