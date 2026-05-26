@@ -7,7 +7,7 @@ from typing import Any
 
 @dataclass(frozen=True)
 class EvidenceEvent:
-    """Append-only event emitted during an evidence processing run."""
+    """evidence processing run 중 append-only로 기록되는 event입니다."""
 
     run_id: str
     sequence: int
@@ -20,7 +20,7 @@ class EvidenceEvent:
 
 @dataclass(frozen=True)
 class EvidenceStep:
-    """A framework-neutral planned or executed unit of work."""
+    """framework-neutral하게 계획되거나 실행된 작업 단위입니다."""
 
     name: str
     status: str
@@ -35,7 +35,7 @@ class EvidenceStep:
 
 @dataclass(frozen=True)
 class EvidenceToolResult:
-    """Framework-neutral output from a capability execution."""
+    """capability execution에서 나온 framework-neutral output입니다."""
 
     capability: str
     status: str
@@ -50,7 +50,7 @@ class EvidenceToolResult:
 
 @dataclass(frozen=True)
 class EvidenceRunState:
-    """Serializable snapshot of an evidence processing run."""
+    """evidence processing run의 serializable snapshot입니다."""
 
     run_id: str
     document: Any

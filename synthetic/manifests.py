@@ -69,7 +69,7 @@ def load_manifests() -> list[SyntheticCaseManifest]:
 def _manifest_from_dict(data: dict[str, object]) -> SyntheticCaseManifest:
     expected = data["expected_behavior"]
     if not isinstance(expected, dict):
-        raise ValueError("expected_behavior must be an object")
+        raise ValueError("expected_behavior는 object여야 합니다")
 
     return SyntheticCaseManifest(
         case_id=str(data["case_id"]),

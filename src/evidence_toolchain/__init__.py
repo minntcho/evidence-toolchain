@@ -1,4 +1,4 @@
-"""Document-evidence observation, planning, extraction, and reporting."""
+"""문서 증거의 observation, planning, extraction, reporting을 다루는 패키지입니다."""
 
 from evidence_toolchain.artifacts import EvidenceDocument
 from evidence_toolchain.capabilities import (

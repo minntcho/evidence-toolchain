@@ -22,7 +22,7 @@ def run_document(
     router: ObservationRouter | None = None,
     capability_runner: CapabilityRunner | None = None,
 ) -> EvidenceRunState:
-    """Run the reference local flow through observation and planning."""
+    """observation과 planning까지 reference local flow를 실행합니다."""
 
     resolved_run_id = run_id or document.document_id
     preflight = preflight_document(document)

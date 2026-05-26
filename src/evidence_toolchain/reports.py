@@ -54,7 +54,7 @@ class EvidenceReport:
 
 def emit_evidence_report(state: EvidenceRunState) -> EvidenceReport:
     if state.plan is None:
-        raise ValueError("EvidenceRunState must include a plan before reporting.")
+        raise ValueError("reporting 전에 EvidenceRunState에 plan이 있어야 합니다.")
 
     return EvidenceReport(
         document_id=state.document.document_id,
