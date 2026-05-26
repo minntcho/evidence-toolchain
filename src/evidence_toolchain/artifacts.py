@@ -18,6 +18,18 @@ class EvidenceDocument:
     declared_document_kind: str | None = None
     metadata: dict[str, str] = field(default_factory=dict)
 
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "document_id": self.document_id,
+            "path": str(self.path),
+            "file_name": self.file_name,
+            "media_type": self.media_type,
+            "file_hash": self.file_hash,
+            "text": self.text,
+            "declared_document_kind": self.declared_document_kind,
+            "metadata": self.metadata,
+        }
+
     @classmethod
     def from_path(
         cls,
