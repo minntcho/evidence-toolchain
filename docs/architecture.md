@@ -1,14 +1,14 @@
-# Architecture
+# 아키텍처
 
-`evidence-toolchain` is a document-evidence front end.
+`evidence-toolchain`은 document-evidence front end입니다.
 
-It should be able to run independently: given a file or document artifact, it should inspect the document, choose an extraction strategy, run tools, and return a structured report.
+이 프로젝트는 독립적으로 실행될 수 있어야 합니다. file 또는 document artifact를 받으면, 문서를 검사하고, extraction strategy를 고르고, tool을 실행하고, structured report를 반환해야 합니다.
 
-It should not require a specific downstream validator to exist.
+특정 Downstream validator의 존재를 요구해서는 안 됩니다.
 
-## Architectural goal
+## 아키텍처 목표
 
-The core architecture separates four concerns:
+Core architecture는 네 가지 관심사를 분리합니다.
 
 ```text
 Observation
@@ -17,11 +17,11 @@ Extraction
 Reporting
 ```
 
-This makes tool limitations explicit. A document parser such as Docling may be useful for born-digital PDFs and structured tables, but it is not enough for every evidence document. Some evidence will be scanned, photographed, handwritten, cropped, rotated, table-heavy, low-resolution, or semantically ambiguous.
+이 분리는 tool limitation을 명시적으로 드러냅니다. Docling 같은 document parser는 born-digital PDF와 structured table에는 유용할 수 있지만 모든 evidence document에 충분하지 않습니다. 어떤 증거는 scanned, photographed, handwritten, cropped, rotated, table-heavy, low-resolution, 또는 semantically ambiguous할 수 있습니다.
 
-The system must therefore choose tools based on document condition instead of forcing every document through one parser.
+따라서 system은 모든 문서를 하나의 parser에 밀어 넣지 않고 document condition에 따라 tool을 선택해야 합니다.
 
-## Main pipeline
+## 주요 파이프라인
 
 ```text
 EvidenceDocument
@@ -34,25 +34,25 @@ EvidenceDocument
 
 ### 1. EvidenceDocument
 
-A neutral wrapper around the input material.
+입력 material을 감싸는 중립적인 wrapper입니다.
 
-It should carry:
+포함해야 하는 정보:
 
 - document id
 - file name
 - media type
 - file hash
-- upload/source metadata when available
-- page/image count when known
-- optional declared target fields requested by the caller
+- 가능한 경우 upload/source metadata
+- 알려진 경우 page/image count
+- caller가 요청한 optional declared target field
 
-It should not carry downstream judgment.
+Downstream judgment를 담아서는 안 됩니다.
 
 ### 2. EvidenceObservation
 
-A first-pass description of the document condition.
+문서 상태에 대한 first-pass description입니다.
 
-Examples:
+예시:
 
 - born-digital PDF
 - scanned PDF
@@ -63,17 +63,17 @@ Examples:
 - handwritten meter log
 - meter photo
 - mixed text and table document
-- unreadable or low-quality image
+- unreadable 또는 low-quality image
 
-Observation may be produced by simple rules, metadata inspection, OCR probes, visual models, or an LLM/VLM router.
+Observation은 simple rule, metadata inspection, OCR probe, visual model, LLM/VLM router로 만들어질 수 있습니다.
 
 ### 3. EvidenceToolPlan
 
-A planned sequence of capabilities.
+Capability의 계획된 실행 순서입니다.
 
-The plan records why a tool was selected. It may include fallbacks.
+Plan은 tool이 선택된 이유를 기록합니다. fallback을 포함할 수 있습니다.
 
-Example:
+예시:
 
 ```json
 {
@@ -94,9 +94,9 @@ Example:
 
 ### 4. EvidenceCapability
 
-A capability is a tool-like unit that performs one extraction or analysis task.
+Capability는 하나의 extraction 또는 analysis task를 수행하는 tool-like unit입니다.
 
-Examples:
+예시:
 
 - `docling_parse`
 - `ocr_extract`
@@ -110,53 +110,53 @@ Examples:
 - `barcode_read`
 - `manual_review_request`
 
-The registry should describe each capability's input requirements, output shape, known strengths, known limitations, and failure modes.
+Registry는 각 capability의 input requirement, output shape, known strength, known limitation, failure mode를 설명해야 합니다.
 
 ### 5. EvidenceExtractionResult
 
-Raw and semi-structured output from a capability.
+Capability에서 나온 raw 또는 semi-structured output입니다.
 
-It should preserve:
+보존해야 하는 정보:
 
-- tool name and version when available
+- 가능한 경우 tool name과 version
 - input document id
-- page or image reference
-- text spans
-- tables or cells
-- bounding boxes
-- confidence scores
-- warnings
-- errors
+- page 또는 image reference
+- text span
+- table 또는 cell
+- bounding box
+- confidence score
+- warning
+- error
 
 ### 6. EvidenceReport
 
-The consolidated neutral output.
+통합된 중립 output입니다.
 
-It should include:
+포함해야 하는 정보:
 
 - document identity
 - observation
 - selected plan
-- tool calls and results summary
-- extracted fields
-- provenance for each field
-- confidence and issue metadata
-- unresolved ambiguities
-- recommended next action when extraction is insufficient
+- tool call과 result summary
+- extracted field
+- 각 field의 provenance
+- confidence와 issue metadata
+- unresolved ambiguity
+- extraction이 충분하지 않을 때의 recommended next action
 
-It should not include final downstream validation judgment.
+최종 Downstream validation judgment를 포함해서는 안 됩니다.
 
-## Independence rule
+## 독립성 규칙
 
-Core modules must not import downstream validators.
+Core module은 Downstream validator를 import하면 안 됩니다.
 
-The dependency direction should be:
+Dependency direction은 다음 중 하나여야 합니다.
 
 ```text
 downstream app -> evidence-toolchain
 ```
 
-or:
+또는:
 
 ```text
 external orchestrator
@@ -164,18 +164,18 @@ external orchestrator
   -> downstream validator
 ```
 
-The reverse direction should not exist:
+반대 방향은 존재해서는 안 됩니다.
 
 ```text
 evidence-toolchain -> downstream validator
 ```
 
-Adapters may live outside the core package. An adapter can translate `EvidenceReport` into another system's claim, hazard, or review format, but that adapter must not define the core model.
+Adapter는 core package 밖에 둘 수 있습니다. Adapter는 `EvidenceReport`를 다른 system의 claim, hazard, review format으로 번역할 수 있지만, adapter가 core model을 정의해서는 안 됩니다.
 
-## Trust stance
+## 신뢰 태도
 
-Extraction is not validation.
+Extraction은 validation이 아닙니다.
 
-The project should make evidence easier to inspect, compare, and review. It should not hide uncertainty behind a polished natural-language answer.
+이 프로젝트는 evidence를 더 쉽게 inspect, compare, review하게 만듭니다. uncertainty를 polished natural-language answer 뒤에 숨겨서는 안 됩니다.
 
-Useful output is not just the extracted value. Useful output includes where the value came from, what tool produced it, what failed, and what remains uncertain.
+유용한 output은 추출된 value만이 아닙니다. 그 value가 어디에서 왔는지, 어떤 tool이 만들었는지, 무엇이 실패했는지, 무엇이 아직 uncertain한지까지 포함해야 유용합니다.

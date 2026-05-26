@@ -1,63 +1,52 @@
-# Orchestration Boundary
+# 오케스트레이션 경계
 
-`evidence-toolchain` should stay useful even when the workflow framework
-changes.
+`evidence-toolchain`은 workflow framework가 바뀌어도 계속 유용해야 합니다.
 
-The core package defines orchestration-neutral evidence semantics. It should
-describe what happened to an evidence document, what remains pending, what tools
-ran, what failed, and what report was emitted. It should not make LangGraph,
-Prefect, Temporal, or any other runner DSL the source of core meaning.
+Core package는 오케스트레이션 중립적인 증거 의미론을 정의합니다. evidence document에 무슨 일이 있었는지, 무엇이 pending인지, 어떤 tool이 실행되었는지, 무엇이 실패했는지, 어떤 report가 emitted되었는지를 설명해야 합니다. LangGraph, Prefect, Temporal, 또는 다른 runner DSL이 core meaning의 source가 되어서는 안 됩니다.
 
-The default design stance is:
+기본 설계 태도는 다음과 같습니다.
 
 ```text
-core = orchestration-neutral evidence semantics
+core = 오케스트레이션 중립적인 증거 의미론
 local runner = reference execution path
 framework adapters = optional execution wrappers
 ```
 
-## Why this boundary exists
+## 이 경계가 필요한 이유
 
-LLM/VLM-assisted routing may be the first semantic observation step, but it is
-not the final validation authority. A framework may help run observation,
-schema validation, retries, capability execution, fallback selection, and human
-review handoff. It must still emit bounded evidence records.
+LLM/VLM-assisted routing은 첫 번째 semantic observation step이 될 수 있지만, 최종 validation authority가 아닙니다. Framework는 observation, schema validation, retry, capability execution, fallback selection, human review handoff를 실행하는 데 도움을 줄 수 있습니다. 그래도 output은 bounded evidence record여야 합니다.
 
-Frameworks may orchestrate the workflow. They must not define the core evidence
-schema, decide Downstream validity, or turn framework state into the public
-contract.
+Framework는 workflow를 orchestrate할 수 있습니다. 하지만 core evidence schema를 정의하거나, Downstream validity를 결정하거나, framework state를 public contract로 바꾸면 안 됩니다.
 
-## Core runtime records
+## Core runtime record
 
-The core runtime contract should be serializable and framework independent.
+Core runtime contract는 serializable하고 framework independent해야 합니다.
 
 ### `EvidenceRunState`
 
-`EvidenceRunState` is the current snapshot of an evidence processing run.
+`EvidenceRunState`는 evidence processing run의 현재 snapshot입니다.
 
-It should eventually carry:
+나중에 포함해야 하는 정보:
 
 - `run_id`
 - input `EvidenceDocument`
 - optional preflight summary
 - current `EvidenceObservation`
 - current `EvidenceToolPlan`
-- completed `EvidenceStep` records
-- pending `EvidenceStep` records
-- `EvidenceToolResult` records
-- issues
-- interrupts or review requests
-- final `EvidenceReport` when emitted
+- completed `EvidenceStep` record
+- pending `EvidenceStep` record
+- `EvidenceToolResult` record
+- issue
+- interrupt 또는 review request
+- emitted된 경우 final `EvidenceReport`
 
-The state should be serializable so it can be stored by a local test runner, a
-checkpoint database, a framework saver, or a durable workflow engine without
-changing core semantics.
+State는 serializable해야 합니다. 그래야 local test runner, checkpoint database, framework saver, durable workflow engine이 core semantics를 바꾸지 않고 저장할 수 있습니다.
 
 ### `EvidenceEvent`
 
-`EvidenceEvent` is an append-only record of what happened during a run.
+`EvidenceEvent`는 run 중 발생한 일을 기록하는 append-only record입니다.
 
-Initial event types should include:
+초기 event type:
 
 - `document_received`
 - `preflight_completed`
@@ -71,15 +60,13 @@ Initial event types should include:
 - `review_resumed`
 - `report_emitted`
 
-Events are useful for replay, debugging, audit review, and comparing runner
-implementations. Event history may explain a run, but it must not become a
-separate source of Downstream approval.
+Event는 replay, debugging, audit review, runner implementation 비교에 유용합니다. Event history는 run을 설명할 수 있지만, Downstream approval의 별도 source가 되어서는 안 됩니다.
 
 ### `EvidenceStep`
 
-`EvidenceStep` is a planned or executed unit of work.
+`EvidenceStep`은 계획되었거나 실행된 work unit입니다.
 
-Examples:
+예시:
 
 - run preflight probe
 - create LLM/VLM observation
@@ -89,148 +76,125 @@ Examples:
 - request manual review
 - emit report
 
-Steps should reference capability names and routing reasons instead of embedding
-framework node ids as core concepts.
+Step은 framework node id를 core concept로 embedding하지 말고 capability name과 routing reason을 reference해야 합니다.
 
 ### `EvidenceToolResult`
 
-`EvidenceToolResult` is the framework-neutral output of a capability.
+`EvidenceToolResult`는 capability의 framework-neutral output입니다.
 
-It should preserve:
+보존해야 하는 정보:
 
 - capability name
-- capability version when available
-- input document or page reference
+- 가능한 경우 capability version
+- input document 또는 page reference
 - status
-- extracted text, tables, fields, spans, or regions where available
+- 가능한 경우 extracted text, table, field, span, region
 - confidence metadata
-- warnings
-- errors
-- produced artifacts
+- warning
+- error
+- produced artifact
 
-Tool results should be JSON-compatible so multiple runners can compare behavior
-without depending on framework-specific result objects.
+Tool result는 JSON-compatible해야 합니다. 그래야 여러 runner가 framework-specific result object에 의존하지 않고 behavior를 비교할 수 있습니다.
 
-## Runtime ports
+## Runtime port
 
-The core should define small neutral ports before adopting framework-specific
-implementations.
+Core는 framework-specific implementation을 채택하기 전에 작고 중립적인 port를 정의해야 합니다.
 
 ### `CapabilityRunner`
 
-Runs a capability against an `EvidenceRunState` and returns an
-`EvidenceToolResult`.
+`EvidenceRunState`에 대해 capability를 실행하고 `EvidenceToolResult`를 반환합니다.
 
-Capabilities should be idempotent where possible. If a capability writes an
-artifact, the artifact id or path should be stable enough for retry and resume.
+Capability는 가능한 경우 idempotent해야 합니다. capability가 artifact를 쓰는 경우 retry와 resume을 위해 artifact id 또는 path가 충분히 stable해야 합니다.
 
 ### `CheckpointStore`
 
-Stores and loads `EvidenceRunState`.
+`EvidenceRunState`를 저장하고 불러옵니다.
 
-Local execution may store checkpoints in memory or files. LangGraph may use a
-saver. Temporal may use workflow history. Prefect may use task state. The core
-should only depend on the checkpoint contract.
+Local execution은 checkpoint를 memory 또는 file에 저장할 수 있습니다. LangGraph는 saver를 사용할 수 있습니다. Temporal은 workflow history를 사용할 수 있습니다. Prefect는 task state를 사용할 수 있습니다. Core는 checkpoint contract에만 의존해야 합니다.
 
 ### `EventSink`
 
-Records append-only `EvidenceEvent` entries.
+Append-only `EvidenceEvent` entry를 기록합니다.
 
-An event sink may write to memory, JSONL, a database, or an observability tool.
-The event payload should remain framework-neutral.
+Event sink는 memory, JSONL, database, observability tool에 쓸 수 있습니다. Event payload는 framework-neutral해야 합니다.
 
 ### `ArtifactStore`
 
-Stores generated artifacts such as page thumbnails, OCR text, structured
-tables, or intermediate JSON outputs.
+Page thumbnail, OCR text, structured table, intermediate JSON output 같은 generated artifact를 저장합니다.
 
-The core should reference stored artifacts by neutral ids or paths, not by
-framework task handles.
+Core는 framework task handle이 아니라 neutral id 또는 path로 stored artifact를 reference해야 합니다.
 
 ### `ReviewQueue`
 
-Represents human review interrupts and resume input.
+Human review interrupt와 resume input을 나타냅니다.
 
-Manual review is part of the evidence toolchain, but review input must be
-recorded as neutral state and events so local and framework runners can resume
-the same run contract.
+Manual review는 evidence toolchain의 일부입니다. 하지만 review input은 neutral state와 event로 기록되어야 local runner와 framework runner가 같은 run contract를 resume할 수 있습니다.
 
 ### `RetryPolicy`
 
-Describes retry limits, timeout behavior, and fallback eligibility.
+Retry limit, timeout behavior, fallback eligibility를 설명합니다.
 
-Retry policy should be explicit enough that a local runner and a durable
-workflow runner can make comparable decisions.
+Retry policy는 local runner와 durable workflow runner가 comparable decision을 내릴 수 있을 만큼 명시적이어야 합니다.
 
-## Runner roles
+## Runner 역할
 
 ### Local runner
 
-The local runner is the reference implementation.
+Local runner는 reference implementation입니다.
 
-It should execute the same evidence semantics without requiring an orchestration
-framework. Tests should prove that the local runner can process generated case
-bundles and emit the expected events, state transitions, and report shape.
+오케스트레이션 framework 없이 같은 evidence semantics를 실행해야 합니다. Test는 local runner가 generated case bundle을 처리하고 expected event, state transition, report shape를 emitted할 수 있음을 증명해야 합니다.
 
 ### Framework adapters
 
-Framework adapters may implement the same runner contract with different
-execution guarantees.
+Framework adapters는 다른 execution guarantee로 같은 runner contract를 구현할 수 있습니다.
 
-Examples:
+예시:
 
-- LangGraph adapter for graph-shaped agentic routing and repair loops
-- Prefect adapter for batch-oriented extraction jobs
-- Temporal adapter for durable long-running workflows
+- graph-shaped agentic routing과 repair loop를 위한 LangGraph adapter
+- batch-oriented extraction job을 위한 Prefect adapter
+- durable long-running workflow를 위한 Temporal adapter
 
-Adapters may add scheduling, persistence, parallelism, tracing, and worker
-deployment behavior. They must emit the same core records.
+Adapter는 scheduling, persistence, parallelism, tracing, worker deployment behavior를 더할 수 있습니다. 하지만 같은 core record를 emitted해야 합니다.
 
-## Framework portability
+## Framework 이식성
 
-Framework replacement becomes cheaper when the workflow is expressed through
-core records and ports instead of a framework DSL.
+Workflow가 framework DSL이 아니라 core record와 port로 표현되면 framework replacement가 더 저렴해집니다.
 
-Hard parts will still remain:
+그래도 어려운 부분은 남습니다.
 
 - checkpoint behavior
 - retry policy
 - parallel capability execution
-- human interrupt and resume semantics
+- human interrupt와 resume semantics
 - timeout handling
-- cache and artifact store integration
-- observability and tracing
-- deployment and worker model
+- cache와 artifact store integration
+- observability와 tracing
+- deployment와 worker model
 
-Those concerns should be isolated behind runtime ports. Switching frameworks
-should be a runner adapter change, not an evidence semantics rewrite.
+이 관심사들은 runtime port 뒤에 격리되어야 합니다. Framework 전환은 runner adapter 변경이어야 하며 evidence semantics rewrite가 되어서는 안 됩니다.
 
-## Testing expectations
+## 테스트 기대사항
 
-Tests may strongly assert:
+Test가 강하게 assert할 수 있는 것:
 
 - `EvidenceRunState` is serializable
 - `EvidenceEvent` is append-only
-- tool results are JSON-compatible
-- local runner output matches expected generated case bundles
+- tool result is JSON-compatible
+- local runner output matches expected generated case bundle
 - framework adapters emit the same core event and report contracts
 
-Tests should avoid freezing:
+Test가 freeze하지 말아야 하는 것:
 
-- framework node names
-- framework checkpoint internals
-- exact task scheduling order when the plan permits parallel execution
+- framework node name
+- framework checkpoint internal
+- plan이 parallel execution을 허용할 때의 exact task scheduling order
 - vendor-specific tracing metadata
 - deployment topology
 
-## Must not
+## 해서는 안 되는 일
 
-The core package must not make a framework DSL the authoritative workflow
-definition.
+Core package는 framework DSL을 authoritative workflow definition으로 만들면 안 됩니다.
 
-Framework adapters must not redefine `EvidenceObservation`, `EvidenceToolPlan`,
-`EvidenceToolResult`, or `EvidenceReport`.
+Framework adapter는 `EvidenceObservation`, `EvidenceToolPlan`, `EvidenceToolResult`, `EvidenceReport`를 재정의하면 안 됩니다.
 
-LLM/VLM routing may propose observations and plans. It must not produce final
-Downstream validation judgments. Final business, policy, audit, publication, or
-commit decisions belong outside the core package.
+LLM/VLM routing은 observation과 plan을 propose할 수 있습니다. 하지만 최종 Downstream validation judgment를 만들면 안 됩니다. 최종 business, policy, audit, publication, commit decision은 core package 밖에 있습니다.
