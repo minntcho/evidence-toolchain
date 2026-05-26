@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from evidence_toolchain.artifacts import EvidenceDocument
-from evidence_toolchain.planner import EvidenceToolPlan, plan_document
+from evidence_toolchain.planner import EvidenceToolPlan
 from evidence_toolchain.preflight import EvidencePreflight, preflight_document
+from evidence_toolchain.routers import ObservationRouter, RuleObservationRouter
 from evidence_toolchain.runtime import EvidenceEvent, EvidenceRunState, EvidenceStep
 
 
@@ -10,12 +11,14 @@ def run_document(
     document: EvidenceDocument,
     *,
     run_id: str | None = None,
+    router: ObservationRouter | None = None,
 ) -> EvidenceRunState:
     """Run the reference local flow through observation and planning."""
 
     resolved_run_id = run_id or document.document_id
     preflight = preflight_document(document)
-    plan = plan_document(document)
+    active_router = router or RuleObservationRouter()
+    plan = active_router.route(document, preflight)
     state = EvidenceRunState(
         run_id=resolved_run_id,
         document=document,

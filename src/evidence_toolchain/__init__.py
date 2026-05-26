@@ -4,6 +4,7 @@ from evidence_toolchain.artifacts import EvidenceDocument
 from evidence_toolchain.observations import EvidenceObservation, observe_document
 from evidence_toolchain.planner import EvidenceToolPlan, plan_document
 from evidence_toolchain.preflight import EvidencePreflight, preflight_document
+from evidence_toolchain.routers import ObservationRouter, RuleObservationRouter
 from evidence_toolchain.runners import run_document
 from evidence_toolchain.runtime import (
     EvidenceEvent,
@@ -21,6 +22,8 @@ __all__ = [
     "EvidenceStep",
     "EvidenceToolResult",
     "EvidenceToolPlan",
+    "ObservationRouter",
+    "RuleObservationRouter",
     "observe_document",
     "plan_document",
     "preflight_document",
