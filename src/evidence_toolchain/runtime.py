@@ -54,6 +54,7 @@ class EvidenceRunState:
 
     run_id: str
     document: Any
+    preflight: Any | None = None
     observation: Any | None = None
     plan: Any | None = None
     completed_steps: tuple[EvidenceStep, ...] = ()
