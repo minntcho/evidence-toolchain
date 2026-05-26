@@ -142,7 +142,10 @@ def run_capability_steps(
                 },
             )
         )
-        result = capability_runner.run(step, current)
+        try:
+            result = capability_runner.run(step, current)
+        except Exception as error:
+            result = _failed_result_from_exception(step, error)
         completed.append(replace(step, status=_step_status_from_result(result.status)))
         tool_results.append(result)
         if result.status == "review_requested":
@@ -199,6 +202,18 @@ def _step_status_from_result(result_status: str) -> str:
     if result_status == "failed":
         return "failed"
     return "completed"
+
+
+def _failed_result_from_exception(
+    step: EvidenceStep,
+    error: Exception,
+) -> EvidenceToolResult:
+    capability = step.capability or "unknown_capability"
+    return EvidenceToolResult(
+        capability=capability,
+        status="failed",
+        errors=(f"{type(error).__name__}: {error}",),
+    )
 
 
 def _record_capability_result_event(
