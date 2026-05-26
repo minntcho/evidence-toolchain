@@ -1,6 +1,11 @@
 """Document-evidence observation, planning, extraction, and reporting."""
 
 from evidence_toolchain.artifacts import EvidenceDocument
+from evidence_toolchain.capabilities import (
+    CapabilityRunner,
+    EvidenceCapability,
+    ManualReviewCapabilityRunner,
+)
 from evidence_toolchain.observations import EvidenceObservation, observe_document
 from evidence_toolchain.planner import EvidenceToolPlan, plan_document
 from evidence_toolchain.preflight import EvidencePreflight, preflight_document
@@ -15,6 +20,7 @@ from evidence_toolchain.runtime import (
 
 __all__ = [
     "EvidenceDocument",
+    "EvidenceCapability",
     "EvidenceEvent",
     "EvidenceObservation",
     "EvidencePreflight",
@@ -22,6 +28,8 @@ __all__ = [
     "EvidenceStep",
     "EvidenceToolResult",
     "EvidenceToolPlan",
+    "CapabilityRunner",
+    "ManualReviewCapabilityRunner",
     "ObservationRouter",
     "RuleObservationRouter",
     "observe_document",
