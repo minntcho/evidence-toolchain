@@ -1,10 +1,10 @@
-# Failure mode
+# 실패 모드
 
-Failure mode는 first-class output입니다.
+실패 모드는 first-class output입니다.
 
 `evidence-toolchain`은 uncertain extraction을 confident-looking answer로 바꾸면 안 됩니다. Document, tool, result가 약하다면 그 약점을 structured issue로 보존해야 합니다.
 
-## Failure mode가 중요한 이유
+## 실패 모드가 중요한 이유
 
 Evidence document는 지저분합니다.
 
@@ -21,9 +21,9 @@ Evidence document는 지저분합니다.
 
 유용한 evidence system은 무엇이 잘못되었는지, 다음에 무엇을 해야 하는지 설명해야 합니다.
 
-## Issue category
+## Issue 분류
 
-### Document quality issue
+### 문서 품질 issue
 
 예시:
 
@@ -37,7 +37,7 @@ missing_pages
 unsupported_media_type
 ```
 
-### OCR and text issue
+### OCR/text issue
 
 예시:
 
@@ -60,7 +60,7 @@ MWh vs mWh
 comma vs decimal point
 ```
 
-### Layout and table issue
+### Layout/table issue
 
 예시:
 
@@ -73,7 +73,7 @@ header_association_unclear
 line_item_association_unclear
 ```
 
-### Field extraction issue
+### Field 추출 issue
 
 예시:
 
@@ -87,7 +87,7 @@ billing_period_vs_invoice_date_confusion
 subtotal_vs_total_confusion
 ```
 
-### Evidence trust issue
+### 증거 신뢰 issue
 
 예시:
 
@@ -101,7 +101,7 @@ screenshot_without_source
 single_transaction_not_period_total
 ```
 
-### Review issue
+### Review 관련 issue
 
 예시:
 
@@ -113,7 +113,7 @@ review_required_for_low_confidence_amount
 review_required_for_missing_period
 ```
 
-## Issue severity
+## Issue 심각도
 
 초기 severity level:
 
@@ -154,7 +154,7 @@ unreadable_document
 field_not_found
 ```
 
-## Failure handling pattern
+## 실패 처리 pattern
 
 System은 다음 pattern을 따라야 합니다.
 
@@ -175,7 +175,7 @@ docling_parse reports ambiguous table structure
 -> request manual review for target field
 ```
 
-## Terminal failure
+## 종결 failure
 
 일부 failure는 automated extraction을 멈춰야 합니다.
 
@@ -190,9 +190,9 @@ no_visible_evidence_content
 
 Terminal failure도 issue detail을 포함한 `EvidenceReport`를 emit해야 합니다. 설명 없는 empty extraction은 허용되지 않습니다.
 
-## Non-goal
+## 비목표
 
-Failure mode는 Downstream policy verdict가 되면 안 됩니다.
+실패 모드는 Downstream policy verdict가 되면 안 됩니다.
 
 허용:
 

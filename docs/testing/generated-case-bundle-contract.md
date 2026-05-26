@@ -1,4 +1,4 @@
-# Generated Case Bundle 계약
+# 생성 case bundle 계약
 
 Generated case bundle은 synthetic evidence generation이 commit하는 test target입니다. Generator는 내부적으로 manifest, renderer, helper model을 사용할 수 있지만, test는 먼저 generator가 produced한 file에 의존해야 합니다.
 
@@ -24,7 +24,7 @@ manifest
 -> compare with generated/<case_id>/expected.json
 ```
 
-## Evidence file
+## Evidence 파일
 
 `evidence.<ext>`는 toolchain이 읽는 file입니다.
 
@@ -32,7 +32,7 @@ manifest
 
 Extension은 test surface의 일부입니다. Tool selection은 container, media type, document condition에 자주 의존하므로, 새 file format은 하나의 broad generator rewrite에 묶기보다 separate slice로 도입해야 합니다.
 
-## Expected file
+## Expected 파일
 
 `expected.json`은 generated case의 test oracle입니다.
 

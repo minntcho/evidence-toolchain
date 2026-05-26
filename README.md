@@ -41,10 +41,10 @@ Downstream system은 추출된 증거가 declared input을 지지하는지, 반�
 - [아키텍처](docs/architecture.md)
 - [증거 라우팅](docs/evidence-routing.md)
 - [오케스트레이션 경계](docs/orchestration-boundary.md)
-- [Capability registry](docs/capability-registry.md)
-- [Failure mode](docs/failure-modes.md)
+- [Capability 레지스트리](docs/capability-registry.md)
+- [실패 모드](docs/failure-modes.md)
 - [Adapter 경계](docs/adapter-boundary.md)
-- [Synthetic evidence testkit](docs/synthetic-evidence.md)
+- [합성 증거 테스트킷](docs/synthetic-evidence.md)
 
 ## 개발 빠른 시작
 
@@ -78,7 +78,7 @@ Adapters translate.
 Downstream systems judge.
 ```
 
-테스트를 위해 이 저장소는 synthetic evidence testkit도 포함합니다.
+테스트를 위해 이 저장소는 합성 증거 테스트킷도 포함합니다.
 
 ```text
 Synthetic manifest가 truth와 expected behavior를 정의한다.

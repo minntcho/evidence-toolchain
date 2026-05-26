@@ -1,6 +1,6 @@
-# Synthetic evidence testkit
+# 합성 증거 테스트킷
 
-Synthetic evidence testkit은 core document-evidence pipeline을 위한 development fixture를 만듭니다.
+합성 증거 테스트킷은 core document-evidence pipeline을 위한 development fixture를 만듭니다.
 
 이 testkit은 이 프로젝트에 repeatable messy evidence case가 필요하기 때문에 존재합니다.
 
@@ -30,7 +30,7 @@ evidence_toolchain core -> synthetic generator
 
 Core package는 real evidence document에 대해 reusable하게 유지되어야 합니다. Synthetic case는 core를 test하는 데 도움을 주지만 runtime authority를 정의하지 않습니다.
 
-## Manifest contract
+## Manifest 계약
 
 각 case는 `synthetic/manifests/` 아래 manifest에서 시작합니다.
 

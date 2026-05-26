@@ -30,6 +30,6 @@ Evidence check는 final domain decision을 내리면 안 됩니다.
 
 Claim을 approve하거나, value를 commit하거나, receipt를 issue하거나, audit ledger entry를 쓰거나, publication readiness를 결정하면 안 됩니다. 이것들은 Downstream authority decision입니다.
 
-## Review semantics
+## Review semantics 규칙
 
 `review needed`는 evidence-processing state입니다. Toolchain이 automated means만으로 check를 충분히 안전하게 resolve하지 못했다는 뜻입니다. Downstream consumer가 반드시 input을 reject해야 한다는 뜻은 아닙니다.

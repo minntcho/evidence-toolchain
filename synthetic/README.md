@@ -1,6 +1,6 @@
-# Synthetic evidence testkit
+# 합성 증거 테스트킷
 
-이 디렉터리는 개발과 테스트를 위한 synthetic evidence document를 만듭니다.
+이 디렉터리는 개발과 테스트를 위한 합성 증거 document를 만듭니다.
 
 이 testkit은 의도적으로 core extraction package 밖에 있습니다. Generator는 manifest를 sample document와 expected behavior file로 materialize할 수 있지만, core package는 이 testkit을 import하면 안 됩니다.
 

@@ -1,4 +1,4 @@
-# Failure Mode 테스트 전략
+# 실패 모드 테스트 전략
 
 Failure-mode test는 toolchain이 약한 evidence를 confident-looking answer로 바꾸지 않고 uncertainty를 보존한다는 점을 증명합니다.
 

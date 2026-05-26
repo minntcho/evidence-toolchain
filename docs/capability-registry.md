@@ -1,14 +1,14 @@
-# Capability registry
+# Capability 레지스트리
 
-Capability registry는 router가 선택할 수 있는 extraction 및 inspection tool catalog입니다.
+Capability 레지스트리는 router가 선택할 수 있는 extraction 및 inspection tool catalog입니다.
 
 Capability는 단순한 function이 아닙니다. Known input, output, strength, limit, failure mode를 가진 declared unit of document-processing behavior입니다.
 
-## Registry가 필요한 이유
+## 레지스트리가 필요한 이유
 
 Evidence document는 하나의 default parser로 처리하기에는 너무 다양합니다.
 
-Registry는 system이 다음 질문을 하게 해 줍니다.
+레지스트리는 system이 다음 질문을 하게 해 줍니다.
 
 ```text
 What can we try on this document?
@@ -18,9 +18,9 @@ What does this tool commonly get wrong?
 When should this tool be followed by another tool?
 ```
 
-## Capability record
+## Capability 기록
 
-Registry entry는 나중에 다음을 설명해야 합니다.
+레지스트리 entry는 나중에 다음을 설명해야 합니다.
 
 ```text
 name
@@ -49,7 +49,7 @@ review triggers
 }
 ```
 
-## 초기 capability set
+## 초기 capability 세트
 
 ### `docling_parse`
 
@@ -261,7 +261,7 @@ Review는 afterthought가 아니라 toolchain의 일부이기 때문에 이것�
 - which fields are uncertain
 - which tool outputs caused the uncertainty
 
-## Registry policy
+## 레지스트리 정책
 
 새 capability를 추가할 때는 다음을 문서화해야 합니다.
 

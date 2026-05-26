@@ -26,7 +26,7 @@ orchestrator
 evidence-toolchain -> specific downstream validator
 ```
 
-## Core language
+## Core 언어
 
 Core term은 중립적으로 유지되어야 합니다.
 
@@ -43,7 +43,7 @@ EvidenceReport
 
 이 용어들은 document processing과 extraction을 설명합니다.
 
-## Downstream language
+## Downstream 언어
 
 Downstream system은 더 강한 용어를 사용할 수 있습니다.
 
@@ -64,7 +64,7 @@ audit ledger
 
 ## Adapter 예시
 
-### Generic JSON adapter
+### Generic JSON adapter 예시
 
 ```text
 EvidenceReport -> JSON
@@ -72,7 +72,7 @@ EvidenceReport -> JSON
 
 API, CLI, batch job, dashboard를 위한 adapter입니다.
 
-### Review UI adapter
+### Review UI adapter 예시
 
 ```text
 EvidenceReport -> review task
@@ -80,7 +80,7 @@ EvidenceReport -> review task
 
 Human review queue를 위한 adapter입니다.
 
-### Domain validator adapter
+### Domain validator adapter 예시
 
 ```text
 EvidenceReport -> domain-specific declared-input comparison payload
@@ -88,7 +88,7 @@ EvidenceReport -> domain-specific declared-input comparison payload
 
 LCA, ESG, ERP, audit system을 위한 adapter입니다.
 
-### Compiler adapter
+### Compiler adapter 예시
 
 ```text
 EvidenceReport -> compiler-specific evidence claim candidates

@@ -18,7 +18,7 @@ LLM/VLM-assisted routing은 첫 번째 semantic observation step이 될 수 있�
 
 Framework는 workflow를 orchestrate할 수 있습니다. 하지만 core evidence schema를 정의하거나, Downstream validity를 결정하거나, framework state를 public contract로 바꾸면 안 됩니다.
 
-## Core runtime record
+## Core runtime 기록
 
 Core runtime contract는 serializable하고 framework independent해야 합니다.
 
@@ -96,7 +96,7 @@ Step은 framework node id를 core concept로 embedding하지 말고 capability n
 
 Tool result는 JSON-compatible해야 합니다. 그래야 여러 runner가 framework-specific result object에 의존하지 않고 behavior를 비교할 수 있습니다.
 
-## Runtime port
+## 런타임 port
 
 Core는 framework-specific implementation을 채택하기 전에 작고 중립적인 port를 정의해야 합니다.
 
@@ -138,13 +138,13 @@ Retry policy는 local runner와 durable workflow runner가 comparable decision�
 
 ## Runner 역할
 
-### Local runner
+### Local runner 역할
 
 Local runner는 reference implementation입니다.
 
 오케스트레이션 framework 없이 같은 evidence semantics를 실행해야 합니다. Test는 local runner가 generated case bundle을 처리하고 expected event, state transition, report shape를 emitted할 수 있음을 증명해야 합니다.
 
-### Framework adapters
+### Framework adapter 역할
 
 Framework adapters는 다른 execution guarantee로 같은 runner contract를 구현할 수 있습니다.
 
