@@ -1,50 +1,44 @@
-# Synthetic Evidence Cases
+# Synthetic Evidence Case
 
-Synthetic evidence cases create repeatable test worlds for development.
+Synthetic evidence case는 개발을 위한 repeatable test world를 만듭니다.
 
-They are useful because real evidence documents are messy, private, and hard to
-share. Synthetic cases let the repository test routing, extraction contracts,
-failure modes, and review triggers without tying the core to one domain.
+Real evidence document는 지저분하고, private하고, 공유하기 어렵습니다. Synthetic case는 core를 한 domain에 묶지 않으면서 routing, extraction contract, failure mode, review trigger를 테스트하게 해 줍니다.
 
-## Case Anatomy
+## Case 구조
 
-Each case should separate:
+각 case는 다음을 분리해야 합니다.
 
-- `ground_truth`: the value in the synthetic world
-- `expected_behavior`: what the toolchain should observe, plan, extract, issue,
-  or send to review
-- generated document: the materialized evidence input
-- expected manifest: the materialized comparison target for tests
+- `ground_truth`: synthetic world 안의 value
+- `expected_behavior`: toolchain이 observe, plan, extract, issue, 또는 review로 보내야 하는 behavior
+- generated document: materialized evidence input
+- expected manifest: test를 위한 materialized comparison target
 
-This separation matters because known synthetic truth does not always mean the
-toolchain should automatically trust the document.
+이 분리가 중요합니다. Known synthetic truth가 있다고 해서 toolchain이 document를 자동으로 trust해야 하는 것은 아닙니다.
 
-## Strong assertions
+## 강하게 assert할 것
 
-Strong assertions should check:
+Strong assertion은 다음을 확인해야 합니다.
 
 - manifest-driven generation
-- stable case ids
+- stable case id
 - generated document existence
 - generated expected manifest existence
-- `ground_truth` and `expected_behavior` separation
-- expected capabilities for baseline cases
-- expected issues for degraded cases
+- `ground_truth`와 `expected_behavior` separation
+- baseline case의 expected capability
+- degraded case의 expected issue
 
-## Weak assertions
+## freeze하지 말아야 할 것
 
-Weak assertions should avoid freezing:
+Weak assertion은 다음을 freeze하지 말아야 합니다.
 
-- exact line wrapping in generated documents
-- synthetic business names
-- fixture file extensions before real renderers exist
-- final downstream schema names
-- visual degradation implementation details
+- generated document의 exact line wrapping
+- synthetic business name
+- real renderer가 생기기 전 fixture file extension
+- final Downstream schema name
+- visual degradation implementation detail
 
-## Must not
+## 해서는 안 되는 일
 
-Synthetic cases must not become core runtime authority.
+Synthetic case는 core runtime authority가 되면 안 됩니다.
 
-The core package must not import the synthetic generator. Synthetic manifests may
-define test worlds, but Downstream systems own real policy, commit, receipt, and
-publication decisions.
+Core package는 synthetic generator를 import하면 안 됩니다. Synthetic manifest는 test world를 정의할 수 있지만, real policy, commit, receipt, publication decision은 Downstream system이 소유합니다.

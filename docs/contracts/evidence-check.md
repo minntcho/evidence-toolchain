@@ -1,14 +1,12 @@
-# Evidence Check Contract
+# Evidence Check 계약
 
-An `EvidenceCheck` records the comparison between declared or requested input and
-extracted evidence candidates.
+`EvidenceCheck`는 declared 또는 requested input과 extracted evidence candidate 사이의 comparison을 기록합니다.
 
-It is the contract that makes this project more than raw extraction: it shows how
-evidence relates to what the caller wanted to verify.
+이 contract는 이 프로젝트가 raw extraction 이상임을 보여줍니다. Evidence가 caller가 verify하려던 대상과 어떻게 관련되는지 설명합니다.
 
-## May
+## 포함할 수 있는 것
 
-An evidence check may say:
+Evidence check는 다음 상태를 말할 수 있습니다.
 
 - supported
 - contradicted
@@ -16,26 +14,22 @@ An evidence check may say:
 - uncertain
 - review needed
 
-It may preserve:
+Evidence check는 다음을 보존할 수 있습니다.
 
 - declared input reference
 - extracted field reference
-- normalization notes
-- unit conversion notes
+- normalization note
+- unit conversion note
 - confidence
-- issue references
-- review trigger references
+- issue reference
+- review trigger reference
 
-## Must not
+## 해서는 안 되는 일
 
-An evidence check must not make final domain decisions.
+Evidence check는 final domain decision을 내리면 안 됩니다.
 
-It must not approve a claim, commit a value, issue a receipt, write an audit
-ledger entry, or decide publication readiness. Those are Downstream authority
-decisions.
+Claim을 approve하거나, value를 commit하거나, receipt를 issue하거나, audit ledger entry를 쓰거나, publication readiness를 결정하면 안 됩니다. 이것들은 Downstream authority decision입니다.
 
-## Review Semantics
+## Review semantics
 
-`review needed` is an evidence-processing state. It means the toolchain could not
-resolve the check safely enough by automated means. It does not mean the
-Downstream consumer must reject the input.
+`review needed`는 evidence-processing state입니다. Toolchain이 automated means만으로 check를 충분히 안전하게 resolve하지 못했다는 뜻입니다. Downstream consumer가 반드시 input을 reject해야 한다는 뜻은 아닙니다.

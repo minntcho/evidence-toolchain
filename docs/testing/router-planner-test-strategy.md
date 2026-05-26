@@ -1,40 +1,35 @@
-# Router and Planner Test Strategy
+# Router와 Planner 테스트 전략
 
-Router and planner tests prove that the toolchain looks at evidence condition
-before choosing capabilities.
+Router와 planner test는 toolchain이 capability를 선택하기 전에 evidence condition을 먼저 본다는 점을 증명합니다.
 
-The goal is not to freeze every implementation detail. The goal is to preserve
-the observable behavior that makes the project an evidence-processing engine
-rather than a single-parser wrapper.
+목표는 모든 implementation detail을 freeze하는 것이 아닙니다. 목표는 이 프로젝트를 single-parser wrapper가 아니라 evidence-processing engine으로 만드는 observable behavior를 보존하는 것입니다.
 
-## Strong assertions
+## 강하게 assert할 것
 
-Strong assertions should check that:
+Strong assertion은 다음을 확인해야 합니다.
 
-- born-digital documents can select structure-aware parsing
-- scanned documents can select OCR
-- receipt-like documents can select receipt extraction
-- handwritten logs can select handwriting and review paths
-- meter photos can select visual and meter-reading paths
-- fallback capabilities remain visible when risk remains
-- plans preserve the reason each selected capability was chosen
+- born-digital document는 structure-aware parsing을 선택할 수 있다
+- scanned document는 OCR을 선택할 수 있다
+- receipt-like document는 receipt extraction을 선택할 수 있다
+- handwritten log는 handwriting과 review path를 선택할 수 있다
+- meter photo는 visual과 meter-reading path를 선택할 수 있다
+- risk가 남아 있을 때 fallback capability가 visible하게 남는다
+- plan은 각 selected capability가 선택된 reason을 보존한다
 
-These assertions protect the observation -> planning -> extraction boundary.
+이 assertion들은 observation -> planning -> extraction boundary를 보호합니다.
 
-## Weak assertions
+## freeze하지 말아야 할 것
 
-Weak assertions should avoid freezing:
+Weak assertion은 다음을 freeze하지 말아야 합니다.
 
-- private helper function names
+- private helper function name
 - exact internal planner rule order
-- whether a future planner is rule-based, model-assisted, or hybrid
-- exact prompt or classifier implementation details
-- downstream adapter shape
+- future planner가 rule-based, model-assisted, hybrid 중 무엇인지
+- exact prompt 또는 classifier implementation detail
+- Downstream adapter shape
 
-## Must not
+## 해서는 안 되는 일
 
-Planner tests must not assert final Downstream approval.
+Planner test는 final Downstream approval을 assert하면 안 됩니다.
 
-A planner may decide that OCR, table extraction, or manual review is needed. It
-must not decide that a domain claim is finally valid, committed, published, or
-policy-approved.
+Planner는 OCR, table extraction, manual review가 필요하다고 판단할 수 있습니다. 하지만 domain claim이 finally valid, committed, published, policy-approved하다고 결정하면 안 됩니다.

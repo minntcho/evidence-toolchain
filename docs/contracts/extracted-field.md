@@ -1,36 +1,33 @@
-# Extracted Field Contract
+# Extracted Field 계약
 
-An `ExtractedField` is a candidate value found in evidence material.
+`ExtractedField`는 evidence material에서 발견된 candidate value입니다.
 
-It is candidate evidence, not final truth.
+이 값은 candidate evidence이지 final truth가 아닙니다.
 
-## May
+## 포함할 수 있는 것
 
-An extracted field may carry:
+Extracted field는 다음을 담을 수 있습니다.
 
 - field name
 - value
 - unit
 - normalized value
-- page or image reference
+- page 또는 image reference
 - bounding box
 - text span
 - table cell reference
 - source capability
 - confidence
-- issue references
+- issue reference
 
-It may have multiple candidates for the same requested field.
+같은 requested field에 대해 여러 candidate가 있을 수 있습니다.
 
-## Must not
+## 해서는 안 되는 일
 
-An extracted field must not decide that a Downstream input is finally valid.
+Extracted field는 Downstream input이 finally valid하다고 판단하면 안 됩니다.
 
-It must not hide ambiguity by choosing one value without preserving competing
-candidates, confidence, provenance, and issues.
+Competing candidate, confidence, provenance, issue를 보존하지 않은 채 한 value를 골라 ambiguity를 숨기면 안 됩니다.
 
-## Provenance Rule
+## Provenance 규칙
 
-Every extracted field should preserve where it came from when the capability can
-provide that information. If provenance cannot be recovered, the field should
-carry an issue instead of pretending the value is fully grounded.
+Capability가 provenance를 제공할 수 있다면 모든 extracted field는 어디에서 왔는지 보존해야 합니다. Provenance를 recover할 수 없다면, value가 fully grounded된 척하지 말고 issue를 담아야 합니다.

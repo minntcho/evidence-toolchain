@@ -1,38 +1,33 @@
-# Evidence Report Contract
+# Evidence Report 계약
 
-An `EvidenceReport` is the consolidated neutral output from the toolchain.
+`EvidenceReport`는 toolchain이 내는 통합된 중립 output입니다.
 
-It should be useful to many consumers without becoming any one consumer's
-authority model.
+이 report는 여러 consumer에게 유용해야 하지만, 특정 consumer의 authority model이 되어서는 안 됩니다.
 
-## May
+## 포함할 수 있는 것
 
-An evidence report may include:
+Evidence report는 다음을 포함할 수 있습니다.
 
 - document identity
-- observations
+- observation
 - selected tool plan
-- capability result summaries
-- extracted fields
-- evidence checks
+- capability result summary
+- extracted field
+- evidence check
 - provenance
 - confidence
-- issues
-- unresolved ambiguities
+- issue
+- unresolved ambiguity
 - recommended next action
 
-The recommended next action may include trying a fallback capability or sending a
-case to review.
+Recommended next action은 fallback capability를 시도하거나 case를 review로 보내는 일을 포함할 수 있습니다.
 
-## Must not
+## 해서는 안 되는 일
 
-An evidence report must not include final Downstream validation judgment.
+Evidence report는 final Downstream validation judgment를 포함하면 안 됩니다.
 
-It must not approve a claim, commit a value, issue a receipt, write an audit
-ledger decision, or decide that a report may be publicly published.
+Claim을 approve하거나, value를 commit하거나, receipt를 issue하거나, audit ledger decision을 쓰거나, report가 publicly published될 수 있다고 결정하면 안 됩니다.
 
-## Adapter Use
+## Adapter 사용
 
-Adapters may translate an evidence report into review tasks, domain validator
-payloads, dashboards, or compiler-specific candidates. That translation must not
-change what the core report is authorized to decide.
+Adapter는 evidence report를 review task, domain validator payload, dashboard, compiler-specific candidate로 번역할 수 있습니다. 그 번역은 core report가 판단할 권한을 바꾸면 안 됩니다.
