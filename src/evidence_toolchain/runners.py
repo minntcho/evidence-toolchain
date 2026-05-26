@@ -7,7 +7,12 @@ from evidence_toolchain.capabilities import CapabilityRunner
 from evidence_toolchain.planner import EvidenceToolPlan
 from evidence_toolchain.preflight import EvidencePreflight, preflight_document
 from evidence_toolchain.routers import ObservationRouter, RuleObservationRouter
-from evidence_toolchain.runtime import EvidenceEvent, EvidenceRunState, EvidenceStep
+from evidence_toolchain.runtime import (
+    EvidenceEvent,
+    EvidenceRunState,
+    EvidenceStep,
+    EvidenceToolResult,
+)
 
 
 def run_document(
@@ -118,6 +123,7 @@ def run_capability_steps(
     completed = list(state.completed_steps)
     tool_results = list(state.tool_results)
     interrupts = list(state.interrupts)
+    selected_fallbacks: list[EvidenceStep] = []
     current = state
 
     for step in state.pending_steps:
@@ -137,7 +143,7 @@ def run_capability_steps(
             )
         )
         result = capability_runner.run(step, current)
-        completed.append(replace(step, status="completed"))
+        completed.append(replace(step, status=_step_status_from_result(result.status)))
         tool_results.append(result)
         if result.status == "review_requested":
             interrupts.append(
@@ -155,17 +161,24 @@ def run_capability_steps(
             tool_results=tuple(tool_results),
             interrupts=tuple(interrupts),
         )
-        current = current.record_event(
-            EvidenceEvent(
-                run_id=current.run_id,
-                sequence=len(current.events) + 1,
-                event_type="capability_completed",
-                payload={
-                    "capability": result.capability,
-                    "status": result.status,
-                },
-            )
-        )
+        current = _record_capability_result_event(current, result)
+        if result.status == "failed":
+            for fallback in _fallback_steps_for_failure(current, result.capability):
+                if _has_capability(pending + completed + selected_fallbacks, fallback):
+                    continue
+                selected_fallbacks.append(fallback)
+                current = current.record_event(
+                    EvidenceEvent(
+                        run_id=current.run_id,
+                        sequence=len(current.events) + 1,
+                        event_type="fallback_selected",
+                        payload={
+                            "capability": fallback.capability,
+                            "reason": fallback.reason,
+                            "source_capability": result.capability,
+                        },
+                    )
+                )
         if result.status == "review_requested":
             current = current.record_event(
                 EvidenceEvent(
@@ -179,4 +192,56 @@ def run_capability_steps(
                 )
             )
 
-    return replace(current, pending_steps=tuple(pending))
+    return replace(current, pending_steps=tuple(pending + selected_fallbacks))
+
+
+def _step_status_from_result(result_status: str) -> str:
+    if result_status == "failed":
+        return "failed"
+    return "completed"
+
+
+def _record_capability_result_event(
+    state: EvidenceRunState,
+    result: EvidenceToolResult,
+) -> EvidenceRunState:
+    event_type = (
+        "capability_failed" if result.status == "failed" else "capability_completed"
+    )
+    payload = {
+        "capability": result.capability,
+        "status": result.status,
+    }
+    if result.status == "failed":
+        payload["errors"] = list(result.errors)
+    return state.record_event(
+        EvidenceEvent(
+            run_id=state.run_id,
+            sequence=len(state.events) + 1,
+            event_type=event_type,
+            payload=payload,
+        )
+    )
+
+
+def _fallback_steps_for_failure(
+    state: EvidenceRunState,
+    source_capability: str,
+) -> tuple[EvidenceStep, ...]:
+    if state.plan is None:
+        return ()
+
+    return tuple(
+        EvidenceStep(
+            name="execute_capability",
+            status="pending",
+            capability=fallback.name,
+            reason=fallback.reason,
+            metadata={"source_capability": source_capability},
+        )
+        for fallback in state.plan.fallbacks
+    )
+
+
+def _has_capability(steps: list[EvidenceStep], step: EvidenceStep) -> bool:
+    return any(existing.capability == step.capability for existing in steps)
