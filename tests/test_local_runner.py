@@ -14,7 +14,7 @@ def test_local_runner_observes_and_plans_without_executing_capabilities(tmp_path
                 "ETC-quality: clean",
                 "ETC-text_layer: true",
                 "",
-                "Usage 6.4 MWh",
+                "사용량 6.4 MWh",
             ]
         ),
         encoding="utf-8",
@@ -64,8 +64,8 @@ def test_local_runner_uses_document_id_as_default_run_id(tmp_path):
                 "ETC-quality: medium",
                 "ETC-text_layer: false",
                 "",
-                "Diesel quantity: 42.0 L",
-                "Total: 62.58",
+                "디젤 수량: 42.0 L",
+                "합계: 62.58",
             ]
         ),
         encoding="utf-8",

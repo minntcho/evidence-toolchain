@@ -11,7 +11,7 @@
     "activity": "metered_water",
     "amount": 1180,
     "unit": "m3",
-    "supplier": "Internal Meter Log"
+    "supplier": "내부 계량기 기록"
   },
   "expected_behavior": {
     "plan_includes": ["handwriting_read", "table_structure_extract"],

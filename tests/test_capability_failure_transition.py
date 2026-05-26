@@ -16,8 +16,8 @@ def test_failed_capability_records_failure_and_selects_plan_fallback(tmp_path):
                 "ETC-quality: medium",
                 "ETC-text_layer: false",
                 "",
-                "Diesel quantity: 42.0 L",
-                "Total: 62.58",
+                "디젤 수량: 42.0 L",
+                "합계: 62.58",
             ]
         ),
         encoding="utf-8",
@@ -84,8 +84,8 @@ def test_capability_exception_is_recorded_as_failed_result(tmp_path):
                 "ETC-quality: medium",
                 "ETC-text_layer: false",
                 "",
-                "Diesel quantity: 42.0 L",
-                "Total: 62.58",
+                "디젤 수량: 42.0 L",
+                "합계: 62.58",
             ]
         ),
         encoding="utf-8",

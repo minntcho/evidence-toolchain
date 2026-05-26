@@ -18,7 +18,7 @@ def test_write_evidence_report_persists_json_artifact(tmp_path):
                 "ETC-quality: clean",
                 "ETC-text_layer: true",
                 "",
-                "Usage 6.4 MWh",
+                "사용량 6.4 MWh",
             ]
         ),
         encoding="utf-8",
@@ -53,7 +53,7 @@ def test_write_evidence_report_uses_safe_artifact_name(tmp_path):
                 "ETC-case_id: ../unsafe case",
                 "ETC-document_kind: utility_bill",
                 "",
-                "Usage 6.4 MWh",
+                "사용량 6.4 MWh",
             ]
         ),
         encoding="utf-8",

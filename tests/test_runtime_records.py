@@ -21,7 +21,7 @@ def test_runtime_records_are_json_serializable(tmp_path):
                 "ETC-quality: clean",
                 "ETC-text_layer: true",
                 "",
-                "Usage 6.4 MWh",
+                "사용량 6.4 MWh",
             ]
         ),
         encoding="utf-8",
@@ -45,7 +45,7 @@ def test_runtime_records_are_json_serializable(tmp_path):
             EvidenceToolResult(
                 capability="docling_parse",
                 status="completed",
-                outputs={"text_spans": ["Usage 6.4 MWh"]},
+                outputs={"text_spans": ["사용량 6.4 MWh"]},
                 artifacts={"raw_text": "artifacts/run-001/docling.txt"},
             ),
         ),
