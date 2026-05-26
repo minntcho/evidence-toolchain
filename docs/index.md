@@ -9,12 +9,13 @@ The repository is an independent evidence document processing engine. Its job is
 1. [Purpose and Boundaries](purpose-and-boundaries.md)
 2. [Architecture](architecture.md)
 3. [Evidence Routing](evidence-routing.md)
-4. [Capability Registry](capability-registry.md)
-5. [Failure Modes](failure-modes.md)
-6. [Adapter Boundary](adapter-boundary.md)
-7. [Synthetic Evidence Testkit](synthetic-evidence.md)
-8. [Contract Documents](contracts/README.md)
-9. [Testing Strategy](testing/README.md)
+4. [Orchestration Boundary](orchestration-boundary.md)
+5. [Capability Registry](capability-registry.md)
+6. [Failure Modes](failure-modes.md)
+7. [Adapter Boundary](adapter-boundary.md)
+8. [Synthetic Evidence Testkit](synthetic-evidence.md)
+9. [Contract Documents](contracts/README.md)
+10. [Testing Strategy](testing/README.md)
 
 ## Project stance
 

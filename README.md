@@ -40,6 +40,7 @@ A downstream system may decide that extracted evidence supports, contradicts, or
 - [Purpose and boundaries](docs/purpose-and-boundaries.md)
 - [Architecture](docs/architecture.md)
 - [Evidence routing](docs/evidence-routing.md)
+- [Orchestration boundary](docs/orchestration-boundary.md)
 - [Capability registry](docs/capability-registry.md)
 - [Failure modes](docs/failure-modes.md)
 - [Adapter boundary](docs/adapter-boundary.md)
