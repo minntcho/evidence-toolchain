@@ -213,6 +213,9 @@ def test_investigation_loop_boundary_doc_is_indexed_and_keeps_model_authority_bo
     assert "LocalInvestigationRunner" in text
     assert "missing/conflict/ambiguous clue" in text
     assert "model output은 EvidenceUnit, EvidenceAtom, NormalizationResult 중 하나로 내려와야 한다." in text
+    assert 'unit_type="visual_observation"' in text
+    assert "visual task result에 포함된 produced unit과 atom을" in text
+    assert "그래도 resolver edge나 claim status는 만들지 않습니다." in text
     assert "Controller가 state와 budget을 들고 model/tool port를 호출한다." in text
     assert "모델끼리 직접 서로 호출하지 않는다." in text
     assert "real provider adapter와 LangGraph adapter는 core contract 뒤에 붙인다." in text

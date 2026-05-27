@@ -57,6 +57,9 @@ def test_local_investigation_runner_plans_tasks_when_agenda_is_empty():
 
 def test_local_investigation_runner_executes_visual_task_with_fake_vlm_observer():
     from evidence_toolchain import (
+        EvidenceAtom,
+        EvidenceAtomType,
+        EvidenceUnit,
         FakeLLMPlanner,
         FakeVLMObserver,
         InvestigationPlan,
@@ -65,6 +68,10 @@ def test_local_investigation_runner_executes_visual_task_with_fake_vlm_observer(
         InvestigationTaskStatus,
         InvestigationTaskType,
         LocalInvestigationRunner,
+        NormalizationResult,
+        NormalizationTargetKind,
+        NormalizedQuantity,
+        NormalizedType,
     )
 
     task = InvestigationTask(
@@ -75,8 +82,37 @@ def test_local_investigation_runner_executes_visual_task_with_fake_vlm_observer(
     result = InvestigationTaskResult(
         task_id="task_visual",
         status=InvestigationTaskStatus.COMPLETED,
-        produced_unit_ids=("unit_visual_001",),
-        produced_atom_ids=("atom_usage_001",),
+        produced_units=(
+            EvidenceUnit(
+                unit_id="unit_visual_001",
+                artifact_id="artifact_image_001",
+                unit_type="visual_observation",
+                producer="fake_vlm_observer",
+                text="이미지 중앙 표에 '사용량 6.4 MWh'가 보임",
+                locator={"bbox": [120, 410, 380, 455]},
+            ),
+        ),
+        produced_atoms=(
+            EvidenceAtom(
+                atom_id="atom_usage_001",
+                atom_type=EvidenceAtomType.USAGE_AMOUNT,
+                source_unit_ids=("unit_visual_001",),
+                source_artifact_ids=("artifact_image_001",),
+                producer="fake_vlm_observer",
+                text="사용량 6.4 MWh",
+                value=6.4,
+                unit="MWh",
+            ),
+        ),
+        produced_normalization_results=(
+            NormalizationResult(
+                target_id="atom_usage_001",
+                target_kind=NormalizationTargetKind.ATOM,
+                normalized_type=NormalizedType.QUANTITY,
+                normalized=NormalizedQuantity(value=6400, unit="kWh", dimension="energy"),
+                producer="fake_vlm_observer",
+            ),
+        ),
     )
     runner = LocalInvestigationRunner(
         planner=FakeLLMPlanner(plan=InvestigationPlan(tasks=())),
@@ -90,8 +126,15 @@ def test_local_investigation_runner_executes_visual_task_with_fake_vlm_observer(
     payload = updated.to_dict()
 
     assert payload["agenda"] == []
+    assert payload["inventory"]["units"][0]["unit_id"] == "unit_visual_001"
+    assert payload["inventory"]["units"][0]["unit_type"] == "visual_observation"
+    assert payload["atoms"][0]["atom_id"] == "atom_usage_001"
+    assert payload["normalization_results"][0]["target_id"] == "atom_usage_001"
     assert payload["completed_tasks"][0]["task_id"] == "task_visual"
     assert payload["completed_tasks"][0]["produced_atom_ids"] == ["atom_usage_001"]
+    assert payload["completed_tasks"][0]["produced_normalization_result_ids"] == [
+        "atom_usage_001"
+    ]
     assert [event["event_type"] for event in payload["events"]] == [
         "task_started",
         "task_completed",

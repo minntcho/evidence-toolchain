@@ -61,6 +61,14 @@ model output을 곧바로 Downstream verdict로 내보내지 않는다.
 model output은 EvidenceUnit, EvidenceAtom, NormalizationResult 중 하나로 내려와야 한다.
 그 외 shape는 runner 내부 임시값으로만 취급하고 public-ish contract로 노출하지 않습니다.
 
+VLM observation task result는 실제 `EvidenceUnit`, `EvidenceAtom`, `NormalizationResult`
+후보를 `InvestigationTaskResult` 안에 담을 수 있습니다. 예를 들어 이미지 또는 PDF page
+preview에서 본 내용은 `unit_type="visual_observation"` EvidenceUnit으로 보존하고, 그
+observation에서 읽은 사용량 후보는 EvidenceAtom으로 보존합니다.
+`LocalInvestigationRunner`는 visual task result에 포함된 produced unit과 atom을
+`InvestigationState.inventory.units`와 `InvestigationState.atoms`에 append할 수 있습니다.
+그래도 resolver edge나 claim status는 만들지 않습니다.
+
 ## Controller
 
 모델끼리 직접 서로 호출하지 않는다.
