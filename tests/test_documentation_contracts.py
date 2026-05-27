@@ -271,6 +271,8 @@ def test_investigation_loop_boundary_doc_is_indexed_and_keeps_model_authority_bo
     assert "`CandidateUnitRetriever`는 retrieve_candidate_units task를 EvidenceUnit 후보 선택으로 접지합니다." in text
     assert "retrieval은 EvidenceAtom이나 ResolutionEdge를 만들지 않습니다." in text
     assert "LocalInvestigationRunner는 `CandidateUnitRetriever`가 주입되면 `retrieve_candidate_units` task를 실행할 수 있습니다." in text
+    assert "`run_agenda(max_steps=...)`는 이미 올라온 agenda만 deterministic하게 실행합니다." in text
+    assert "run_agenda는 새 planner task를 요청하지 않습니다." in text
     assert "현재 runner는 `retrieve_candidate_units`를 자동 실행하지 않습니다." not in text
     assert "missing/conflict/ambiguous clue" in text
     assert "model output은 EvidenceUnit, EvidenceAtom, NormalizationResult 중 하나로 내려와야 한다." in text

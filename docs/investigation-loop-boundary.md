@@ -202,6 +202,9 @@ LocalInvestigationRunner는 `CandidateUnitRetriever`가 주입되면 `retrieve_c
 이 실행은 기존 `EvidenceUnit` id만 선택하고, 선택된 unit이 있을 때 다음
 `atomize_unit_cluster` task를 agenda 앞에 추가합니다. 선택된 unit이 없으면 completed task는
 `no_new_clue`로 남고 follow-up task를 만들지 않습니다.
+`run_agenda(max_steps=...)`는 이미 올라온 agenda만 deterministic하게 실행합니다.
+이 helper는 `retrieve_candidate_units -> atomize_unit_cluster` 같은 queued task chain을
+로컬에서 검증하기 위한 것이며, run_agenda는 새 planner task를 요청하지 않습니다.
 
 다음은 아직 구현하지 않습니다.
 
