@@ -50,6 +50,7 @@ from evidence_toolchain.normalization import (
     NormalizedType,
     NormalizedValue,
 )
+from evidence_toolchain.normalizers import DeterministicNormalizer
 from evidence_toolchain.readers import (
     DelimitedTableReader,
     ImageProfileReader,
@@ -107,6 +108,7 @@ __all__ = [
     "NormalizedQuantity",
     "NormalizedType",
     "NormalizedValue",
+    "DeterministicNormalizer",
     "SimpleTextAtomizer",
     "atomize_inventory",
     "AttachmentBundle",
