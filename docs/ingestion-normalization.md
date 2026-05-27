@@ -105,6 +105,15 @@ PDF profile은 text extraction이 아니다.
 Page count, encrypted 여부, rough text-layer marker 같은 cheap signal만 보존하며,
 text span, table, field extraction은 별도 reader/capability가 담당해야 합니다.
 
+### `ImageProfileReader`
+
+ImageProfileReader는 image attachment를 image artifact와 image profile metadata
+EvidenceUnit으로 낮춥니다.
+Image profile은 OCR 또는 VLM extraction이 아니다.
+Width, height, format, mode, EXIF orientation placeholder, aspect ratio 같은
+cheap signal만 보존하며, text OCR, meter reading, receipt extraction, handwriting
+해석은 별도 capability가 담당해야 합니다.
+
 ## 해야 하는 일
 
 - 물리 attachment를 공통 inventory로 정규화한다.

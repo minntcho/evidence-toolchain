@@ -10,7 +10,12 @@ from evidence_toolchain.ingestion import (
     SafetyDecision,
 )
 from evidence_toolchain.issues import EvidenceIssue
-from evidence_toolchain.readers import DelimitedTableReader, PdfProfileReader, PlainTextReader
+from evidence_toolchain.readers import (
+    DelimitedTableReader,
+    ImageProfileReader,
+    PdfProfileReader,
+    PlainTextReader,
+)
 
 
 MACRO_ENABLED_EXTENSIONS = {".docm", ".pptm", ".xlsm"}
@@ -195,6 +200,13 @@ def ingest_attachment(
         )
     if route_decision.route == "pdf":
         return PdfProfileReader().read(
+            bundle_id=bundle_id,
+            attachment=attachment,
+            route_decision=route_decision,
+            safety_decision=safety_decision,
+        )
+    if route_decision.route == "image":
+        return ImageProfileReader().read(
             bundle_id=bundle_id,
             attachment=attachment,
             route_decision=route_decision,
