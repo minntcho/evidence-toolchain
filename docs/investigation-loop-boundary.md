@@ -140,20 +140,39 @@ manual review required
 
 ## 현재 범위
 
-이 문서는 runtime runner contract가 아니다.
+현재 구현은 조사 루프 record contract만 제공합니다.
 
-현재 문서는 다음을 구현하지 않습니다.
+현재 구현된 contract는 다음과 같습니다.
 
 ```text
 InvestigationState dataclass
 InvestigationTask dataclass
+InvestigationTaskResult dataclass
+InvestigationEvent dataclass
 NeedLedgerEntry
+InvestigationBudget
+InvestigationTaskType
+InvestigationTaskStatus
+NeedLedgerStatus
+InvestigationEventType
+```
+
+이 contract들은 state snapshot, agenda, completed task, clue ledger, event, budget을
+직렬화하기 위한 record입니다. 아직 task를 실행하거나 모델을 호출하지 않습니다.
+
+다음은 아직 구현하지 않습니다.
+
+```text
 LLM/VLM port Protocol
 fake model adapter
 LocalInvestigationRunner
 provider adapter
 LangGraph adapter
 ```
+
+LLM/VLM port Protocol은 아직 구현하지 않습니다.
+LocalInvestigationRunner는 아직 구현하지 않습니다.
+provider adapter와 LangGraph adapter도 아직 구현하지 않습니다.
 
 이 문서는 앞으로 구현될 investigation 계층의 권한 경계만 고정합니다.
 다음 code slice는 resolver hard-gate 또는 investigation contract 중 하나가 될 수 있지만,
