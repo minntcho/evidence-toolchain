@@ -55,6 +55,7 @@ from evidence_toolchain.investigation_ports import (
     LLMAtomizerPort,
     LLMNormalizerPort,
     LLMPlannerPort,
+    ResolverPort,
     VLMObserverPort,
 )
 from evidence_toolchain.investigation_gaps import ResolutionGapPlan, ResolutionGapPlanner
@@ -164,6 +165,7 @@ __all__ = [
     "VLMObserverPort",
     "LLMAtomizerPort",
     "LLMNormalizerPort",
+    "ResolverPort",
     "FakeLLMPlanner",
     "FakeVLMObserver",
     "FakeLLMAtomizer",

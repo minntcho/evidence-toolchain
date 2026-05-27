@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
 from evidence_toolchain.atoms import AtomizerResult, EvidenceAtom
+from evidence_toolchain.claims import DeclaredClaim, NeedSpec
 from evidence_toolchain.ingestion import EvidenceUnit
 from evidence_toolchain.investigation import (
     InvestigationState,
@@ -13,6 +14,7 @@ from evidence_toolchain.investigation import (
 )
 from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.normalization import NormalizationResult
+from evidence_toolchain.resolution import EvidenceResolutionGraph
 
 
 @dataclass(frozen=True)
@@ -79,6 +81,24 @@ class LLMNormalizerPort(Protocol):
         atoms: tuple[EvidenceAtom, ...],
     ) -> tuple[NormalizationResult, ...]:
         """EvidenceAtom 후보를 normalized comparison material로 변환합니다."""
+
+
+@runtime_checkable
+class ResolverPort(Protocol):
+    """normalized material을 draft EvidenceResolutionGraph로 변환하는 resolver port입니다."""
+
+    producer: str
+
+    def resolve(
+        self,
+        *,
+        bundle_id: str,
+        claims: tuple[DeclaredClaim, ...],
+        need_specs: tuple[NeedSpec, ...],
+        atoms: tuple[EvidenceAtom, ...],
+        normalization_results: tuple[NormalizationResult, ...],
+    ) -> EvidenceResolutionGraph:
+        """현재 state material로 draft resolution graph를 만듭니다."""
 
 
 @dataclass(frozen=True)
