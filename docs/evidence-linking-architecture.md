@@ -144,6 +144,25 @@ NormalizedIdentifier
 `normalize_atom_value`는 EvidenceAtom 후보를 normalized comparison material로 낮추고,
 `normalize_claim_need`는 NeedSpec의 개별 need를 normalized comparison material로 낮춥니다.
 
+`DeterministicNormalizer`는 v0 pure-python baseline adapter입니다.
+명확한 `usage_amount`, `currency_amount`, `service_period`, `date` atom과
+`usage_amount`, `service_period` need를 `NormalizationResult`로 낮춥니다.
+
+지원 범위는 작게 유지합니다.
+
+```text
+energy: Wh, kWh, MWh, GWh -> kWh
+volume: L, m3, m³ -> L
+mass: kg, t, tonne -> kg
+currency: KRW, USD, EUR, 원
+period: YYYY-MM 또는 YYYY-MM-DD ~ YYYY-MM-DD
+date role: 납부기한, 청구일, 발행일 같은 명확한 label
+```
+
+DeterministicNormalizer는 resolver가 아니다.
+예를 들어 `6.4 MWh`를 `6400 kWh`로 낮출 수는 있지만,
+그 값이 특정 X claim을 support한다고 판단하지 않습니다.
+
 정규화 계층은 다음을 하지 않습니다.
 
 ```text
@@ -289,6 +308,7 @@ NormalizedPeriod
 NormalizedDate
 NormalizedCurrency
 NormalizedIdentifier
+DeterministicNormalizer
 DeclaredClaim
 Need
 NeedSpec
@@ -345,8 +365,9 @@ status, edge ids, supporting/rejected atom ids, missing need ids를 보존합니
 계산된 결과를 담을 수 있는 public-ish shape만 제공합니다.
 
 정규화 계약도 마찬가지입니다. 현재 구현은 `NormalizationResult`와 normalized value shape,
-그리고 `NormalizationAdapter` interface를 제공합니다. 하지만 deterministic unit conversion,
-period parsing, date role parsing은 아직 수행하지 않습니다.
+`NormalizationAdapter` interface, 그리고 명확한 atom/need만 처리하는
+`DeterministicNormalizer` v0를 제공합니다. 이 adapter는 비교 재료만 만들고
+resolver edge를 생성하지 않습니다.
 
 ## 아직 구현하지 않은 것
 
@@ -358,6 +379,8 @@ hard gate / soft score resolver
 aggregation support solver
 derivation support solver
 support set selection
+site/supplier alias normalizer
+ambiguous period normalizer
 LLM/VLM atomizer adapter
 OCR/VLM interrogation loop
 archive recursive expansion
