@@ -46,6 +46,17 @@ from evidence_toolchain.investigation import (
     NeedLedgerEntry,
     NeedLedgerStatus,
 )
+from evidence_toolchain.investigation_ports import (
+    FakeLLMAtomizer,
+    FakeLLMNormalizer,
+    FakeLLMPlanner,
+    FakeVLMObserver,
+    InvestigationPlan,
+    LLMAtomizerPort,
+    LLMNormalizerPort,
+    LLMPlannerPort,
+    VLMObserverPort,
+)
 from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.observations import EvidenceObservation, observe_document
 from evidence_toolchain.planner import EvidenceToolPlan, plan_document
@@ -142,6 +153,15 @@ __all__ = [
     "InvestigationTaskType",
     "NeedLedgerEntry",
     "NeedLedgerStatus",
+    "InvestigationPlan",
+    "LLMPlannerPort",
+    "VLMObserverPort",
+    "LLMAtomizerPort",
+    "LLMNormalizerPort",
+    "FakeLLMPlanner",
+    "FakeVLMObserver",
+    "FakeLLMAtomizer",
+    "FakeLLMNormalizer",
     "FileKindRouter",
     "SafetyLimits",
     "SafetyPolicy",

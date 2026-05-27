@@ -140,7 +140,7 @@ manual review required
 
 ## 현재 범위
 
-현재 구현은 조사 루프 record contract만 제공합니다.
+현재 구현은 조사 루프 record contract와 model port contract를 제공합니다.
 
 현재 구현된 contract는 다음과 같습니다.
 
@@ -155,22 +155,29 @@ InvestigationTaskType
 InvestigationTaskStatus
 NeedLedgerStatus
 InvestigationEventType
+InvestigationPlan
+LLMPlannerPort
+VLMObserverPort
+LLMAtomizerPort
+LLMNormalizerPort
+FakeLLMPlanner
+FakeVLMObserver
+FakeLLMAtomizer
+FakeLLMNormalizer
 ```
 
 이 contract들은 state snapshot, agenda, completed task, clue ledger, event, budget을
-직렬화하기 위한 record입니다. 아직 task를 실행하거나 모델을 호출하지 않습니다.
+직렬화하기 위한 record와 테스트용 deterministic model port를 제공합니다.
+fake adapter는 외부 모델을 호출하지 않으며, runner orchestration도 수행하지 않습니다.
 
 다음은 아직 구현하지 않습니다.
 
 ```text
-LLM/VLM port Protocol
-fake model adapter
 LocalInvestigationRunner
 provider adapter
 LangGraph adapter
 ```
 
-LLM/VLM port Protocol은 아직 구현하지 않습니다.
 LocalInvestigationRunner는 아직 구현하지 않습니다.
 provider adapter와 LangGraph adapter도 아직 구현하지 않습니다.
 
