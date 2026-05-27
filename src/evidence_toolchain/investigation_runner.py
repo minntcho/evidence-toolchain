@@ -17,6 +17,7 @@ from evidence_toolchain.investigation_ports import (
     LLMAtomizerPort,
     LLMNormalizerPort,
     LLMPlannerPort,
+    ResolverPort,
     VLMObserverPort,
 )
 from evidence_toolchain.investigation_retrieval import CandidateUnitRetriever
@@ -33,6 +34,7 @@ class LocalInvestigationRunner:
     llm_atomizer: LLMAtomizerPort | None = None
     llm_normalizer: LLMNormalizerPort | None = None
     normalizer: NormalizationAdapter | None = None
+    resolver: ResolverPort | None = None
     unit_retriever: CandidateUnitRetriever | None = None
     artifact_bytes: dict[str, bytes] | None = None
     producer: str = "local_investigation_runner_v0"
@@ -159,7 +161,8 @@ class LocalInvestigationRunner:
                 produced_normalization_result_ids=tuple(result.target_id for result in results),
                 metadata={"producer": self._normalizer_producer()},
             )
-            return self._complete_task(state, task, result=result, normalizations=results)
+            next_state = self._complete_task(state, task, result=result, normalizations=results)
+            return self._refresh_draft_graph(next_state, source_task=task)
 
         if task.task_type == InvestigationTaskType.REQUEST_MANUAL_REVIEW:
             result = InvestigationTaskResult(
@@ -284,6 +287,36 @@ class LocalInvestigationRunner:
             target_need_id=source_task.target_need_id,
             metadata={"target_atom_ids": produced_atom_ids},
             reason="normalize_produced_atom_candidates",
+        )
+
+    def _refresh_draft_graph(
+        self,
+        state: InvestigationState,
+        *,
+        source_task: InvestigationTask,
+    ) -> InvestigationState:
+        if self.resolver is None:
+            return state
+        graph = self.resolver.resolve(
+            bundle_id=state.inventory.bundle_id,
+            claims=state.claims,
+            need_specs=state.need_specs,
+            atoms=state.atoms,
+            normalization_results=state.normalization_results,
+        )
+        next_state = replace(
+            state,
+            draft_graph=graph,
+            metadata={**state.metadata, "resolver": self.resolver.producer},
+        )
+        return self._record_event(
+            next_state,
+            InvestigationEventType.STATE_UPDATED,
+            {
+                "draft_graph_claim_ids": list(graph.claim_ids),
+                "producer": self.resolver.producer,
+                "source_task_id": source_task.task_id,
+            },
         )
 
     def _complete_task(

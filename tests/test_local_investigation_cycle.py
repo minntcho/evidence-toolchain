@@ -245,6 +245,89 @@ def test_local_investigation_runner_run_agenda_completes_retrieve_atomize_normal
     }
 
 
+def test_local_investigation_runner_run_agenda_refreshes_draft_graph_after_normalization():
+    from evidence_toolchain import (
+        CandidateUnitRetriever,
+        DeclaredClaim,
+        DeterministicNormalizer,
+        EvidenceAtomType,
+        EvidenceUnit,
+        HardGateResolver,
+        InvestigationTask,
+        InvestigationTaskType,
+        LocalInvestigationRunner,
+        Need,
+        NeedSpec,
+        NeedType,
+        ResolutionStatus,
+    )
+
+    unit = EvidenceUnit(
+        unit_id="unit_usage",
+        artifact_id="artifact_pdf_page_1",
+        unit_type="text_span",
+        producer="pdfplumber_extract",
+        text="electricity usage 6.4 MWh",
+    )
+    claim = DeclaredClaim(
+        x_id="x_001",
+        fields={"activity": "electricity", "amount": 6400, "unit": "kWh"},
+    )
+    usage_need = Need(
+        need_id=NeedType.USAGE_AMOUNT,
+        need_type=NeedType.USAGE_AMOUNT,
+        target_value=6400,
+        target_unit="kWh",
+        acceptable_units=("kWh", "MWh"),
+    )
+    retrieve_task = InvestigationTask(
+        task_id="gap_x_001_usage_amount_001",
+        task_type=InvestigationTaskType.RETRIEVE_CANDIDATE_UNITS,
+        target_claim_id="x_001",
+        target_need_id=NeedType.USAGE_AMOUNT,
+        allowed_atom_types=(
+            EvidenceAtomType.USAGE_AMOUNT,
+            EvidenceAtomType.CURRENCY_AMOUNT,
+        ),
+    )
+    normalizer = DeterministicNormalizer()
+    state = replace(
+        _state_with_inventory(unit),
+        claims=(claim,),
+        need_specs=(NeedSpec(x_id="x_001", needs=(usage_need,)),),
+        normalization_results=normalizer.normalize_claim_need(usage_need),
+        agenda=(retrieve_task,),
+    )
+    runner = LocalInvestigationRunner(
+        planner=_NoPlanner(),
+        unit_retriever=CandidateUnitRetriever(),
+        llm_atomizer=_UnitEchoAtomizer(),
+        normalizer=normalizer,
+        resolver=HardGateResolver(),
+    )
+
+    updated = runner.run_agenda(state, max_steps=3)
+    payload = updated.to_dict()
+
+    assert payload["draft_graph"]["metadata"]["producer"] == "hard_gate_resolver_v0"
+    assert payload["draft_graph"]["resolutions"][0]["status"] == (
+        ResolutionStatus.SUPPORTED_AFTER_UNIT_NORMALIZATION
+    )
+    assert payload["draft_graph"]["resolutions"][0]["supporting_atom_ids"] == [
+        "atom_from_cycle_001"
+    ]
+    assert payload["events"][-1] == {
+        "run_id": "run_cycle_001",
+        "sequence": 9,
+        "event_type": "state_updated",
+        "payload": {
+            "draft_graph_claim_ids": ["x_001"],
+            "producer": "hard_gate_resolver_v0",
+            "source_task_id": "gap_x_001_usage_amount_001_atomize_001_normalize_001",
+        },
+    }
+
+
 def test_local_investigation_runner_run_agenda_can_normalize_queued_atom_candidates():
     from evidence_toolchain import (
         DeterministicNormalizer,

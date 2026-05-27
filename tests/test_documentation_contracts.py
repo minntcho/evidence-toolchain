@@ -112,6 +112,7 @@ def test_architecture_doc_summarizes_current_pipeline_and_legacy_report_path():
     assert "LocalInvestigationRunner는 주입된 CandidateUnitRetriever로 retrieve_candidate_units를 실행할 수 있다." in doc
     assert "LocalInvestigationRunner는 주입된 NormalizationAdapter로 queued normalize_candidate를 실행할 수 있다." in doc
     assert "LocalInvestigationRunner는 atomize_unit_cluster가 만든 atom id를 normalize_candidate follow-up task로 이어 줄 수 있다." in doc
+    assert "LocalInvestigationRunner는 주입된 ResolverPort로 draft EvidenceResolutionGraph를 갱신할 수 있다." in doc
     assert "LocalInvestigationRunner retrieve_candidate_units 자동 실행" not in doc
     assert "기존 `EvidenceDocument -> EvidenceReport` 경로는 compatibility document workflow입니다." in doc
     assert "현재 구현된 것" in doc
@@ -165,6 +166,7 @@ def test_contract_docs_are_indexed_and_define_allowed_boundaries():
         "ResolutionGapPlanner",
         "EvidenceUnitRetrievalResult",
         "CandidateUnitRetriever",
+        "ResolverPort",
         "InvestigationState",
         "InvestigationTask",
         "InvestigationTaskResult",
@@ -265,6 +267,7 @@ def test_investigation_loop_boundary_doc_is_indexed_and_keeps_model_authority_bo
     assert "VLMObserverPort" in text
     assert "LLMAtomizerPort" in text
     assert "LLMNormalizerPort" in text
+    assert "ResolverPort" in text
     assert "FakeLLMPlanner" in text
     assert "FakeVLMObserver" in text
     assert "LocalInvestigationRunner" in text
@@ -287,6 +290,8 @@ def test_investigation_loop_boundary_doc_is_indexed_and_keeps_model_authority_bo
     assert "이 실행도 resolver edge나 claim status를 만들지 않습니다." in text
     assert "normalizer가 주입된 runner는 `atomize_unit_cluster`가 accepted atom id를 만들면" in text
     assert "이미 같은 atom id를 대상으로 하는 normalize task가 agenda에 있으면 중복으로 만들지 않습니다." in text
+    assert "ResolverPort가 주입된 runner는 `normalize_candidate` 완료 뒤 현재 state material로" in text
+    assert "주입된 port 결과를 `draft_graph`에 저장하며 `state_updated` event를 남깁니다." in text
     assert "model output atom은 core atom vocabulary와 task의 `allowed_atom_types`를 통과해야 합니다." in text
     assert "source_unit_ids 또는 source_artifact_ids provenance가 없으면 state에 append하지 않습니다." in text
     assert "Controller가 state와 budget을 들고 model/tool port를 호출한다." in text
@@ -294,7 +299,7 @@ def test_investigation_loop_boundary_doc_is_indexed_and_keeps_model_authority_bo
     assert "real provider adapter와 LangGraph adapter는 core contract 뒤에 붙인다." in text
     assert "현재 구현은 조사 루프 record contract와 model port contract를 제공합니다." in text
     assert "agenda가 있으면 첫 task 하나를 fake/model port로 실행해" in text
-    assert "이 runner는 provider SDK, LangGraph, resolver를 자동 호출하지 않습니다." in text
+    assert "이 runner는 provider SDK, LangGraph, resolver 구현을 직접 import하지 않습니다." in text
     assert "retrieve_candidate_units -> atomize_unit_cluster -> normalize_candidate" in text
     assert "fake adapter는 외부 모델을 호출하지 않습니다." in text
 

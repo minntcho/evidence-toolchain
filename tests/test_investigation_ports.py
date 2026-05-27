@@ -164,6 +164,32 @@ def test_fake_llm_atomizer_and_normalizer_ports_return_existing_contracts():
     assert normalizer.normalize(task, atoms=(atom,)) == (normalization,)
 
 
+def test_resolver_port_accepts_hard_gate_resolver_contract_without_runner_coupling():
+    from evidence_toolchain import (
+        EvidenceInventory,
+        HardGateResolver,
+        ResolverPort,
+    )
+
+    resolver = HardGateResolver()
+
+    assert isinstance(resolver, ResolverPort)
+    graph = resolver.resolve(
+        bundle_id=EvidenceInventory(
+            bundle_id="bundle_001",
+            attachments=(),
+            artifacts=(),
+            units=(),
+            route_decisions=(),
+        ).bundle_id,
+        claims=(),
+        need_specs=(),
+        atoms=(),
+        normalization_results=(),
+    )
+    assert graph.to_dict()["metadata"]["producer"] == "hard_gate_resolver_v0"
+
+
 def test_investigation_ports_do_not_import_real_provider_or_framework_packages():
     source = Path("src/evidence_toolchain/investigation_ports.py").read_text(encoding="utf-8")
 

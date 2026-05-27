@@ -123,6 +123,7 @@ LLMPlannerPort
 VLMObserverPort
 LLMAtomizerPort
 LLMNormalizerPort
+ResolverPort
 ```
 
 각 port는 직접 provider SDK를 core에 끌어오지 않습니다. real provider adapter와 LangGraph adapter는 core contract 뒤에 붙인다.
@@ -187,6 +188,7 @@ FakeLLMPlanner
 FakeVLMObserver
 FakeLLMAtomizer
 FakeLLMNormalizer
+ResolverPort
 EvidenceUnitRetrievalResult
 CandidateUnitRetriever
 LocalInvestigationRunner
@@ -197,7 +199,7 @@ LocalInvestigationRunner
 fake adapter는 외부 모델을 호출하지 않습니다.
 `LocalInvestigationRunner`는 agenda가 비어 있으면 planner port로 task를 계획하고,
 agenda가 있으면 첫 task 하나를 fake/model port로 실행해 `InvestigationState`를 갱신합니다.
-이 runner는 provider SDK, LangGraph, resolver를 자동 호출하지 않습니다.
+이 runner는 provider SDK, LangGraph, resolver 구현을 직접 import하지 않습니다.
 LocalInvestigationRunner는 `CandidateUnitRetriever`가 주입되면 `retrieve_candidate_units` task를 실행할 수 있습니다.
 이 실행은 기존 `EvidenceUnit` id만 선택하고, 선택된 unit이 있을 때 다음
 `atomize_unit_cluster` task를 agenda 앞에 추가합니다. 선택된 unit이 없으면 completed task는
@@ -208,6 +210,9 @@ task가 있으면 선택된 `EvidenceAtom` 후보를 `NormalizationResult`로 �
 normalizer가 주입된 runner는 `atomize_unit_cluster`가 accepted atom id를 만들면
 그 id를 대상으로 하는 follow-up `normalize_candidate` task를 agenda 앞에 추가할 수 있습니다.
 이미 같은 atom id를 대상으로 하는 normalize task가 agenda에 있으면 중복으로 만들지 않습니다.
+ResolverPort가 주입된 runner는 `normalize_candidate` 완료 뒤 현재 state material로
+draft `EvidenceResolutionGraph`를 갱신할 수 있습니다. 이때 runner는 resolver 구현을 직접
+import하지 않고, 주입된 port 결과를 `draft_graph`에 저장하며 `state_updated` event를 남깁니다.
 `run_agenda(max_steps=...)`는 이미 올라온 agenda만 deterministic하게 실행합니다.
 이 helper는 `retrieve_candidate_units -> atomize_unit_cluster -> normalize_candidate` 같은 queued task chain을
 로컬에서 검증하기 위한 것이며, run_agenda는 새 planner task를 요청하지 않습니다.

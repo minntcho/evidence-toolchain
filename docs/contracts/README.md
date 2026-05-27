@@ -35,6 +35,7 @@ ResolutionGapPlan
 ResolutionGapPlanner
 EvidenceUnitRetrievalResult
 CandidateUnitRetriever
+ResolverPort
 InvestigationState
 InvestigationTask
 InvestigationTaskResult
