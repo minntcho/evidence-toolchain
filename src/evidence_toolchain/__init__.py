@@ -13,6 +13,7 @@ from evidence_toolchain.file_routing import (
     SafetyPolicy,
     UnsupportedReader,
     ingest_attachment,
+    ingest_bundle,
 )
 from evidence_toolchain.ingestion import (
     AttachmentBundle,
@@ -22,6 +23,7 @@ from evidence_toolchain.ingestion import (
     RawAttachment,
     RouteDecision,
     SafetyDecision,
+    merge_evidence_inventories,
 )
 from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.observations import EvidenceObservation, observe_document
@@ -70,6 +72,8 @@ __all__ = [
     "ImageProfileReader",
     "SpreadsheetReader",
     "ingest_attachment",
+    "ingest_bundle",
+    "merge_evidence_inventories",
     "EvidenceObservation",
     "EvidencePreflight",
     "EvidenceReport",

@@ -142,6 +142,48 @@ class EvidenceInventory:
         return _to_json_compatible(self)
 
 
+def merge_evidence_inventories(
+    *,
+    bundle_id: str,
+    inventories: tuple[EvidenceInventory, ...],
+) -> EvidenceInventory:
+    """single-attachment inventories를 bundle-level inventory로 결합합니다."""
+
+    return EvidenceInventory(
+        bundle_id=bundle_id,
+        attachments=tuple(
+            attachment
+            for inventory in inventories
+            for attachment in inventory.attachments
+        ),
+        artifacts=tuple(
+            artifact
+            for inventory in inventories
+            for artifact in inventory.artifacts
+        ),
+        units=tuple(
+            unit
+            for inventory in inventories
+            for unit in inventory.units
+        ),
+        route_decisions=tuple(
+            route_decision
+            for inventory in inventories
+            for route_decision in inventory.route_decisions
+        ),
+        safety_decisions=tuple(
+            safety_decision
+            for inventory in inventories
+            for safety_decision in inventory.safety_decisions
+        ),
+        issues=tuple(
+            issue
+            for inventory in inventories
+            for issue in inventory.issues
+        ),
+    )
+
+
 def _to_json_compatible(value: Any) -> Any:
     if isinstance(value, Path):
         return str(value)
