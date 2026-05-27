@@ -97,6 +97,14 @@ DelimitedTableReader는 `.csv`, `.tsv` attachment를 file artifact, `table`
 EvidenceUnit, `table_cell` EvidenceUnit으로 낮춥니다.
 Header, row, column locator는 provenance로 남기지만, reader는 EvidenceAtom을 만들지 않는다.
 
+### `PdfProfileReader`
+
+PdfProfileReader는 PDF attachment를 file artifact, page-level `pdf_page` artifact,
+그리고 PDF profile metadata EvidenceUnit으로 낮춥니다.
+PDF profile은 text extraction이 아니다.
+Page count, encrypted 여부, rough text-layer marker 같은 cheap signal만 보존하며,
+text span, table, field extraction은 별도 reader/capability가 담당해야 합니다.
+
 ## 해야 하는 일
 
 - 물리 attachment를 공통 inventory로 정규화한다.

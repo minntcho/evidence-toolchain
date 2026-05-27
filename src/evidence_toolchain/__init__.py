@@ -27,7 +27,11 @@ from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.observations import EvidenceObservation, observe_document
 from evidence_toolchain.planner import EvidenceToolPlan, plan_document
 from evidence_toolchain.preflight import EvidencePreflight, preflight_document
-from evidence_toolchain.readers import DelimitedTableReader, PlainTextReader
+from evidence_toolchain.readers import (
+    DelimitedTableReader,
+    PdfProfileReader,
+    PlainTextReader,
+)
 from evidence_toolchain.reports import (
     EvidenceReport,
     emit_evidence_report,
@@ -60,6 +64,7 @@ __all__ = [
     "UnsupportedReader",
     "PlainTextReader",
     "DelimitedTableReader",
+    "PdfProfileReader",
     "ingest_attachment",
     "EvidenceObservation",
     "EvidencePreflight",

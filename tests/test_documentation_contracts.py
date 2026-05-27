@@ -201,6 +201,8 @@ def test_ingestion_normalization_doc_is_indexed_and_layered():
     assert "UnsupportedReader" in text
     assert "PlainTextReader" in text
     assert "DelimitedTableReader" in text
+    assert "PdfProfileReader" in text
+    assert "PDF profile은 text extraction이 아니다." in text
     assert "reader는 EvidenceAtom을 만들지 않는다." in text
     assert "해서는 안 되는 일" in text
 
