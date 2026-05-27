@@ -257,6 +257,10 @@ def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundar
     assert "DeterministicNormalizer" in text
     assert "정규화는 support/contradict 판단이 아니다." in text
     assert "DeterministicNormalizer는 resolver가 아니다." in text
+    assert "DeterministicNormalizer는 optional/reference adapter입니다." in text
+    assert "core flow는 normalizer를 자동 호출하지 않는다." in text
+    assert "LLM/VLM normalizer도 NormalizationAdapter contract를 따라야 합니다." in text
+    assert "site/supplier alias와 ambiguous period는 deterministic scope 밖입니다." in text
     assert "현재 구현된 것" in text
     assert "아직 구현하지 않은 것" in text
     assert "NeedSpec 없는 simple resolver로 가지 않는다." in text
