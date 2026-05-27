@@ -19,6 +19,7 @@ from evidence_toolchain.investigation_ports import (
     LLMPlannerPort,
     VLMObserverPort,
 )
+from evidence_toolchain.investigation_retrieval import CandidateUnitRetriever
 from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.normalization import NormalizationResult
 
@@ -31,6 +32,7 @@ class LocalInvestigationRunner:
     vlm_observer: VLMObserverPort | None = None
     llm_atomizer: LLMAtomizerPort | None = None
     llm_normalizer: LLMNormalizerPort | None = None
+    unit_retriever: CandidateUnitRetriever | None = None
     artifact_bytes: dict[str, bytes] | None = None
     producer: str = "local_investigation_runner_v0"
 
@@ -81,6 +83,9 @@ class LocalInvestigationRunner:
         state: InvestigationState,
         task: InvestigationTask,
     ) -> InvestigationState:
+        if task.task_type == InvestigationTaskType.RETRIEVE_CANDIDATE_UNITS:
+            return self._execute_retrieval_task(state, task)
+
         if task.task_type in {
             InvestigationTaskType.INSPECT_VISUAL_ARTIFACT,
             InvestigationTaskType.INSPECT_VISUAL_REGION,
@@ -140,6 +145,39 @@ class LocalInvestigationRunner:
         artifact_id = task.target_artifact_ids[0] if task.target_artifact_ids else None
         payload = (self.artifact_bytes or {}).get(artifact_id or "", b"")
         return self.vlm_observer.inspect(task, artifact_bytes=payload)
+
+    def _execute_retrieval_task(
+        self,
+        state: InvestigationState,
+        task: InvestigationTask,
+    ) -> InvestigationState:
+        if self.unit_retriever is None:
+            result = InvestigationTaskResult(
+                task_id=task.task_id,
+                status=InvestigationTaskStatus.FAILED,
+                metadata={"reason": "unit_retriever_missing"},
+            )
+            return self._complete_task(state, task, result=result)
+
+        retrieval = self.unit_retriever.retrieve(
+            task=task,
+            inventory=state.inventory,
+            need_spec=_need_spec_for_task(state, task),
+        )
+        next_task = retrieval.to_atomize_task(source_task=task)
+        next_state = self._complete_task(
+            state,
+            task,
+            result=retrieval.to_task_result(),
+        )
+        if next_task is None:
+            return next_state
+        next_state = replace(next_state, agenda=(next_task,) + next_state.agenda)
+        return self._record_event(
+            next_state,
+            InvestigationEventType.TASK_PLANNED,
+            {"task_ids": [next_task.task_id], "source_task_id": task.task_id},
+        )
 
     def _execute_atomizer_task(
         self,
@@ -262,6 +300,18 @@ def _select_atoms(
         return atoms
     allowed = set(target_atom_ids)
     return tuple(atom for atom in atoms if atom.atom_id in allowed)
+
+
+def _need_spec_for_task(
+    state: InvestigationState,
+    task: InvestigationTask,
+):
+    if task.target_claim_id is None:
+        return None
+    for need_spec in state.need_specs:
+        if need_spec.x_id == task.target_claim_id:
+            return need_spec
+    return None
 
 
 def _merge_inventory_units(

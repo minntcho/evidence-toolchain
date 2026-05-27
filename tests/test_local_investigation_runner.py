@@ -195,6 +195,155 @@ def test_local_investigation_runner_executes_atomizer_task_and_appends_atoms():
     assert "relation" not in payload["completed_tasks"][0]
 
 
+def test_local_investigation_runner_executes_retrieve_candidate_units_and_plans_atomize_task():
+    from evidence_toolchain import (
+        CandidateUnitRetriever,
+        EvidenceAtomType,
+        EvidenceUnit,
+        FakeLLMPlanner,
+        InvestigationPlan,
+        InvestigationTask,
+        InvestigationTaskStatus,
+        InvestigationTaskType,
+        LocalInvestigationRunner,
+        Need,
+        NeedSpec,
+        NeedType,
+    )
+
+    unit = EvidenceUnit(
+        unit_id="unit_usage",
+        artifact_id="artifact_pdf_page_1",
+        unit_type="text_span",
+        producer="pdfplumber_extract",
+        text="전력 사용량 6.4 MWh",
+    )
+    retrieve_task = InvestigationTask(
+        task_id="gap_x_001_usage_amount_001",
+        task_type=InvestigationTaskType.RETRIEVE_CANDIDATE_UNITS,
+        target_claim_id="x_001",
+        target_need_id=NeedType.USAGE_AMOUNT,
+        allowed_atom_types=(
+            EvidenceAtomType.USAGE_AMOUNT,
+            EvidenceAtomType.CURRENCY_AMOUNT,
+        ),
+    )
+    followup_task = InvestigationTask(
+        task_id="task_existing_manual_review",
+        task_type=InvestigationTaskType.REQUEST_MANUAL_REVIEW,
+    )
+    state = _state_with_inventory(unit)
+    state = replace(
+        state,
+        need_specs=(
+            NeedSpec(
+                x_id="x_001",
+                needs=(
+                    Need(
+                        need_id=NeedType.USAGE_AMOUNT,
+                        need_type=NeedType.USAGE_AMOUNT,
+                        target_value=6400,
+                        target_unit="kWh",
+                        acceptable_units=("kWh", "MWh"),
+                    ),
+                ),
+            ),
+        ),
+        agenda=(retrieve_task, followup_task),
+    )
+    runner = LocalInvestigationRunner(
+        planner=FakeLLMPlanner(plan=InvestigationPlan(tasks=())),
+        unit_retriever=CandidateUnitRetriever(),
+    )
+
+    updated = runner.run_once(state)
+    payload = updated.to_dict()
+
+    assert payload["completed_tasks"][0]["task_id"] == "gap_x_001_usage_amount_001"
+    assert payload["completed_tasks"][0]["status"] == InvestigationTaskStatus.COMPLETED
+    assert payload["completed_tasks"][0]["metadata"]["selected_unit_ids"] == ["unit_usage"]
+    assert payload["agenda"][0]["task_id"] == "gap_x_001_usage_amount_001_atomize_001"
+    assert payload["agenda"][0]["task_type"] == InvestigationTaskType.ATOMIZE_UNIT_CLUSTER
+    assert payload["agenda"][0]["target_unit_ids"] == ["unit_usage"]
+    assert payload["agenda"][0]["allowed_atom_types"] == [
+        EvidenceAtomType.USAGE_AMOUNT,
+        EvidenceAtomType.CURRENCY_AMOUNT,
+    ]
+    assert payload["agenda"][1]["task_id"] == "task_existing_manual_review"
+    assert payload["atoms"] == []
+    assert [event["event_type"] for event in payload["events"]] == [
+        "task_started",
+        "task_completed",
+        "task_planned",
+    ]
+    assert payload["events"][2]["payload"]["task_ids"] == [
+        "gap_x_001_usage_amount_001_atomize_001"
+    ]
+
+
+def test_local_investigation_runner_records_no_new_clue_without_atomize_task():
+    from evidence_toolchain import (
+        CandidateUnitRetriever,
+        EvidenceUnit,
+        FakeLLMPlanner,
+        InvestigationPlan,
+        InvestigationTask,
+        InvestigationTaskStatus,
+        InvestigationTaskType,
+        LocalInvestigationRunner,
+        Need,
+        NeedSpec,
+        NeedType,
+    )
+
+    unit = EvidenceUnit(
+        unit_id="unit_noise",
+        artifact_id="artifact_pdf_page_1",
+        unit_type="text_span",
+        producer="pdfplumber_extract",
+        text="고객센터 1234-5678",
+    )
+    retrieve_task = InvestigationTask(
+        task_id="gap_x_001_site_identity_001",
+        task_type=InvestigationTaskType.RETRIEVE_CANDIDATE_UNITS,
+        target_claim_id="x_001",
+        target_need_id=NeedType.SITE_IDENTITY,
+    )
+    state = _state_with_inventory(unit)
+    state = replace(
+        state,
+        need_specs=(
+            NeedSpec(
+                x_id="x_001",
+                needs=(
+                    Need(
+                        need_id=NeedType.SITE_IDENTITY,
+                        need_type=NeedType.SITE_IDENTITY,
+                        target_text="OCH-01",
+                    ),
+                ),
+            ),
+        ),
+        agenda=(retrieve_task,),
+    )
+    runner = LocalInvestigationRunner(
+        planner=FakeLLMPlanner(plan=InvestigationPlan(tasks=())),
+        unit_retriever=CandidateUnitRetriever(),
+    )
+
+    updated = runner.run_once(state)
+    payload = updated.to_dict()
+
+    assert payload["completed_tasks"][0]["status"] == InvestigationTaskStatus.NO_NEW_CLUE
+    assert payload["completed_tasks"][0]["metadata"]["selected_unit_ids"] == []
+    assert "next_task_type" not in payload["completed_tasks"][0]["metadata"]
+    assert payload["agenda"] == []
+    assert [event["event_type"] for event in payload["events"]] == [
+        "task_started",
+        "task_completed",
+    ]
+
+
 def test_local_investigation_runner_rejects_model_atoms_without_allowed_type_or_provenance():
     from evidence_toolchain import (
         AtomizerResult,
