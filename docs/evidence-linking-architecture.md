@@ -147,6 +147,12 @@ NormalizedIdentifier
 `DeterministicNormalizer`는 v0 pure-python baseline adapter입니다.
 명확한 `usage_amount`, `currency_amount`, `service_period`, `date` atom과
 `usage_amount`, `service_period` need를 `NormalizationResult`로 낮춥니다.
+DeterministicNormalizer는 optional/reference adapter입니다.
+core flow는 normalizer를 자동 호출하지 않는다.
+
+즉 ingestion, reader, atomizer, NeedSpec, ResolutionGraph contract는
+`DeterministicNormalizer`를 직접 실행하지 않습니다. NormalizationAdapter는 orchestrator,
+resolver, 또는 별도 tool adapter가 명시적으로 선택해서 호출해야 합니다.
 
 지원 범위는 작게 유지합니다.
 
@@ -171,6 +177,10 @@ currency_amount를 usage_amount로 승격하지 않는다.
 site alias가 정책상 충분한지 판단하지 않는다.
 period overlap이 X를 만족한다고 확정하지 않는다.
 ```
+
+site/supplier alias와 ambiguous period는 deterministic scope 밖입니다.
+이 영역은 catalog, policy, LLM/VLM 보조 normalizer, 또는 manual review와 결합될 수 있지만,
+그 경우에도 output은 `NormalizationAdapter` contract를 따라야 합니다.
 
 ### EvidenceResolutionGraph
 
@@ -254,6 +264,10 @@ NeedSpec에 맞는 follow-up extraction task를 제안한다.
 하지만 LLM/VLM 호출 결과가 곧 최종 support 판정은 아닙니다.
 LLM/VLM output도 `EvidenceUnit` 또는 `EvidenceAtom`으로 내려와 provenance, producer,
 confidence, issue를 보존해야 합니다. 그 다음 resolver가 같은 hard gate와 graph rule로 판단합니다.
+
+LLM/VLM normalizer도 NormalizationAdapter contract를 따라야 합니다.
+LLM/VLM이 모호한 날짜, alias, 단위 표현을 보정하더라도 결과는 `NormalizationResult`로
+기록되어야 하며, resolver edge를 직접 만들면 안 됩니다.
 
 ## Resolver 판단 방식
 
@@ -367,20 +381,21 @@ status, edge ids, supporting/rejected atom ids, missing need ids를 보존합니
 정규화 계약도 마찬가지입니다. 현재 구현은 `NormalizationResult`와 normalized value shape,
 `NormalizationAdapter` interface, 그리고 명확한 atom/need만 처리하는
 `DeterministicNormalizer` v0를 제공합니다. 이 adapter는 비교 재료만 만들고
-resolver edge를 생성하지 않습니다.
+resolver edge를 생성하지 않습니다. DeterministicNormalizer는 optional/reference adapter이며,
+기본 ingestion/atomization/resolution contract가 자동 호출하는 runtime step이 아닙니다.
 
 ## 아직 구현하지 않은 것
 
 다음은 architecture target이지만 아직 구현된 runtime contract가 아닙니다.
 
 ```text
-deterministic quantity/period normalizer
 hard gate / soft score resolver
 aggregation support solver
 derivation support solver
 support set selection
 site/supplier alias normalizer
 ambiguous period normalizer
+automatic normalization orchestration
 LLM/VLM atomizer adapter
 OCR/VLM interrogation loop
 archive recursive expansion
