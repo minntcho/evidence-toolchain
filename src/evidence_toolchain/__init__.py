@@ -12,6 +12,7 @@ from evidence_toolchain.file_routing import (
     SafetyLimits,
     SafetyPolicy,
     UnsupportedReader,
+    ingest_attachment,
 )
 from evidence_toolchain.ingestion import (
     AttachmentBundle,
@@ -26,6 +27,7 @@ from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.observations import EvidenceObservation, observe_document
 from evidence_toolchain.planner import EvidenceToolPlan, plan_document
 from evidence_toolchain.preflight import EvidencePreflight, preflight_document
+from evidence_toolchain.readers import DelimitedTableReader, PlainTextReader
 from evidence_toolchain.reports import (
     EvidenceReport,
     emit_evidence_report,
@@ -56,6 +58,9 @@ __all__ = [
     "SafetyLimits",
     "SafetyPolicy",
     "UnsupportedReader",
+    "PlainTextReader",
+    "DelimitedTableReader",
+    "ingest_attachment",
     "EvidenceObservation",
     "EvidencePreflight",
     "EvidenceReport",

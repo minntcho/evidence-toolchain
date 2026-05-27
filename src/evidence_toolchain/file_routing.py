@@ -10,6 +10,7 @@ from evidence_toolchain.ingestion import (
     SafetyDecision,
 )
 from evidence_toolchain.issues import EvidenceIssue
+from evidence_toolchain.readers import DelimitedTableReader, PlainTextReader
 
 
 MACRO_ENABLED_EXTENSIONS = {".docm", ".pptm", ".xlsm"}
@@ -155,6 +156,49 @@ class UnsupportedReader:
             safety_decisions=(safety_decision,),
             issues=issues,
         )
+
+
+def ingest_attachment(
+    bundle_id: str,
+    attachment: RawAttachment,
+    *,
+    router: FileKindRouter | None = None,
+    safety_policy: SafetyPolicy | None = None,
+) -> EvidenceInventory:
+    """single attachment를 안전 검사, 파일 라우팅, reader 실행으로 inventory화합니다."""
+
+    active_safety = safety_policy or SafetyPolicy()
+    active_router = router or FileKindRouter()
+    safety_decision = active_safety.evaluate(attachment)
+    route_decision = active_router.route(attachment)
+
+    if not safety_decision.allowed:
+        return UnsupportedReader().read(
+            bundle_id=bundle_id,
+            attachment=attachment,
+            route_decision=route_decision,
+            safety_decision=safety_decision,
+        )
+    if route_decision.route == "plain_text":
+        return PlainTextReader().read(
+            bundle_id=bundle_id,
+            attachment=attachment,
+            route_decision=route_decision,
+            safety_decision=safety_decision,
+        )
+    if route_decision.route == "delimited_table":
+        return DelimitedTableReader().read(
+            bundle_id=bundle_id,
+            attachment=attachment,
+            route_decision=route_decision,
+            safety_decision=safety_decision,
+        )
+    return UnsupportedReader().read(
+        bundle_id=bundle_id,
+        attachment=attachment,
+        route_decision=route_decision,
+        safety_decision=safety_decision,
+    )
 
 
 def _decision(

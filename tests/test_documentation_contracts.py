@@ -199,6 +199,9 @@ def test_ingestion_normalization_doc_is_indexed_and_layered():
     assert "SafetyPolicy는 reader보다 먼저 적용되어야 한다." in text
     assert "FileKindRouter는 route와 근거를 함께 남긴다." in text
     assert "UnsupportedReader" in text
+    assert "PlainTextReader" in text
+    assert "DelimitedTableReader" in text
+    assert "reader는 EvidenceAtom을 만들지 않는다." in text
     assert "해서는 안 되는 일" in text
 
 

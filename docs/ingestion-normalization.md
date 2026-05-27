@@ -85,6 +85,18 @@ bundle-level ingestion output입니다.
 `unsupported_media_type` issue로 보존합니다.
 UnsupportedReader는 semantic extraction을 수행하지 않으며 `EvidenceUnit`을 만들지 않습니다.
 
+### `PlainTextReader`
+
+PlainTextReader는 `.txt`, `.md`, `.log` 같은 plain text attachment를 file
+artifact와 line-level `text_span` EvidenceUnit으로 낮춥니다.
+Plain text는 원천성이 약할 수 있으므로 `plain_text_low_provenance` issue를 보존합니다.
+
+### `DelimitedTableReader`
+
+DelimitedTableReader는 `.csv`, `.tsv` attachment를 file artifact, `table`
+EvidenceUnit, `table_cell` EvidenceUnit으로 낮춥니다.
+Header, row, column locator는 provenance로 남기지만, reader는 EvidenceAtom을 만들지 않는다.
+
 ## 해야 하는 일
 
 - 물리 attachment를 공통 inventory로 정규화한다.
