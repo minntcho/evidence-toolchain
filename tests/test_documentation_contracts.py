@@ -227,6 +227,28 @@ def test_ingestion_normalization_doc_is_indexed_and_layered():
     assert "해서는 안 되는 일" in text
 
 
+def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundaries():
+    doc_path = Path("docs/evidence-linking-architecture.md")
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+    readme = Path("README.md").read_text(encoding="utf-8")
+
+    assert doc_path.exists()
+    assert "evidence-linking-architecture.md" in docs_index
+    assert "X-Y 증거 연결 아키텍처" in readme
+
+    text = doc_path.read_text(encoding="utf-8")
+    assert "증빙 처리는 문서 파싱이 아니라 X-Y evidence linking 문제입니다." in text
+    assert "File routing은 증빙 의미를 판단하지 않는다." in text
+    assert "Reader는 EvidenceUnit까지만 만든다." in text
+    assert "Atomizer는 EvidenceAtom 후보만 만든다." in text
+    assert "Resolver만 support/contradict를 판단한다." in text
+    assert "LLM/VLM은 authority가 아니라 adapter입니다." in text
+    assert "NeedSpec" in text
+    assert "EvidenceResolutionGraph" in text
+    assert "현재 구현된 것" in text
+    assert "아직 구현하지 않은 것" in text
+
+
 def test_supporting_architecture_docs_are_localized_and_indexed():
     docs_index = Path("docs/index.md").read_text(encoding="utf-8")
     readme = Path("README.md").read_text(encoding="utf-8")
