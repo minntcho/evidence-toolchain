@@ -251,6 +251,7 @@ Reader는 관찰하고, atomizer는 의미 후보를 만들고, resolver는 관�
 ## LLM/VLM 위치
 
 LLM/VLM은 authority가 아니라 adapter입니다.
+구체적인 조사 루프 경계는 [조사 루프 경계](investigation-loop-boundary.md)에 따릅니다.
 
 LLM이나 VLM은 다음 일을 도울 수 있습니다.
 
