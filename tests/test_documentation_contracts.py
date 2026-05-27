@@ -244,9 +244,12 @@ def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundar
     assert "Resolver만 support/contradict를 판단한다." in text
     assert "LLM/VLM은 authority가 아니라 adapter입니다." in text
     assert "NeedSpec" in text
+    assert "DeclaredClaim" in text
+    assert "derive_need_spec" in text
     assert "EvidenceResolutionGraph" in text
     assert "현재 구현된 것" in text
     assert "아직 구현하지 않은 것" in text
+    assert "NeedSpec 없는 simple resolver로 가지 않는다." in text
 
 
 def test_supporting_architecture_docs_are_localized_and_indexed():

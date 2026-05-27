@@ -232,9 +232,14 @@ NEEDS_REVIEW
 
 ## 현재 구현된 것
 
-현재 repository는 ingestion normalization과 atom candidate contract의 baseline을 갖고 있습니다.
+현재 repository는 ingestion normalization, atom candidate contract, 그리고
+X claim을 NeedSpec으로 낮추는 baseline contract를 갖고 있습니다.
 
 ```text
+DeclaredClaim
+Need
+NeedSpec
+NeedType
 AttachmentBundle
 RawAttachment
 RouteDecision
@@ -259,19 +264,24 @@ SpreadsheetReader
 merge_evidence_inventories
 ingest_bundle
 SimpleTextAtomizer
+derive_need_spec
 ```
 
 이 구현들은 아직 X-Y support graph를 만들지 않습니다. 특히 `SimpleTextAtomizer`는
 `usage_amount`, `currency_amount`, `service_period`, `date` 같은 명확한 text/table-cell
 후보만 올리는 deterministic baseline입니다.
 
+`DeclaredClaim`은 사용자가 기입했거나 Downstream system이 검사하려는 X claim을
+보존합니다. `derive_need_spec`은 `activity`, `amount`, `unit`, `period`, `site`,
+`supplier` 같은 공통 field를 `activity_identity`, `usage_amount`, `service_period`,
+`site_identity`, `supplier_identity` need로 낮춥니다. 이 함수는 검색 요구사항을 만들 뿐
+EvidenceAtom retrieval이나 support 판정은 수행하지 않습니다.
+
 ## 아직 구현하지 않은 것
 
 다음은 architecture target이지만 아직 구현된 runtime contract가 아닙니다.
 
 ```text
-NeedSpec
-X claim model
 EvidenceResolutionGraph
 hard gate / soft score resolver
 aggregation support solver
