@@ -67,6 +67,7 @@ from evidence_toolchain.reports import (
 from evidence_toolchain.resolution import (
     ClaimResolution,
     EvidenceResolutionGraph,
+    HardGateResolver,
     ResolutionEdge,
     ResolutionRelation,
     ResolutionStatus,
@@ -98,6 +99,7 @@ __all__ = [
     "ResolutionEdge",
     "ClaimResolution",
     "EvidenceResolutionGraph",
+    "HardGateResolver",
     "NormalizationAdapter",
     "NormalizationResult",
     "NormalizationTargetKind",

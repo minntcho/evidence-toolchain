@@ -333,6 +333,7 @@ ResolutionStatus
 ResolutionEdge
 ClaimResolution
 EvidenceResolutionGraph
+HardGateResolver
 AttachmentBundle
 RawAttachment
 RouteDecision
@@ -376,8 +377,10 @@ status, edge ids, supporting/rejected atom ids, missing need ids를 보존합니
 `EvidenceResolutionGraph`는 bundle 안의 claim ids, atom ids, edge, resolution을 묶습니다.
 `ResolutionRelation`과 `ResolutionStatus`는 v0 string vocabulary입니다.
 
-이 계약들은 solver가 아닙니다. 현재 구현은 edge와 resolution을 계산하지 않고,
-계산된 결과를 담을 수 있는 public-ish shape만 제공합니다.
+`HardGateResolver`는 명시적으로 제공된 `NeedSpec`, `EvidenceAtom`, `NormalizationResult`를
+소비해 `usage_amount`, `service_period`, currency reject, missing required need에 대한
+v0 hard-gate edge와 claim resolution을 만듭니다. 이 resolver는 normalizer를 자동 호출하지
+않으며, aggregation, derivation, soft score, alias 판단은 수행하지 않습니다.
 
 정규화 계약도 마찬가지입니다. 현재 구현은 `NormalizationResult`와 normalized value shape,
 `NormalizationAdapter` interface, 그리고 명확한 atom/need만 처리하는
@@ -390,7 +393,7 @@ resolver edge를 생성하지 않습니다. DeterministicNormalizer는 optional/
 다음은 architecture target이지만 아직 구현된 runtime contract가 아닙니다.
 
 ```text
-hard gate / soft score resolver
+soft score resolver
 aggregation support solver
 derivation support solver
 support set selection
@@ -410,7 +413,7 @@ manual review queue output
 EvidenceInventory -> NeedSpec 없는 simple resolver로 가지 않는다.
 먼저 X model과 NeedSpec을 정의한다.
 그 다음 atom retrieval과 ResolutionGraph edge contract를 연다.
-그 다음 hard gate / soft score resolver, support set solving, review queue를 붙인다.
+그 다음 hard gate resolver를 작게 붙이고, soft score, support set solving, review queue를 붙인다.
 ```
 
 ## 설계 원칙
