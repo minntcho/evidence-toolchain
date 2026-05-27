@@ -28,6 +28,7 @@ NeedSpec은 declared X claim을 탐색 가능한 need로 낮춘다.
 NormalizationResult는 비교 가능한 재료를 만든다.
 Resolver만 support/contradict를 판단한다.
 Resolution gap bridge는 resolver gap을 NeedLedgerEntry와 InvestigationTask로 번역한다.
+CandidateUnitRetriever는 retrieve_candidate_units task를 EvidenceInventory 안의 EvidenceUnit 후보 선택으로 접지한다.
 Investigation loop는 부족한 단서를 채우기 위한 task를 오케스트레이션한다.
 LLM/VLM은 resolver authority가 아니다.
 ```
@@ -123,6 +124,11 @@ LocalInvestigationRunner
 `NeedLedgerEntry`와 `InvestigationTask` agenda로 번역합니다. 이 bridge는 resolver를 다시
 실행하지 않고, runner나 provider도 호출하지 않습니다.
 
+`CandidateUnitRetriever`는 `retrieve_candidate_units` task와 `EvidenceInventory`,
+`NeedSpec`을 받아 관련 있어 보이는 기존 `EvidenceUnit` id만 고릅니다. 이 결과는 다음
+`atomize_unit_cluster` task의 `target_unit_ids`로 넘길 수 있습니다. 이 단계는
+EvidenceAtom, NormalizationResult, ResolutionEdge를 만들지 않습니다.
+
 `LocalInvestigationRunner`는 fake/model port를 호출할 수 있지만, provider SDK나 LangGraph를
 core에 묶지 않습니다. 모델 output atom은 core vocabulary, `allowed_atom_types`,
 provenance guardrail을 통과해야 state에 들어갑니다.
@@ -173,6 +179,8 @@ EvidenceResolutionGraph
 HardGateResolver
 ResolutionGapPlan
 ResolutionGapPlanner
+EvidenceUnitRetrievalResult
+CandidateUnitRetriever
 InvestigationState
 InvestigationTask
 InvestigationTaskResult
@@ -197,6 +205,7 @@ derivation support solver
 support set selection
 site/supplier alias normalizer
 ambiguous period normalizer
+LocalInvestigationRunner retrieve_candidate_units 자동 실행
 real LLM/VLM provider adapter
 LangGraph adapter
 OCR/VLM interrogation loop

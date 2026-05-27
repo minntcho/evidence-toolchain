@@ -73,6 +73,12 @@ observation에서 읽은 사용량 후보는 EvidenceAtom으로 보존합니다.
 이 bridge는 resolver가 만든 missing/contradict 상태를 조사 agenda로 낮출 뿐이며,
 resolver를 다시 실행하거나 model/provider를 호출하지 않습니다.
 
+`CandidateUnitRetriever`는 retrieve_candidate_units task를 EvidenceUnit 후보 선택으로 접지합니다.
+입력은 `InvestigationTask`, `EvidenceInventory`, `NeedSpec`이고, 출력은
+`EvidenceUnitRetrievalResult`입니다. 이 결과는 선택된 기존 unit id와 matched clue,
+rejected unit id를 보존하고, 다음 `atomize_unit_cluster` task의 `target_unit_ids`를 만들 수
+있습니다. retrieval은 EvidenceAtom이나 ResolutionEdge를 만들지 않습니다.
+
 model output atom은 core atom vocabulary와 task의 `allowed_atom_types`를 통과해야 합니다.
 또한 source_unit_ids 또는 source_artifact_ids provenance가 없으면 state에 append하지 않습니다.
 이 gate는 모델 출력으로 판정하는 권한이 아니라, 출처와 vocabulary가 확인된 후보만 다음 resolver 입력으로
@@ -181,6 +187,8 @@ FakeLLMPlanner
 FakeVLMObserver
 FakeLLMAtomizer
 FakeLLMNormalizer
+EvidenceUnitRetrievalResult
+CandidateUnitRetriever
 LocalInvestigationRunner
 ```
 
@@ -190,6 +198,8 @@ fake adapter는 외부 모델을 호출하지 않습니다.
 `LocalInvestigationRunner`는 agenda가 비어 있으면 planner port로 task를 계획하고,
 agenda가 있으면 첫 task 하나를 fake/model port로 실행해 `InvestigationState`를 갱신합니다.
 이 runner는 provider SDK, LangGraph, resolver, deterministic normalizer를 자동 호출하지 않습니다.
+현재 runner는 `retrieve_candidate_units`를 자동 실행하지 않습니다. 이 연결은 다음 slice에서
+`CandidateUnitRetriever`를 runner에 주입하는 방식으로 열 수 있습니다.
 
 다음은 아직 구현하지 않습니다.
 
