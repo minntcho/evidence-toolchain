@@ -9,6 +9,13 @@ from evidence_toolchain.capabilities import (
     ManualReviewCapabilityRunner,
     StaticCapabilityRunner,
 )
+from evidence_toolchain.claims import (
+    DeclaredClaim,
+    Need,
+    NeedSpec,
+    NeedType,
+    derive_need_spec,
+)
 from evidence_toolchain.file_routing import (
     FileKindRouter,
     SafetyLimits,
@@ -61,6 +68,11 @@ __all__ = [
     "EvidenceAtom",
     "EvidenceAtomType",
     "AtomizerResult",
+    "DeclaredClaim",
+    "Need",
+    "NeedSpec",
+    "NeedType",
+    "derive_need_spec",
     "SimpleTextAtomizer",
     "atomize_inventory",
     "AttachmentBundle",
