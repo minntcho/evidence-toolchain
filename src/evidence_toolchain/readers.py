@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import importlib
 import posixpath
 import re
 import struct
@@ -17,6 +18,9 @@ from evidence_toolchain.ingestion import (
     SafetyDecision,
 )
 from evidence_toolchain.issues import EvidenceIssue
+
+
+_AUTO_PDFPLUMBER = object()
 
 
 class PlainTextReader:
@@ -207,6 +211,167 @@ class PdfProfileReader:
             route_decisions=(route_decision,),
             safety_decisions=(safety_decision,),
             issues=issues,
+        )
+
+
+class PdfPlumberExtractReader:
+    """pdfplumber로 born-digital PDF text/word EvidenceUnit을 추출합니다."""
+
+    producer = "pdfplumber_extract"
+
+    def __init__(self, pdfplumber_module: object = _AUTO_PDFPLUMBER) -> None:
+        self._pdfplumber_module = pdfplumber_module
+
+    def read(
+        self,
+        *,
+        bundle_id: str,
+        attachment: RawAttachment,
+        route_decision: RouteDecision,
+        safety_decision: SafetyDecision,
+    ) -> EvidenceInventory:
+        pdfplumber = self._load_pdfplumber()
+        if pdfplumber is None:
+            issue = EvidenceIssue(
+                code="pdfplumber_dependency_missing",
+                severity="blocking",
+                message="pdfplumber is required for PDF text and word extraction.",
+            )
+            artifact = _file_artifact(
+                attachment,
+                media_type="application/pdf",
+                reader=self.producer,
+                issues=(issue,),
+            )
+            return EvidenceInventory(
+                bundle_id=bundle_id,
+                attachments=(attachment,),
+                artifacts=(artifact,),
+                units=(),
+                route_decisions=(route_decision,),
+                safety_decisions=(safety_decision,),
+                issues=(issue,),
+            )
+
+        try:
+            return self._read_with_pdfplumber(
+                pdfplumber=pdfplumber,
+                bundle_id=bundle_id,
+                attachment=attachment,
+                route_decision=route_decision,
+                safety_decision=safety_decision,
+            )
+        except Exception:
+            issue = EvidenceIssue(
+                code="pdf_text_extract_failed",
+                severity="warning",
+                message="PDF text extraction failed; preserve the file for later OCR or review.",
+            )
+            artifact = _file_artifact(
+                attachment,
+                media_type="application/pdf",
+                reader=self.producer,
+                issues=(issue,),
+            )
+            return EvidenceInventory(
+                bundle_id=bundle_id,
+                attachments=(attachment,),
+                artifacts=(artifact,),
+                units=(),
+                route_decisions=(route_decision,),
+                safety_decisions=(safety_decision,),
+                issues=(issue,),
+            )
+
+    def _load_pdfplumber(self) -> object | None:
+        if self._pdfplumber_module is not _AUTO_PDFPLUMBER:
+            return self._pdfplumber_module
+        try:
+            return importlib.import_module("pdfplumber")
+        except ImportError:
+            return None
+
+    def _read_with_pdfplumber(
+        self,
+        *,
+        pdfplumber: object,
+        bundle_id: str,
+        attachment: RawAttachment,
+        route_decision: RouteDecision,
+        safety_decision: SafetyDecision,
+    ) -> EvidenceInventory:
+        artifacts: list[EvidenceArtifact] = []
+        units: list[EvidenceUnit] = []
+
+        with pdfplumber.open(str(attachment.path)) as pdf:
+            file_artifact = _file_artifact(
+                attachment,
+                media_type="application/pdf",
+                reader=self.producer,
+                metadata={"page_count": len(pdf.pages)},
+            )
+            artifacts.append(file_artifact)
+
+            for page_index, page in enumerate(pdf.pages, start=1):
+                page_artifact = EvidenceArtifact(
+                    artifact_id=f"artifact_{attachment.attachment_id}_page_{page_index}",
+                    artifact_type="pdf_page",
+                    parent_id=file_artifact.artifact_id,
+                    media_type="application/pdf-page",
+                    source_locator={
+                        "file_name": attachment.original_filename,
+                        "page": page_index,
+                    },
+                    metadata={
+                        "height": page.height,
+                        "reader": self.producer,
+                        "width": page.width,
+                    },
+                )
+                artifacts.append(page_artifact)
+
+                page_text = (page.extract_text() or "").strip()
+                if page_text:
+                    units.append(
+                        EvidenceUnit(
+                            unit_id=f"unit_{attachment.attachment_id}_page_{page_index}_text",
+                            artifact_id=page_artifact.artifact_id,
+                            unit_type="text_span",
+                            producer=self.producer,
+                            text=page_text,
+                            locator={"page": page_index},
+                            metadata={"line_count": len(page_text.splitlines())},
+                        )
+                    )
+
+                for word_index, word in enumerate(page.extract_words(), start=1):
+                    units.append(
+                        EvidenceUnit(
+                            unit_id=(
+                                f"unit_{attachment.attachment_id}_page_{page_index}_word_{word_index}"
+                            ),
+                            artifact_id=page_artifact.artifact_id,
+                            unit_type="word_box",
+                            producer=self.producer,
+                            text=str(word.get("text", "")),
+                            bbox=(
+                                float(word["x0"]),
+                                float(word["top"]),
+                                float(word["x1"]),
+                                float(word["bottom"]),
+                            ),
+                            locator={"page": page_index, "word_index": word_index},
+                            metadata={"source_keys": _pdfplumber_word_source_keys(word)},
+                        )
+                    )
+
+        return EvidenceInventory(
+            bundle_id=bundle_id,
+            attachments=(attachment,),
+            artifacts=tuple(artifacts),
+            units=tuple(units),
+            route_decisions=(route_decision,),
+            safety_decisions=(safety_decision,),
         )
 
 
@@ -456,6 +621,20 @@ def _count_pdf_pages(data: bytes) -> int:
 
 def _has_pdf_text_markers(data: bytes) -> bool:
     return b"BT" in data and (b"Tj" in data or b"TJ" in data)
+
+
+def _pdfplumber_word_source_keys(word: dict[str, object]) -> list[str]:
+    preferred_keys = [
+        "bottom",
+        "direction",
+        "doctop",
+        "text",
+        "top",
+        "upright",
+        "x0",
+        "x1",
+    ]
+    return [key for key in preferred_keys if key in word]
 
 
 def _profile_image(data: bytes) -> dict[str, object]:

@@ -32,6 +32,7 @@ from evidence_toolchain.preflight import EvidencePreflight, preflight_document
 from evidence_toolchain.readers import (
     DelimitedTableReader,
     ImageProfileReader,
+    PdfPlumberExtractReader,
     PdfProfileReader,
     PlainTextReader,
     SpreadsheetReader,
@@ -69,6 +70,7 @@ __all__ = [
     "PlainTextReader",
     "DelimitedTableReader",
     "PdfProfileReader",
+    "PdfPlumberExtractReader",
     "ImageProfileReader",
     "SpreadsheetReader",
     "ingest_attachment",
