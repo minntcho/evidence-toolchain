@@ -24,6 +24,7 @@ def test_document_heading_and_navigation_labels_are_korean():
         "docs/evidence-routing.md",
         "docs/orchestration-boundary.md",
         "docs/synthetic-evidence.md",
+        "docs/ingestion-normalization.md",
         "docs/contracts/evidence-check.md",
         "docs/testing/generated-case-bundle-contract.md",
         "docs/testing/failure-mode-test-strategy.md",
@@ -180,6 +181,23 @@ def test_orchestration_boundary_doc_is_indexed_and_framework_neutral():
     assert "CheckpointStore" in text
     assert "해서는 안 되는 일" in text
     assert "Downstream" in text
+
+
+def test_ingestion_normalization_doc_is_indexed_and_layered():
+    doc_path = Path("docs/ingestion-normalization.md")
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+    readme = Path("README.md").read_text(encoding="utf-8")
+
+    assert doc_path.exists()
+    assert "ingestion-normalization.md" in docs_index
+    assert "첨부 정규화" in readme
+
+    text = doc_path.read_text(encoding="utf-8")
+    assert "파일 라우팅은 물리 첨부를 공통 inventory로 낮춘다." in text
+    assert "EvidenceUnit은 semantic matching target이 아니다." in text
+    assert "EvidenceAtom" in text
+    assert "SafetyPolicy는 reader보다 먼저 적용되어야 한다." in text
+    assert "해서는 안 되는 일" in text
 
 
 def test_supporting_architecture_docs_are_localized_and_indexed():

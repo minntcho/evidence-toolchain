@@ -13,9 +13,10 @@
 5. [Capability 레지스트리](capability-registry.md)
 6. [실패 모드](failure-modes.md)
 7. [Adapter 경계](adapter-boundary.md)
-8. [합성 증거 테스트킷](synthetic-evidence.md)
-9. [계약 문서](contracts/README.md)
-10. [테스트 전략](testing/README.md)
+8. [첨부 정규화](ingestion-normalization.md)
+9. [합성 증거 테스트킷](synthetic-evidence.md)
+10. [계약 문서](contracts/README.md)
+11. [테스트 전략](testing/README.md)
 
 ## 프로젝트 입장
 
