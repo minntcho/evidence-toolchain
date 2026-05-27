@@ -33,6 +33,8 @@ NormalizationResult
 EvidenceResolutionGraph
 ResolutionGapPlan
 ResolutionGapPlanner
+EvidenceUnitRetrievalResult
+CandidateUnitRetriever
 InvestigationState
 InvestigationTask
 InvestigationTaskResult

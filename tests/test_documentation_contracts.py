@@ -106,7 +106,9 @@ def test_architecture_doc_summarizes_current_pipeline_and_legacy_report_path():
     assert "EvidenceInventory -> EvidenceAtom -> NeedSpec -> NormalizationResult -> EvidenceResolutionGraph" in doc
     assert "InvestigationState / InvestigationTask / InvestigationTaskResult" in doc
     assert "ResolutionGapPlanner" in doc
+    assert "CandidateUnitRetriever" in doc
     assert "resolver gap을 NeedLedgerEntry와 InvestigationTask로 번역한다." in doc
+    assert "retrieve_candidate_units task를 EvidenceInventory 안의 EvidenceUnit 후보 선택으로 접지한다." in doc
     assert "기존 `EvidenceDocument -> EvidenceReport` 경로는 compatibility document workflow입니다." in doc
     assert "현재 구현된 것" in doc
     assert "아직 구현하지 않은 것" in doc
@@ -157,6 +159,8 @@ def test_contract_docs_are_indexed_and_define_allowed_boundaries():
         "EvidenceResolutionGraph",
         "ResolutionGapPlan",
         "ResolutionGapPlanner",
+        "EvidenceUnitRetrievalResult",
+        "CandidateUnitRetriever",
         "InvestigationState",
         "InvestigationTask",
         "InvestigationTaskResult",
@@ -262,6 +266,8 @@ def test_investigation_loop_boundary_doc_is_indexed_and_keeps_model_authority_bo
     assert "LocalInvestigationRunner" in text
     assert "ResolutionGapPlanner" in text
     assert "EvidenceResolutionGraph gap을 NeedLedgerEntry와 InvestigationTask로 번역합니다." in text
+    assert "`CandidateUnitRetriever`는 retrieve_candidate_units task를 EvidenceUnit 후보 선택으로 접지합니다." in text
+    assert "retrieval은 EvidenceAtom이나 ResolutionEdge를 만들지 않습니다." in text
     assert "missing/conflict/ambiguous clue" in text
     assert "model output은 EvidenceUnit, EvidenceAtom, NormalizationResult 중 하나로 내려와야 한다." in text
     assert 'unit_type="visual_observation"' in text
