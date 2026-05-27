@@ -4,11 +4,18 @@ from pathlib import Path
 
 def test_investigation_task_result_and_budget_are_serializable_contracts():
     from evidence_toolchain import (
+        EvidenceAtom,
+        EvidenceAtomType,
+        EvidenceUnit,
         InvestigationBudget,
         InvestigationTask,
         InvestigationTaskResult,
         InvestigationTaskStatus,
         InvestigationTaskType,
+        NormalizationResult,
+        NormalizationTargetKind,
+        NormalizedQuantity,
+        NormalizedType,
     )
     from evidence_toolchain.issues import EvidenceIssue
 
@@ -26,9 +33,40 @@ def test_investigation_task_result_and_budget_are_serializable_contracts():
     result = InvestigationTaskResult(
         task_id="task_001",
         status=InvestigationTaskStatus.COMPLETED,
+        produced_units=(
+            EvidenceUnit(
+                unit_id="unit_visual_001",
+                artifact_id="artifact_img_001",
+                unit_type="visual_observation",
+                producer="fake_vlm_observer",
+                text="이미지 중앙 표에 '사용량 6.4 MWh'가 보임",
+                locator={"bbox": [120, 410, 380, 455]},
+            ),
+        ),
+        produced_atoms=(
+            EvidenceAtom(
+                atom_id="atom_usage_001",
+                atom_type=EvidenceAtomType.USAGE_AMOUNT,
+                source_unit_ids=("unit_visual_001",),
+                source_artifact_ids=("artifact_img_001",),
+                producer="fake_vlm_observer",
+                text="사용량 6.4 MWh",
+                value=6.4,
+                unit="MWh",
+            ),
+        ),
+        produced_normalization_results=(
+            NormalizationResult(
+                target_id="atom_usage_001",
+                target_kind=NormalizationTargetKind.ATOM,
+                normalized_type=NormalizedType.QUANTITY,
+                normalized=NormalizedQuantity(value=6400, unit="kWh", dimension="energy"),
+                producer="fake_vlm_observer",
+            ),
+        ),
         produced_unit_ids=("unit_visual_001",),
         produced_atom_ids=("atom_usage_001",),
-        produced_normalization_result_ids=("norm_usage_001",),
+        produced_normalization_result_ids=("atom_usage_001",),
         issues=(
             EvidenceIssue(
                 code="visual_observation_requires_review",
@@ -59,6 +97,9 @@ def test_investigation_task_result_and_budget_are_serializable_contracts():
         "metadata": {"planned_by": "fixture"},
     }
     assert result.to_dict()["status"] == "completed"
+    assert result.to_dict()["produced_units"][0]["unit_type"] == "visual_observation"
+    assert result.to_dict()["produced_atoms"][0]["atom_type"] == "usage_amount"
+    assert result.to_dict()["produced_normalization_results"][0]["normalized_type"] == "quantity"
     assert result.to_dict()["produced_atom_ids"] == ["atom_usage_001"]
     assert result.to_dict()["issues"][0]["code"] == "visual_observation_requires_review"
     assert budget.to_dict()["max_model_calls"] == 5

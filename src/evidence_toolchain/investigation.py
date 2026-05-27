@@ -6,7 +6,7 @@ from typing import Any
 
 from evidence_toolchain.atoms import EvidenceAtom
 from evidence_toolchain.claims import DeclaredClaim, NeedSpec
-from evidence_toolchain.ingestion import EvidenceInventory
+from evidence_toolchain.ingestion import EvidenceInventory, EvidenceUnit
 from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.normalization import NormalizationResult
 from evidence_toolchain.resolution import EvidenceResolutionGraph
@@ -151,6 +151,9 @@ class InvestigationTaskResult:
 
     task_id: str
     status: str
+    produced_units: tuple[EvidenceUnit, ...] = ()
+    produced_atoms: tuple[EvidenceAtom, ...] = ()
+    produced_normalization_results: tuple[NormalizationResult, ...] = ()
     produced_unit_ids: tuple[str, ...] = ()
     produced_atom_ids: tuple[str, ...] = ()
     produced_normalization_result_ids: tuple[str, ...] = ()

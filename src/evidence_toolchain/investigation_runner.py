@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 
 from evidence_toolchain.atoms import EvidenceAtom
-from evidence_toolchain.ingestion import EvidenceUnit
+from evidence_toolchain.ingestion import EvidenceInventory, EvidenceUnit
 from evidence_toolchain.investigation import (
     InvestigationEvent,
     InvestigationEventType,
@@ -175,12 +175,16 @@ class LocalInvestigationRunner:
         atoms: tuple[EvidenceAtom, ...] = (),
         normalizations: tuple[NormalizationResult, ...] = (),
     ) -> InvestigationState:
+        merged_atoms = result.produced_atoms + atoms
+        merged_normalizations = result.produced_normalization_results + normalizations
+        result = _with_produced_ids(result, atoms=merged_atoms, normalizations=merged_normalizations)
         next_state = replace(
             state,
             agenda=state.agenda[1:],
             completed_tasks=state.completed_tasks + (result,),
-            atoms=state.atoms + atoms,
-            normalization_results=state.normalization_results + normalizations,
+            inventory=_merge_inventory_units(state.inventory, result.produced_units),
+            atoms=state.atoms + merged_atoms,
+            normalization_results=state.normalization_results + merged_normalizations,
             metadata={**state.metadata, "runner": self.producer},
         )
         return self._record_event(
@@ -236,3 +240,33 @@ def _select_atoms(
         return atoms
     allowed = set(target_atom_ids)
     return tuple(atom for atom in atoms if atom.atom_id in allowed)
+
+
+def _merge_inventory_units(
+    inventory: EvidenceInventory,
+    units: tuple[EvidenceUnit, ...],
+) -> EvidenceInventory:
+    if not units:
+        return inventory
+    return replace(inventory, units=inventory.units + units)
+
+
+def _with_produced_ids(
+    result: InvestigationTaskResult,
+    *,
+    atoms: tuple[EvidenceAtom, ...],
+    normalizations: tuple[NormalizationResult, ...],
+) -> InvestigationTaskResult:
+    produced_unit_ids = result.produced_unit_ids or tuple(
+        unit.unit_id for unit in result.produced_units
+    )
+    produced_atom_ids = result.produced_atom_ids or tuple(atom.atom_id for atom in atoms)
+    produced_normalization_result_ids = result.produced_normalization_result_ids or tuple(
+        item.target_id for item in normalizations
+    )
+    return replace(
+        result,
+        produced_unit_ids=produced_unit_ids,
+        produced_atom_ids=produced_atom_ids,
+        produced_normalization_result_ids=produced_normalization_result_ids,
+    )
