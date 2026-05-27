@@ -2,7 +2,20 @@
 
 이 디렉터리는 `evidence-toolchain`의 첫 번째 architecture contract를 정의합니다.
 
-이 저장소는 독립적인 evidence document processing engine입니다. 이 저장소의 일은 business claim을 직접 validate하는 것이 아닙니다. 이 저장소의 일은 지저분한 evidence document를 다른 시스템이 검사할 수 있는 structured, provenance-carrying report로 바꾸는 것입니다.
+이 저장소는 독립적인 evidence document processing engine입니다. 이 저장소의 일은 business claim을 직접 validate하는 것이 아닙니다. 이 저장소의 일은 지저분한 evidence document를 다른 시스템이 검사할 수 있는 structured, provenance-carrying evidence state로 바꾸는 것입니다.
+
+현재 구현 기준으로는 다음 계층이 함께 열려 있습니다.
+
+```text
+AttachmentBundle
+-> EvidenceInventory
+-> EvidenceAtom
+-> NeedSpec
+-> NormalizationResult
+-> EvidenceResolutionGraph
+```
+
+최종 support/contradict 판단은 resolver 경계에 남깁니다.
 
 ## 먼저 읽기
 
@@ -35,7 +48,7 @@
 
 따라서 core package는 downstream-specific authority term을 피해야 합니다. core package는 observation, plan, extraction result, field, provenance, confidence, issue 같은 중립적인 evidence output을 내야 합니다.
 
-## Core 흐름
+## Compatibility 흐름
 
 ```text
 EvidenceDocument
