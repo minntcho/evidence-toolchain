@@ -23,6 +23,7 @@ def test_document_heading_and_navigation_labels_are_korean():
         "docs/adapter-boundary.md",
         "docs/evidence-routing.md",
         "docs/orchestration-boundary.md",
+        "docs/investigation-loop-boundary.md",
         "docs/synthetic-evidence.md",
         "docs/ingestion-normalization.md",
         "docs/contracts/evidence-check.md",
@@ -42,6 +43,7 @@ def test_document_heading_and_navigation_labels_are_korean():
         "입력",
         "출력",
         "런타임 port",
+        "조사 루프 경계",
         "Evidence 파일",
         "Expected 파일",
         "Manifest 계약",
@@ -183,6 +185,28 @@ def test_orchestration_boundary_doc_is_indexed_and_framework_neutral():
     assert "Downstream" in text
 
 
+def test_investigation_loop_boundary_doc_is_indexed_and_keeps_model_authority_bounded():
+    doc_path = Path("docs/investigation-loop-boundary.md")
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+    readme = Path("README.md").read_text(encoding="utf-8")
+
+    assert doc_path.exists()
+    assert "investigation-loop-boundary.md" in docs_index
+    assert "조사 루프 경계" in readme
+
+    text = doc_path.read_text(encoding="utf-8")
+    assert "LLM/VLM은 판사가 아니라 조사관입니다." in text
+    assert "LLM/VLM은 ingestion reader에 들어가지 않는다." in text
+    assert "LLM/VLM은 resolver authority가 아니다." in text
+    assert "EvidenceInvestigationLoop" in text
+    assert "missing/conflict/ambiguous clue" in text
+    assert "model output은 EvidenceUnit, EvidenceAtom, NormalizationResult 중 하나로 내려와야 한다." in text
+    assert "Controller가 state와 budget을 들고 model/tool port를 호출한다." in text
+    assert "모델끼리 직접 서로 호출하지 않는다." in text
+    assert "real provider adapter와 LangGraph adapter는 core contract 뒤에 붙인다." in text
+    assert "이 문서는 runtime runner contract가 아니다." in text
+
+
 def test_ingestion_normalization_doc_is_indexed_and_layered():
     doc_path = Path("docs/ingestion-normalization.md")
     docs_index = Path("docs/index.md").read_text(encoding="utf-8")
@@ -243,6 +267,7 @@ def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundar
     assert "Atomizer는 EvidenceAtom 후보만 만든다." in text
     assert "Resolver만 support/contradict를 판단한다." in text
     assert "LLM/VLM은 authority가 아니라 adapter입니다." in text
+    assert "조사 루프 경계" in text
     assert "NeedSpec" in text
     assert "DeclaredClaim" in text
     assert "derive_need_spec" in text
