@@ -210,14 +210,16 @@ def test_investigation_loop_boundary_doc_is_indexed_and_keeps_model_authority_bo
     assert "LLMNormalizerPort" in text
     assert "FakeLLMPlanner" in text
     assert "FakeVLMObserver" in text
+    assert "LocalInvestigationRunner" in text
     assert "missing/conflict/ambiguous clue" in text
     assert "model output은 EvidenceUnit, EvidenceAtom, NormalizationResult 중 하나로 내려와야 한다." in text
     assert "Controller가 state와 budget을 들고 model/tool port를 호출한다." in text
     assert "모델끼리 직접 서로 호출하지 않는다." in text
     assert "real provider adapter와 LangGraph adapter는 core contract 뒤에 붙인다." in text
     assert "현재 구현은 조사 루프 record contract와 model port contract를 제공합니다." in text
-    assert "LocalInvestigationRunner는 아직 구현하지 않습니다." in text
-    assert "fake adapter는 외부 모델을 호출하지 않으며" in text
+    assert "agenda가 있으면 첫 task 하나를 fake/model port로 실행해" in text
+    assert "이 runner는 provider SDK, LangGraph, resolver, deterministic normalizer를 자동 호출하지 않습니다." in text
+    assert "fake adapter는 외부 모델을 호출하지 않습니다." in text
 
 
 def test_ingestion_normalization_doc_is_indexed_and_layered():

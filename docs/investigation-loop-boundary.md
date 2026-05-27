@@ -164,21 +164,23 @@ FakeLLMPlanner
 FakeVLMObserver
 FakeLLMAtomizer
 FakeLLMNormalizer
+LocalInvestigationRunner
 ```
 
 이 contract들은 state snapshot, agenda, completed task, clue ledger, event, budget을
 직렬화하기 위한 record와 테스트용 deterministic model port를 제공합니다.
-fake adapter는 외부 모델을 호출하지 않으며, runner orchestration도 수행하지 않습니다.
+fake adapter는 외부 모델을 호출하지 않습니다.
+`LocalInvestigationRunner`는 agenda가 비어 있으면 planner port로 task를 계획하고,
+agenda가 있으면 첫 task 하나를 fake/model port로 실행해 `InvestigationState`를 갱신합니다.
+이 runner는 provider SDK, LangGraph, resolver, deterministic normalizer를 자동 호출하지 않습니다.
 
 다음은 아직 구현하지 않습니다.
 
 ```text
-LocalInvestigationRunner
 provider adapter
 LangGraph adapter
 ```
 
-LocalInvestigationRunner는 아직 구현하지 않습니다.
 provider adapter와 LangGraph adapter도 아직 구현하지 않습니다.
 
 이 문서는 앞으로 구현될 investigation 계층의 권한 경계만 고정합니다.
