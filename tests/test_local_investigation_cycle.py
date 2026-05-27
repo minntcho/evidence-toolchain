@@ -161,6 +161,90 @@ def test_local_investigation_runner_run_agenda_completes_retrieve_to_atomize_cyc
     ]
 
 
+def test_local_investigation_runner_run_agenda_completes_retrieve_atomize_normalize_cycle():
+    from evidence_toolchain import (
+        CandidateUnitRetriever,
+        DeterministicNormalizer,
+        EvidenceAtomType,
+        EvidenceUnit,
+        InvestigationTask,
+        InvestigationTaskType,
+        LocalInvestigationRunner,
+        Need,
+        NeedSpec,
+        NeedType,
+        NormalizedType,
+    )
+
+    unit = EvidenceUnit(
+        unit_id="unit_usage",
+        artifact_id="artifact_pdf_page_1",
+        unit_type="text_span",
+        producer="pdfplumber_extract",
+        text="electricity usage 6.4 MWh",
+    )
+    retrieve_task = InvestigationTask(
+        task_id="gap_x_001_usage_amount_001",
+        task_type=InvestigationTaskType.RETRIEVE_CANDIDATE_UNITS,
+        target_claim_id="x_001",
+        target_need_id=NeedType.USAGE_AMOUNT,
+        allowed_atom_types=(
+            EvidenceAtomType.USAGE_AMOUNT,
+            EvidenceAtomType.CURRENCY_AMOUNT,
+        ),
+    )
+    state = replace(
+        _state_with_inventory(unit),
+        need_specs=(
+            NeedSpec(
+                x_id="x_001",
+                needs=(
+                    Need(
+                        need_id=NeedType.USAGE_AMOUNT,
+                        need_type=NeedType.USAGE_AMOUNT,
+                        target_value=6400,
+                        target_unit="kWh",
+                        acceptable_units=("kWh", "MWh"),
+                    ),
+                ),
+            ),
+        ),
+        agenda=(retrieve_task,),
+    )
+    runner = LocalInvestigationRunner(
+        planner=_NoPlanner(),
+        unit_retriever=CandidateUnitRetriever(),
+        llm_atomizer=_UnitEchoAtomizer(),
+        normalizer=DeterministicNormalizer(),
+    )
+
+    updated = runner.run_agenda(state, max_steps=3)
+    payload = updated.to_dict()
+
+    assert payload["agenda"] == []
+    assert [task["task_id"] for task in payload["completed_tasks"]] == [
+        "gap_x_001_usage_amount_001",
+        "gap_x_001_usage_amount_001_atomize_001",
+        "gap_x_001_usage_amount_001_atomize_001_normalize_001",
+    ]
+    assert payload["completed_tasks"][2]["metadata"] == {
+        "producer": "deterministic_normalizer_v0"
+    }
+    assert payload["normalization_results"][0]["target_id"] == "atom_from_cycle_001"
+    assert payload["normalization_results"][0]["normalized_type"] == NormalizedType.QUANTITY
+    assert payload["normalization_results"][0]["normalized"]["value"] == 6400
+    assert payload["normalization_results"][0]["normalized"]["unit"] == "kWh"
+    assert payload["events"][5] == {
+        "run_id": "run_cycle_001",
+        "sequence": 6,
+        "event_type": "task_planned",
+        "payload": {
+            "task_ids": ["gap_x_001_usage_amount_001_atomize_001_normalize_001"],
+            "source_task_id": "gap_x_001_usage_amount_001_atomize_001",
+        },
+    }
+
+
 def test_local_investigation_runner_run_agenda_can_normalize_queued_atom_candidates():
     from evidence_toolchain import (
         DeterministicNormalizer,

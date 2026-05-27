@@ -205,8 +205,11 @@ LocalInvestigationRunner는 `CandidateUnitRetriever`가 주입되면 `retrieve_c
 LocalInvestigationRunner는 `NormalizationAdapter`가 주입되고 agenda에 `normalize_candidate`
 task가 있으면 선택된 `EvidenceAtom` 후보를 `NormalizationResult`로 낮출 수 있습니다.
 이 실행도 resolver edge나 claim status를 만들지 않습니다.
+normalizer가 주입된 runner는 `atomize_unit_cluster`가 accepted atom id를 만들면
+그 id를 대상으로 하는 follow-up `normalize_candidate` task를 agenda 앞에 추가할 수 있습니다.
+이미 같은 atom id를 대상으로 하는 normalize task가 agenda에 있으면 중복으로 만들지 않습니다.
 `run_agenda(max_steps=...)`는 이미 올라온 agenda만 deterministic하게 실행합니다.
-이 helper는 `retrieve_candidate_units -> atomize_unit_cluster` 같은 queued task chain을
+이 helper는 `retrieve_candidate_units -> atomize_unit_cluster -> normalize_candidate` 같은 queued task chain을
 로컬에서 검증하기 위한 것이며, run_agenda는 새 planner task를 요청하지 않습니다.
 같은 task fingerprint가 다시 나타나면 `repeated_task_detected`로 멈춥니다.
 runner가 agenda, completed task, unit, atom, normalization, event를 전혀 바꾸지 못하면 `no_progress_detected`로 멈춥니다.
