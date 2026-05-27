@@ -29,6 +29,7 @@ NormalizationResult는 비교 가능한 재료를 만든다.
 Resolver만 support/contradict를 판단한다.
 Resolution gap bridge는 resolver gap을 NeedLedgerEntry와 InvestigationTask로 번역한다.
 CandidateUnitRetriever는 retrieve_candidate_units task를 EvidenceInventory 안의 EvidenceUnit 후보 선택으로 접지한다.
+LocalInvestigationRunner는 주입된 CandidateUnitRetriever로 retrieve_candidate_units를 실행할 수 있다.
 Investigation loop는 부족한 단서를 채우기 위한 task를 오케스트레이션한다.
 LLM/VLM은 resolver authority가 아니다.
 ```
@@ -132,6 +133,8 @@ EvidenceAtom, NormalizationResult, ResolutionEdge를 만들지 않습니다.
 `LocalInvestigationRunner`는 fake/model port를 호출할 수 있지만, provider SDK나 LangGraph를
 core에 묶지 않습니다. 모델 output atom은 core vocabulary, `allowed_atom_types`,
 provenance guardrail을 통과해야 state에 들어갑니다.
+또한 `CandidateUnitRetriever`가 주입되면 `retrieve_candidate_units` task를 실행하고,
+선택된 unit이 있을 때 follow-up `atomize_unit_cluster` task를 agenda 앞에 추가합니다.
 
 ## Compatibility document workflow
 
@@ -205,7 +208,6 @@ derivation support solver
 support set selection
 site/supplier alias normalizer
 ambiguous period normalizer
-LocalInvestigationRunner retrieve_candidate_units 자동 실행
 real LLM/VLM provider adapter
 LangGraph adapter
 OCR/VLM interrogation loop

@@ -198,8 +198,10 @@ fake adapter는 외부 모델을 호출하지 않습니다.
 `LocalInvestigationRunner`는 agenda가 비어 있으면 planner port로 task를 계획하고,
 agenda가 있으면 첫 task 하나를 fake/model port로 실행해 `InvestigationState`를 갱신합니다.
 이 runner는 provider SDK, LangGraph, resolver, deterministic normalizer를 자동 호출하지 않습니다.
-현재 runner는 `retrieve_candidate_units`를 자동 실행하지 않습니다. 이 연결은 다음 slice에서
-`CandidateUnitRetriever`를 runner에 주입하는 방식으로 열 수 있습니다.
+LocalInvestigationRunner는 `CandidateUnitRetriever`가 주입되면 `retrieve_candidate_units` task를 실행할 수 있습니다.
+이 실행은 기존 `EvidenceUnit` id만 선택하고, 선택된 unit이 있을 때 다음
+`atomize_unit_cluster` task를 agenda 앞에 추가합니다. 선택된 unit이 없으면 completed task는
+`no_new_clue`로 남고 follow-up task를 만들지 않습니다.
 
 다음은 아직 구현하지 않습니다.
 
