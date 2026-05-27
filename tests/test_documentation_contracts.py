@@ -197,6 +197,8 @@ def test_ingestion_normalization_doc_is_indexed_and_layered():
     assert "EvidenceUnit은 semantic matching target이 아니다." in text
     assert "EvidenceAtom" in text
     assert "SafetyPolicy는 reader보다 먼저 적용되어야 한다." in text
+    assert "FileKindRouter는 route와 근거를 함께 남긴다." in text
+    assert "UnsupportedReader" in text
     assert "해서는 안 되는 일" in text
 
 
