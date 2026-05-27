@@ -8,15 +8,16 @@
 
 1. [목적과 경계](purpose-and-boundaries.md)
 2. [아키텍처](architecture.md)
-3. [증거 라우팅](evidence-routing.md)
-4. [오케스트레이션 경계](orchestration-boundary.md)
-5. [Capability 레지스트리](capability-registry.md)
-6. [실패 모드](failure-modes.md)
-7. [Adapter 경계](adapter-boundary.md)
-8. [첨부 정규화](ingestion-normalization.md)
-9. [합성 증거 테스트킷](synthetic-evidence.md)
-10. [계약 문서](contracts/README.md)
-11. [테스트 전략](testing/README.md)
+3. [X-Y 증거 연결 아키텍처](evidence-linking-architecture.md)
+4. [증거 라우팅](evidence-routing.md)
+5. [오케스트레이션 경계](orchestration-boundary.md)
+6. [Capability 레지스트리](capability-registry.md)
+7. [실패 모드](failure-modes.md)
+8. [Adapter 경계](adapter-boundary.md)
+9. [첨부 정규화](ingestion-normalization.md)
+10. [합성 증거 테스트킷](synthetic-evidence.md)
+11. [계약 문서](contracts/README.md)
+12. [테스트 전략](testing/README.md)
 
 ## 프로젝트 입장
 

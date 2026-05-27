@@ -39,6 +39,7 @@ Downstream system은 추출된 증거가 declared input을 지지하는지, 반�
 - [문서 색인](docs/index.md)
 - [목적과 경계](docs/purpose-and-boundaries.md)
 - [아키텍처](docs/architecture.md)
+- [X-Y 증거 연결 아키텍처](docs/evidence-linking-architecture.md)
 - [증거 라우팅](docs/evidence-routing.md)
 - [오케스트레이션 경계](docs/orchestration-boundary.md)
 - [Capability 레지스트리](docs/capability-registry.md)
