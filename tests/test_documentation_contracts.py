@@ -251,9 +251,14 @@ def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundar
     assert "ClaimResolution" in text
     assert "ResolutionRelation" in text
     assert "ResolutionStatus" in text
+    assert "NormalizationResult" in text
+    assert "NormalizedQuantity" in text
+    assert "NormalizationAdapter" in text
+    assert "정규화는 support/contradict 판단이 아니다." in text
     assert "현재 구현된 것" in text
     assert "아직 구현하지 않은 것" in text
     assert "NeedSpec 없는 simple resolver로 가지 않는다." in text
+    assert "deterministic quantity/period normalizer" in text
     assert "hard gate / soft score resolver" in text
 
 

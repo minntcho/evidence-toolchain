@@ -38,6 +38,18 @@ from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.observations import EvidenceObservation, observe_document
 from evidence_toolchain.planner import EvidenceToolPlan, plan_document
 from evidence_toolchain.preflight import EvidencePreflight, preflight_document
+from evidence_toolchain.normalization import (
+    NormalizationAdapter,
+    NormalizationResult,
+    NormalizationTargetKind,
+    NormalizedCurrency,
+    NormalizedDate,
+    NormalizedIdentifier,
+    NormalizedPeriod,
+    NormalizedQuantity,
+    NormalizedType,
+    NormalizedValue,
+)
 from evidence_toolchain.readers import (
     DelimitedTableReader,
     ImageProfileReader,
@@ -85,6 +97,16 @@ __all__ = [
     "ResolutionEdge",
     "ClaimResolution",
     "EvidenceResolutionGraph",
+    "NormalizationAdapter",
+    "NormalizationResult",
+    "NormalizationTargetKind",
+    "NormalizedCurrency",
+    "NormalizedDate",
+    "NormalizedIdentifier",
+    "NormalizedPeriod",
+    "NormalizedQuantity",
+    "NormalizedType",
+    "NormalizedValue",
     "SimpleTextAtomizer",
     "atomize_inventory",
     "AttachmentBundle",
