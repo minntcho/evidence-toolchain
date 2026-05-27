@@ -32,6 +32,7 @@ from evidence_toolchain.readers import (
     ImageProfileReader,
     PdfProfileReader,
     PlainTextReader,
+    SpreadsheetReader,
 )
 from evidence_toolchain.reports import (
     EvidenceReport,
@@ -67,6 +68,7 @@ __all__ = [
     "DelimitedTableReader",
     "PdfProfileReader",
     "ImageProfileReader",
+    "SpreadsheetReader",
     "ingest_attachment",
     "EvidenceObservation",
     "EvidencePreflight",

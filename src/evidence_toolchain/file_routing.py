@@ -15,6 +15,7 @@ from evidence_toolchain.readers import (
     ImageProfileReader,
     PdfProfileReader,
     PlainTextReader,
+    SpreadsheetReader,
 )
 
 
@@ -207,6 +208,13 @@ def ingest_attachment(
         )
     if route_decision.route == "image":
         return ImageProfileReader().read(
+            bundle_id=bundle_id,
+            attachment=attachment,
+            route_decision=route_decision,
+            safety_decision=safety_decision,
+        )
+    if route_decision.route == "spreadsheet":
+        return SpreadsheetReader().read(
             bundle_id=bundle_id,
             attachment=attachment,
             route_decision=route_decision,
