@@ -114,6 +114,18 @@ Width, height, format, mode, EXIF orientation placeholder, aspect ratio 같은
 cheap signal만 보존하며, text OCR, meter reading, receipt extraction, handwriting
 해석은 별도 capability가 담당해야 합니다.
 
+### `SpreadsheetReader`
+
+SpreadsheetReader는 `.xlsx` workbook을 workbook artifact, sheet artifact,
+`table` EvidenceUnit, `table_cell` EvidenceUnit으로 낮춥니다.
+Sheet name, used range, row/column/cell locator, cached cell value, formula 존재 여부,
+hidden sheet signal을 provenance로 남기지만, reader는 EvidenceAtom을 만들지 않는다.
+
+Spreadsheet reader는 수식을 실행하지 않는다.
+Formula cell은 cached value와 formula text를 raw observation으로 보존할 뿐이며,
+usage_amount, service_period, site_identity 같은 semantic 후보 생성은 후속
+atomizer 계층이 담당해야 합니다.
+
 ## 해야 하는 일
 
 - 물리 attachment를 공통 inventory로 정규화한다.

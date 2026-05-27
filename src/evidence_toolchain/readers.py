@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import csv
+import posixpath
 import re
 import struct
+import xml.etree.ElementTree as ET
 from pathlib import Path
+from zipfile import BadZipFile, ZipFile
 
 from evidence_toolchain.ingestion import (
     EvidenceArtifact,
@@ -260,6 +263,149 @@ class ImageProfileReader:
         )
 
 
+class SpreadsheetReader:
+    """XLSX workbook을 workbook/sheet/table/cell EvidenceUnit으로 낮춥니다."""
+
+    producer = "spreadsheet_reader"
+
+    def read(
+        self,
+        *,
+        bundle_id: str,
+        attachment: RawAttachment,
+        route_decision: RouteDecision,
+        safety_decision: SafetyDecision,
+    ) -> EvidenceInventory:
+        try:
+            workbook = _read_xlsx_workbook(attachment.path)
+        except (BadZipFile, KeyError, ET.ParseError, OSError):
+            issue = EvidenceIssue(
+                code="spreadsheet_profile_unreadable",
+                severity="warning",
+                message="Spreadsheet workbook structure could not be read by the basic XLSX reader.",
+            )
+            artifact = _file_artifact(
+                attachment,
+                media_type=_spreadsheet_media_type(attachment),
+                reader=self.producer,
+                issues=(issue,),
+            )
+            return EvidenceInventory(
+                bundle_id=bundle_id,
+                attachments=(attachment,),
+                artifacts=(artifact,),
+                units=(),
+                route_decisions=(route_decision,),
+                safety_decisions=(safety_decision,),
+                issues=(issue,),
+            )
+
+        workbook_artifact = EvidenceArtifact(
+            artifact_id=f"artifact_{attachment.attachment_id}_workbook",
+            artifact_type="spreadsheet_workbook",
+            parent_id=attachment.attachment_id,
+            media_type=_spreadsheet_media_type(attachment),
+            source_locator={"file_name": attachment.original_filename},
+            metadata={
+                "reader": self.producer,
+                "sheet_count": len(workbook["sheets"]),
+            },
+        )
+        artifacts: list[EvidenceArtifact] = [workbook_artifact]
+        units: list[EvidenceUnit] = []
+        issues: list[EvidenceIssue] = []
+
+        for sheet_index, sheet in enumerate(workbook["sheets"], start=1):
+            used_range = str(sheet["used_range"] or "")
+            hidden_state = sheet["state"]
+            sheet_issues: tuple[EvidenceIssue, ...] = ()
+            if hidden_state is not None:
+                hidden_issue = EvidenceIssue(
+                    code="hidden_spreadsheet_sheet",
+                    severity="warning",
+                    message="Spreadsheet contains a hidden sheet that was inventoried but should be reviewed.",
+                )
+                sheet_issues = (hidden_issue,)
+                issues.append(hidden_issue)
+
+            sheet_artifact = EvidenceArtifact(
+                artifact_id=f"artifact_{attachment.attachment_id}_sheet_{sheet_index}",
+                artifact_type="spreadsheet_sheet",
+                parent_id=workbook_artifact.artifact_id,
+                media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml",
+                source_locator={
+                    "file_name": attachment.original_filename,
+                    "sheet": sheet["name"],
+                    "sheet_index": sheet_index,
+                },
+                metadata={
+                    "hidden_state": hidden_state,
+                    "reader": self.producer,
+                    "used_range": used_range,
+                },
+                issues=sheet_issues,
+            )
+            artifacts.append(sheet_artifact)
+
+            cells = sheet["cells"]
+            row_count, column_count = _range_shape(used_range, cells)
+            units.append(
+                EvidenceUnit(
+                    unit_id=f"unit_{attachment.attachment_id}_sheet_{sheet_index}_table_1",
+                    artifact_id=sheet_artifact.artifact_id,
+                    unit_type="table",
+                    producer=self.producer,
+                    metadata={
+                        "column_count": column_count,
+                        "formula_cell_count": sum(
+                            1 for cell in cells if cell["formula"] is not None
+                        ),
+                        "headers": _headers_from_cells(cells),
+                        "non_empty_cell_count": len(cells),
+                        "row_count": row_count,
+                        "sheet": sheet["name"],
+                        "used_range": used_range,
+                    },
+                )
+            )
+
+            for cell in cells:
+                units.append(
+                    EvidenceUnit(
+                        unit_id=(
+                            f"unit_{attachment.attachment_id}_sheet_{sheet_index}_{cell['cell_ref']}"
+                        ),
+                        artifact_id=sheet_artifact.artifact_id,
+                        unit_type="table_cell",
+                        producer=self.producer,
+                        text=cell["text"],
+                        value=cell["text"],
+                        locator={
+                            "cell": cell["cell_ref"],
+                            "column": cell["column"],
+                            "column_letter": cell["column_letter"],
+                            "row": cell["row"],
+                            "sheet": sheet["name"],
+                        },
+                        metadata={
+                            "data_type": cell["data_type"],
+                            "formula": cell["formula"],
+                            "has_formula": cell["formula"] is not None,
+                        },
+                    )
+                )
+
+        return EvidenceInventory(
+            bundle_id=bundle_id,
+            attachments=(attachment,),
+            artifacts=tuple(artifacts),
+            units=tuple(units),
+            route_decisions=(route_decision,),
+            safety_decisions=(safety_decision,),
+            issues=tuple(issues),
+        )
+
+
 def _file_artifact(
     attachment: RawAttachment,
     *,
@@ -414,3 +560,177 @@ def _image_media_type(attachment: RawAttachment, profile: dict[str, object]) -> 
     if image_format == "JPEG":
         return "image/jpeg"
     return "application/octet-stream"
+
+
+def _spreadsheet_media_type(attachment: RawAttachment) -> str:
+    if attachment.declared_media_type is not None:
+        return attachment.declared_media_type
+    if attachment.detected_media_type is not None:
+        return attachment.detected_media_type
+    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+def _read_xlsx_workbook(path: Path) -> dict[str, object]:
+    with ZipFile(path) as archive:
+        workbook_root = ET.fromstring(archive.read("xl/workbook.xml"))
+        rels_root = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
+        shared_strings = _read_xlsx_shared_strings(archive)
+        relationship_targets = _relationship_targets(rels_root)
+
+        sheets = []
+        for sheet_element in workbook_root.findall(f".//{{{_SS_NS}}}sheet"):
+            rel_id = sheet_element.attrib[f"{{{_R_NS}}}id"]
+            target = relationship_targets[rel_id]
+            sheet_root = ET.fromstring(archive.read(target))
+            sheets.append(
+                {
+                    "cells": _read_xlsx_cells(sheet_root, shared_strings),
+                    "name": sheet_element.attrib["name"],
+                    "state": sheet_element.attrib.get("state"),
+                    "used_range": _worksheet_dimension(sheet_root),
+                }
+            )
+
+    return {"sheets": sheets}
+
+
+def _read_xlsx_shared_strings(archive: ZipFile) -> list[str]:
+    try:
+        root = ET.fromstring(archive.read("xl/sharedStrings.xml"))
+    except KeyError:
+        return []
+
+    values = []
+    for item in root.findall(f"{{{_SS_NS}}}si"):
+        values.append("".join(text.text or "" for text in item.findall(f".//{{{_SS_NS}}}t")))
+    return values
+
+
+def _relationship_targets(root: ET.Element) -> dict[str, str]:
+    targets = {}
+    for relationship in root.findall(f"{{{_REL_NS}}}Relationship"):
+        target = relationship.attrib["Target"]
+        if target.startswith("/"):
+            normalized = target.lstrip("/")
+        else:
+            normalized = posixpath.normpath(posixpath.join("xl", target))
+        targets[relationship.attrib["Id"]] = normalized
+    return targets
+
+
+def _worksheet_dimension(root: ET.Element) -> str | None:
+    dimension = root.find(f"{{{_SS_NS}}}dimension")
+    if dimension is None:
+        return None
+    return dimension.attrib.get("ref")
+
+
+def _read_xlsx_cells(root: ET.Element, shared_strings: list[str]) -> list[dict[str, object]]:
+    cells = []
+    for row in root.findall(f".//{{{_SS_NS}}}row"):
+        for cell in row.findall(f"{{{_SS_NS}}}c"):
+            cell_ref = cell.attrib["r"]
+            column_letter, row_number = _split_cell_ref(cell_ref)
+            data_type = cell.attrib.get("t")
+            formula = _element_text(cell.find(f"{{{_SS_NS}}}f"))
+            raw_value = _cell_raw_value(cell)
+            text = _resolve_cell_text(data_type, raw_value, shared_strings)
+            if text is None:
+                continue
+            cells.append(
+                {
+                    "cell_ref": cell_ref,
+                    "column": _column_index(column_letter),
+                    "column_letter": column_letter,
+                    "data_type": data_type,
+                    "formula": formula,
+                    "row": row_number,
+                    "text": text,
+                }
+            )
+    return cells
+
+
+def _cell_raw_value(cell: ET.Element) -> str | None:
+    value = cell.find(f"{{{_SS_NS}}}v")
+    if value is not None:
+        return _element_text(value)
+    inline_text = cell.find(f"{{{_SS_NS}}}is")
+    if inline_text is not None:
+        return "".join(
+            text.text or ""
+            for text in inline_text.findall(f".//{{{_SS_NS}}}t")
+        )
+    return None
+
+
+def _resolve_cell_text(
+    data_type: str | None,
+    raw_value: str | None,
+    shared_strings: list[str],
+) -> str | None:
+    if raw_value is None:
+        return None
+    if data_type == "s":
+        try:
+            return shared_strings[int(raw_value)]
+        except (IndexError, ValueError):
+            return raw_value
+    if data_type == "inlineStr":
+        return raw_value
+    return raw_value
+
+
+def _element_text(element: ET.Element | None) -> str | None:
+    if element is None or element.text is None:
+        return None
+    return element.text
+
+
+def _headers_from_cells(cells: list[dict[str, object]]) -> list[str]:
+    if not cells:
+        return []
+    first_row = min(int(cell["row"]) for cell in cells)
+    return [
+        str(cell["text"])
+        for cell in sorted(
+            (cell for cell in cells if cell["row"] == first_row),
+            key=lambda item: int(item["column"]),
+        )
+    ]
+
+
+def _range_shape(used_range: str, cells: list[dict[str, object]]) -> tuple[int, int]:
+    if ":" in used_range:
+        start, end = used_range.split(":", 1)
+        start_column, start_row = _split_cell_ref(start)
+        end_column, end_row = _split_cell_ref(end)
+        return (
+            end_row - start_row + 1,
+            _column_index(end_column) - _column_index(start_column) + 1,
+        )
+    if cells:
+        return (
+            max(int(cell["row"]) for cell in cells),
+            max(int(cell["column"]) for cell in cells),
+        )
+    return (0, 0)
+
+
+def _split_cell_ref(cell_ref: str) -> tuple[str, int]:
+    match = re.match(r"([A-Z]+)([0-9]+)$", cell_ref)
+    if match is None:
+        return ("", 0)
+    return (match.group(1), int(match.group(2)))
+
+
+def _column_index(column_letter: str) -> int:
+    index = 0
+    for character in column_letter:
+        index = index * 26 + ord(character) - ord("A") + 1
+    return index
+
+
+_SS_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+_R_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+_REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
