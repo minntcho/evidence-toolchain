@@ -201,6 +201,12 @@ def test_ingestion_normalization_doc_is_indexed_and_layered():
     assert "merge_evidence_inventories" in text
     assert "ingest_bundle" in text
     assert "이 merge는 semantic routing이 아니다." in text
+    assert "EvidenceAtom은 support/contradict 판정이 아니다." in text
+    assert "v0 atom type vocabulary는 사람이 읽을 수 있는 string으로 고정합니다." in text
+    assert "currency_amount" in text
+    assert "`producer`는 atom을 만든 주체를 보존합니다." in text
+    assert "`normalized`는 best-effort helper field다." in text
+    assert "AtomizerResult는 EvidenceReport도 아니고 ResolutionGraph도 아닙니다." in text
     assert "UnsupportedReader" in text
     assert "PlainTextReader" in text
     assert "DelimitedTableReader" in text

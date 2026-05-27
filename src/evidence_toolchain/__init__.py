@@ -1,6 +1,7 @@
 """문서 증거의 observation, planning, extraction, reporting을 다루는 패키지입니다."""
 
 from evidence_toolchain.artifacts import EvidenceDocument
+from evidence_toolchain.atoms import AtomizerResult, EvidenceAtom, EvidenceAtomType
 from evidence_toolchain.capabilities import (
     CapabilityRunner,
     EvidenceCapability,
@@ -56,6 +57,9 @@ __all__ = [
     "EvidenceCapability",
     "EvidenceEvent",
     "EvidenceIssue",
+    "EvidenceAtom",
+    "EvidenceAtomType",
+    "AtomizerResult",
     "AttachmentBundle",
     "RawAttachment",
     "RouteDecision",

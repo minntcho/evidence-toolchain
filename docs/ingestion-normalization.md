@@ -90,6 +90,51 @@ safety policy를 적용한 뒤 결과 inventory를 merge합니다.
 Bundle ingestion은 reader orchestration의 얇은 계층이며, archive expansion이나
 semantic evidence classification을 수행하지 않습니다.
 
+### `EvidenceAtom`
+
+EvidenceAtom은 `EvidenceUnit`에서 해석된 semantic evidence candidate입니다.
+LLM, VLM, deterministic atomizer, resolver가 함께 소비할 수 있는 공통 언어이며,
+X-Y matching 대상이 되는 Y 후보입니다.
+
+EvidenceAtom은 support/contradict 판정이 아니다.
+Atom은 "이 단서가 usage_amount, service_period, site_identity 같은 의미 후보일 수 있다"를
+표현할 뿐이며, 특정 X를 지지하거나 반박하는지는 후속 ResolutionGraph가 판단합니다.
+
+v0 atom type vocabulary는 사람이 읽을 수 있는 string으로 고정합니다.
+
+```text
+document_type
+activity_identity
+usage_amount
+service_period
+site_identity
+supplier_identity
+meter_reading
+meter_delta
+line_item
+currency_amount
+date
+identifier
+table_row
+note
+unknown
+```
+
+`producer`는 atom을 만든 주체를 보존합니다.
+예시는 `regex_atomizer`, `table_atomizer`, `llm_atomizer`, `vlm_atomizer`입니다.
+`source_unit_ids`와 `source_artifact_ids`는 반드시 보존해야 합니다.
+
+`normalized`는 best-effort helper field다.
+단위 변환 또는 정규화 결과를 담을 수 있지만 final matching authority가 아니며,
+최종 compatibility, tolerance, support 여부는 resolver 계층이 판단해야 합니다.
+
+### `AtomizerResult`
+
+AtomizerResult는 하나의 `EvidenceInventory` 또는 bundle에서 생성된
+EvidenceAtom 후보 묶음입니다.
+AtomizerResult는 EvidenceReport도 아니고 ResolutionGraph도 아닙니다.
+Support edge, contradiction edge, `x_id` 연결은 이 계층에 들어오면 안 됩니다.
+
 ### `UnsupportedReader`
 
 지원하지 않는 attachment를 억지로 읽지 않고 `unsupported_attachment` artifact와
