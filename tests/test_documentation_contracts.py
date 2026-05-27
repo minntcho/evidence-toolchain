@@ -98,6 +98,35 @@ def test_purpose_doc_keeps_consumer_examples_outside_core_identity():
     assert "코어 용어는 중립적으로 유지한다" in doc
 
 
+def test_architecture_doc_summarizes_current_pipeline_and_legacy_report_path():
+    doc = Path("docs/architecture.md").read_text(encoding="utf-8")
+
+    assert "현재 구현 기준의 큰 흐름" in doc
+    assert "AttachmentBundle -> RawAttachment -> EvidenceArtifact -> EvidenceUnit -> EvidenceInventory" in doc
+    assert "EvidenceInventory -> EvidenceAtom -> NeedSpec -> NormalizationResult -> EvidenceResolutionGraph" in doc
+    assert "InvestigationState / InvestigationTask / InvestigationTaskResult" in doc
+    assert "기존 `EvidenceDocument -> EvidenceReport` 경로는 compatibility document workflow입니다." in doc
+    assert "현재 구현된 것" in doc
+    assert "아직 구현하지 않은 것" in doc
+    assert "Reader는 EvidenceUnit까지만 만든다." in doc
+    assert "Resolver만 support/contradict를 판단한다." in doc
+    assert "LLM/VLM은 resolver authority가 아니다." in doc
+
+
+def test_readme_and_docs_index_point_to_current_architecture_state():
+    readme = Path("README.md").read_text(encoding="utf-8")
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+
+    for text in (readme, docs_index):
+        assert "현재 구현 기준" in text
+        assert "AttachmentBundle" in text
+        assert "EvidenceInventory" in text
+        assert "EvidenceAtom" in text
+        assert "NeedSpec" in text
+        assert "EvidenceResolutionGraph" in text
+        assert "최종 support/contradict 판단은 resolver 경계에 남깁니다." in text
+
+
 def test_contract_docs_are_indexed_and_define_allowed_boundaries():
     contract_docs = [
         "evidence-document.md",
@@ -113,6 +142,22 @@ def test_contract_docs_are_indexed_and_define_allowed_boundaries():
 
     contracts_text = contracts_index.read_text(encoding="utf-8")
     assert "계약 문서는 동작을 정의하지 Downstream 정책을 정의하지 않는다." in contracts_text
+    assert "현재 public-ish contract surface" in contracts_text
+    for contract_name in (
+        "AttachmentBundle",
+        "RawAttachment",
+        "EvidenceArtifact",
+        "EvidenceUnit",
+        "EvidenceInventory",
+        "EvidenceAtom",
+        "NeedSpec",
+        "NormalizationResult",
+        "EvidenceResolutionGraph",
+        "InvestigationState",
+        "InvestigationTask",
+        "InvestigationTaskResult",
+    ):
+        assert contract_name in contracts_text
     assert "contracts/README.md" in docs_index
 
     for filename in contract_docs:

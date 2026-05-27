@@ -1,156 +1,208 @@
 # 아키텍처
 
-`evidence-toolchain`은 document-evidence front end입니다.
+`evidence-toolchain`은 지저분한 증빙 첨부를 도메인 중립적인 evidence state로 낮추고,
+Downstream system이 입력 claim과 증거 후보를 비교할 수 있게 준비하는 toolchain입니다.
 
-이 프로젝트는 독립적으로 실행될 수 있어야 합니다. file 또는 document artifact를 받으면, 문서를 검사하고, extraction strategy를 고르고, tool을 실행하고, structured report를 반환해야 합니다.
+이 저장소는 최종 validation authority가 아닙니다. 문서를 읽고, 관찰을 보존하고,
+의미 후보를 만들고, resolver가 X claim과 Y evidence atom 사이의 관계를 기록할 수 있게
+합니다. 최종 정책 판단, 제출 승인, public report publish 여부는 Downstream system의
+책임입니다.
 
-특정 Downstream validator의 존재를 요구해서는 안 됩니다.
+## 현재 구현 기준의 큰 흐름
 
-## 아키텍처 목표
-
-Core architecture는 네 가지 관심사를 분리합니다.
+현재 구현 기준의 큰 흐름은 단일 문서 report generator보다 넓습니다.
 
 ```text
-Observation
-Planning
-Extraction
-Reporting
+AttachmentBundle -> RawAttachment -> EvidenceArtifact -> EvidenceUnit -> EvidenceInventory
+EvidenceInventory -> EvidenceAtom -> NeedSpec -> NormalizationResult -> EvidenceResolutionGraph
+InvestigationState / InvestigationTask / InvestigationTaskResult
 ```
 
-이 분리는 tool limitation을 명시적으로 드러냅니다. Docling 같은 document parser는 born-digital PDF와 structured table에는 유용할 수 있지만 모든 evidence document에 충분하지 않습니다. 어떤 증거는 scanned, photographed, handwritten, cropped, rotated, table-heavy, low-resolution, 또는 semantically ambiguous할 수 있습니다.
+각 계층의 책임은 다음처럼 나뉩니다.
 
-따라서 system은 모든 문서를 하나의 parser에 밀어 넣지 않고 document condition에 따라 tool을 선택해야 합니다.
+```text
+파일 라우팅은 물리 첨부를 공통 EvidenceInventory로 낮춘다.
+Reader는 EvidenceUnit까지만 만든다.
+Atomizer는 EvidenceAtom 후보만 만든다.
+NeedSpec은 declared X claim을 탐색 가능한 need로 낮춘다.
+NormalizationResult는 비교 가능한 재료를 만든다.
+Resolver만 support/contradict를 판단한다.
+Investigation loop는 부족한 단서를 채우기 위한 task를 오케스트레이션한다.
+LLM/VLM은 resolver authority가 아니다.
+```
 
-## 주요 파이프라인
+## 계층
+
+### Ingestion
+
+Ingestion 계층은 physical attachment를 안전하게 열고 공통 inventory로 낮춥니다.
+
+```text
+AttachmentBundle
+-> RawAttachment
+-> SafetyPolicy
+-> FileKindRouter
+-> EvidenceArtifact
+-> file-specific reader
+-> EvidenceUnit
+-> EvidenceInventory
+```
+
+이 계층은 증빙 의미를 판단하지 않습니다. PDF, image, CSV, XLSX 같은 형식 차이를
+흡수하고, route decision, safety decision, source locator, issue를 보존합니다.
+
+### Atomization
+
+Atomization 계층은 `EvidenceUnit`에서 semantic candidate인 `EvidenceAtom`을 만듭니다.
+
+예를 들어 reader가 본 것은 `"사용량 6.4 MWh"` text span이고, atomizer가 만든 것은
+`usage_amount` atom입니다. 이 atom은 "사용량 후보처럼 보인다"까지만 말합니다.
+특정 X claim을 support한다고 판단하지 않습니다.
+
+### NeedSpec
+
+`DeclaredClaim`은 사용자가 기입했거나 Downstream system이 검사하려는 X claim입니다.
+`NeedSpec`은 이 claim을 문서 탐색 가능한 need 목록으로 낮춥니다.
+
+```text
+activity_identity
+usage_amount
+service_period
+site_identity
+supplier_identity
+```
+
+X를 문서에서 직접 문자열 검색하지 않습니다. `6400 kWh`는 문서에서 `6.4 MWh`로
+나타날 수 있고, `2025-03`은 `2025년 3월 사용분`으로 나타날 수 있습니다.
+
+### Normalization
+
+`NormalizationResult`는 atom 또는 need를 resolver가 비교 가능한 재료로 낮춥니다.
+
+```text
+NormalizedQuantity
+NormalizedPeriod
+NormalizedDate
+NormalizedCurrency
+NormalizedIdentifier
+```
+
+정규화는 support/contradict 판단이 아닙니다. `6.4 MWh`를 `6400 kWh`로 낮출 수는
+있지만, 그 값이 특정 X claim을 지지한다고 판단하는 것은 resolver 책임입니다.
+
+### Resolution
+
+`EvidenceResolutionGraph`는 X claim과 EvidenceAtom/Y 후보 사이의 관계를 기록합니다.
+`HardGateResolver`는 v0에서 명시적으로 제공된 `NeedSpec`, `EvidenceAtom`,
+`NormalizationResult`를 소비해 `usage_amount`, `service_period`, currency reject,
+missing required need에 대한 hard-gate edge와 claim resolution을 만듭니다.
+
+이 resolver는 normalizer를 자동 호출하지 않으며, aggregation, derivation, soft score,
+site/supplier alias 판단은 아직 수행하지 않습니다.
+
+### Investigation
+
+Investigation 계층은 부족한 단서를 채우기 위한 framework-neutral state와 task contract를
+제공합니다.
+
+```text
+InvestigationState
+InvestigationTask
+InvestigationTaskResult
+InvestigationBudget
+NeedLedgerEntry
+LLMPlannerPort
+VLMObserverPort
+LLMAtomizerPort
+LLMNormalizerPort
+LocalInvestigationRunner
+```
+
+`LocalInvestigationRunner`는 fake/model port를 호출할 수 있지만, provider SDK나 LangGraph를
+core에 묶지 않습니다. 모델 output atom은 core vocabulary, `allowed_atom_types`,
+provenance guardrail을 통과해야 state에 들어갑니다.
+
+## Compatibility document workflow
+
+기존 `EvidenceDocument -> EvidenceReport` 경로는 compatibility document workflow입니다.
+이 경로는 단일 문서 관찰, planning, capability 실행, report emission을 실험하고 보존하는
+표면입니다.
 
 ```text
 EvidenceDocument
-  -> observe_document
-  -> build_tool_plan
-  -> execute_capabilities
-  -> consolidate_results
-  -> emit_evidence_report
+-> EvidenceObservation
+-> EvidenceToolPlan
+-> EvidenceCapability calls
+-> EvidenceReport
 ```
 
-### 1. EvidenceDocument
+이 경로도 여전히 유효하지만, 새 X-Y evidence linking 계층의 최종 authority는 아닙니다.
+`EvidenceReport`는 관찰과 issue를 보존하는 output이고, X claim과 atom 사이의
+support/contradict 판정은 `EvidenceResolutionGraph` 계층에서 다뤄야 합니다.
 
-입력 material을 감싸는 중립적인 wrapper입니다.
+## 현재 구현된 것
 
-포함해야 하는 정보:
+현재 repository는 다음 contract와 baseline adapter를 제공합니다.
 
-- document id
-- file name
-- media type
-- file hash
-- 가능한 경우 upload/source metadata
-- 알려진 경우 page/image count
-- caller가 요청한 optional declared target field
-
-Downstream judgment를 담아서는 안 됩니다.
-
-### 2. EvidenceObservation
-
-문서 상태에 대한 first-pass description입니다.
-
-예시:
-
-- born-digital PDF
-- scanned PDF
-- receipt photo
-- invoice image
-- utility bill
-- spreadsheet export
-- handwritten meter log
-- meter photo
-- mixed text and table document
-- unreadable 또는 low-quality image
-
-Observation은 simple rule, metadata inspection, OCR probe, visual model, LLM/VLM router로 만들어질 수 있습니다.
-
-### 3. EvidenceToolPlan
-
-Capability의 계획된 실행 순서입니다.
-
-Plan은 tool이 선택된 이유를 기록합니다. fallback을 포함할 수 있습니다.
-
-예시:
-
-```json
-{
-  "document_class": "utility_bill",
-  "selected_capabilities": [
-    {
-      "name": "docling_parse",
-      "reason": "born_digital_pdf_with_tables"
-    },
-    {
-      "name": "table_extract",
-      "reason": "usage_values_appear_in_table"
-    }
-  ],
-  "fallbacks": ["ocr_extract", "manual_review"]
-}
+```text
+AttachmentBundle
+RawAttachment
+RouteDecision
+SafetyDecision
+EvidenceArtifact
+EvidenceUnit
+EvidenceInventory
+EvidenceAtom
+AtomizerResult
+SimpleTextAtomizer
+DeclaredClaim
+Need
+NeedSpec
+derive_need_spec
+NormalizationAdapter
+NormalizationResult
+DeterministicNormalizer
+ResolutionEdge
+ClaimResolution
+EvidenceResolutionGraph
+HardGateResolver
+InvestigationState
+InvestigationTask
+InvestigationTaskResult
+LLM/VLM model port protocols
+Fake model adapters
+LocalInvestigationRunner
 ```
 
-### 4. EvidenceCapability
+Reader baseline은 plain text, CSV/TSV, PDF profile, PDF text/word extraction,
+image profile, XLSX sheet/cell inventory를 지원합니다. Archive, Office, email full reader는
+아직 본격 구현 범위 밖입니다.
 
-Capability는 하나의 extraction 또는 analysis task를 수행하는 tool-like unit입니다.
+## 아직 구현하지 않은 것
 
-예시:
+다음은 architecture target이지만 아직 닫힌 구현 축이 아닙니다.
 
-- `docling_parse`
-- `ocr_extract`
-- `layout_kv_extract`
-- `table_structure_extract`
-- `receipt_extract`
-- `invoice_extract`
-- `utility_bill_extract`
-- `meter_photo_read`
-- `handwriting_read`
-- `barcode_read`
-- `manual_review_request`
-
-Registry는 각 capability의 input requirement, output shape, known strength, known limitation, failure mode를 설명해야 합니다.
-
-### 5. EvidenceExtractionResult
-
-Capability에서 나온 raw 또는 semi-structured output입니다.
-
-보존해야 하는 정보:
-
-- 가능한 경우 tool name과 version
-- input document id
-- page 또는 image reference
-- text span
-- table 또는 cell
-- bounding box
-- confidence score
-- warning
-- error
-
-### 6. EvidenceReport
-
-통합된 중립 output입니다.
-
-포함해야 하는 정보:
-
-- document identity
-- observation
-- selected plan
-- tool call과 result summary
-- extracted field
-- 각 field의 provenance
-- confidence와 issue metadata
-- unresolved ambiguity
-- extraction이 충분하지 않을 때의 recommended next action
-
-최종 Downstream validation judgment를 포함해서는 안 됩니다.
+```text
+automatic end-to-end EvidenceInventory -> ResolutionGraph orchestration
+soft score resolver
+aggregation support solver
+derivation support solver
+support set selection
+site/supplier alias normalizer
+ambiguous period normalizer
+real LLM/VLM provider adapter
+LangGraph adapter
+OCR/VLM interrogation loop
+archive recursive expansion
+Office/email full reader
+manual review queue output
+```
 
 ## 독립성 규칙
 
 Core module은 Downstream validator를 import하면 안 됩니다.
 
-Dependency direction은 다음 중 하나여야 합니다.
+허용되는 dependency direction은 다음과 같습니다.
 
 ```text
 downstream app -> evidence-toolchain
@@ -164,18 +216,20 @@ external orchestrator
   -> downstream validator
 ```
 
-반대 방향은 존재해서는 안 됩니다.
+반대 방향은 금지합니다.
 
 ```text
 evidence-toolchain -> downstream validator
 ```
 
-Adapter는 core package 밖에 둘 수 있습니다. Adapter는 `EvidenceReport`를 다른 system의 claim, hazard, review format으로 번역할 수 있지만, adapter가 core model을 정의해서는 안 됩니다.
+Adapter는 core package 밖에 둘 수 있습니다. Adapter는 evidence-toolchain output을 다른
+system의 claim, hazard, review format으로 번역할 수 있지만, adapter가 core model을
+정의해서는 안 됩니다.
 
 ## 신뢰 태도
 
-Extraction은 validation이 아닙니다.
+Extraction은 validation이 아닙니다. Normalization도 validation이 아닙니다. Model observation도
+validation이 아닙니다.
 
-이 프로젝트는 evidence를 더 쉽게 inspect, compare, review하게 만듭니다. uncertainty를 polished natural-language answer 뒤에 숨겨서는 안 됩니다.
-
-유용한 output은 추출된 value만이 아닙니다. 그 value가 어디에서 왔는지, 어떤 tool이 만들었는지, 무엇이 실패했는지, 무엇이 아직 uncertain한지까지 포함해야 유용합니다.
+이 프로젝트의 유용한 output은 값 하나가 아니라, 그 값이 어디에서 왔는지, 어떤 tool이
+만들었는지, 무엇이 실패했는지, 무엇이 아직 uncertain한지까지 포함하는 evidence state입니다.

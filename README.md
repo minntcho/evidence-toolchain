@@ -2,9 +2,22 @@
 
 `evidence-toolchain`는 독립적인 document-evidence 처리 엔진입니다.
 
-이 프로젝트는 지저분한 증거 문서를 관찰하고, 추출 전략을 고른 뒤, document tool을 실행하고, Downstream 시스템이 소비할 수 있는 중립적인 `EvidenceReport`를 냅니다.
+이 프로젝트는 지저분한 증거 문서를 관찰하고, 추출 전략을 고른 뒤, document tool을 실행하고, Downstream 시스템이 소비할 수 있는 중립적인 evidence state를 냅니다.
 
-핵심 흐름은 단순합니다.
+현재 구현 기준으로는 단일 `EvidenceReport` 생성기보다 넓은 X-Y evidence linking toolchain을 향합니다.
+
+```text
+AttachmentBundle
+-> EvidenceInventory
+-> EvidenceAtom
+-> NeedSpec
+-> NormalizationResult
+-> EvidenceResolutionGraph
+```
+
+최종 support/contradict 판단은 resolver 경계에 남깁니다.
+
+기존 compatibility document workflow는 단순합니다.
 
 ```text
 Evidence document

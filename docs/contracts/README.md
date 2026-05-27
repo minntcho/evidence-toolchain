@@ -12,6 +12,33 @@
 4. [Evidence Check](evidence-check.md)
 5. [Evidence Report](evidence-report.md)
 
+위 개별 문서는 초기 document/report compatibility contract입니다.
+현재 public-ish contract surface는 더 넓어졌고, 다음 object들이 core architecture에서
+안정적으로 이름을 갖습니다.
+
+```text
+AttachmentBundle
+RawAttachment
+RouteDecision
+SafetyDecision
+EvidenceArtifact
+EvidenceUnit
+EvidenceInventory
+EvidenceAtom
+AtomizerResult
+DeclaredClaim
+Need
+NeedSpec
+NormalizationResult
+EvidenceResolutionGraph
+InvestigationState
+InvestigationTask
+InvestigationTaskResult
+```
+
+이 목록은 downstream policy를 정의하지 않습니다. 어디까지가 core evidence state인지,
+어디부터가 Downstream 판단인지 구분하기 위한 현재 contract surface입니다.
+
 ## 계약 규칙
 
 Core contract는 evidence-processing state를 설명할 수 있습니다.
