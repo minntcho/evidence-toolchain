@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 
-from evidence_toolchain.atoms import EvidenceAtom
+from evidence_toolchain.atoms import EvidenceAtom, EvidenceAtomType
 from evidence_toolchain.ingestion import EvidenceInventory, EvidenceUnit
 from evidence_toolchain.investigation import (
     InvestigationEvent,
@@ -19,6 +19,7 @@ from evidence_toolchain.investigation_ports import (
     LLMPlannerPort,
     VLMObserverPort,
 )
+from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.normalization import NormalizationResult
 
 
@@ -176,14 +177,35 @@ class LocalInvestigationRunner:
         normalizations: tuple[NormalizationResult, ...] = (),
     ) -> InvestigationState:
         merged_atoms = result.produced_atoms + atoms
+        accepted_atoms, rejected_atom_ids, guardrail_issues = _filter_model_atoms(
+            task,
+            merged_atoms,
+        )
         merged_normalizations = result.produced_normalization_results + normalizations
-        result = _with_produced_ids(result, atoms=merged_atoms, normalizations=merged_normalizations)
+        merged_normalizations = _drop_normalizations_for_rejected_atoms(
+            merged_normalizations,
+            rejected_atom_ids,
+        )
+        if merged_atoms:
+            result = replace(
+                result,
+                produced_atoms=accepted_atoms,
+                produced_atom_ids=(),
+                produced_normalization_results=merged_normalizations,
+                produced_normalization_result_ids=(),
+                issues=result.issues + guardrail_issues,
+            )
+        result = _with_produced_ids(
+            result,
+            atoms=accepted_atoms,
+            normalizations=merged_normalizations,
+        )
         next_state = replace(
             state,
             agenda=state.agenda[1:],
             completed_tasks=state.completed_tasks + (result,),
             inventory=_merge_inventory_units(state.inventory, result.produced_units),
-            atoms=state.atoms + merged_atoms,
+            atoms=state.atoms + accepted_atoms,
             normalization_results=state.normalization_results + merged_normalizations,
             metadata={**state.metadata, "runner": self.producer},
         )
@@ -249,6 +271,66 @@ def _merge_inventory_units(
     if not units:
         return inventory
     return replace(inventory, units=inventory.units + units)
+
+
+def _filter_model_atoms(
+    task: InvestigationTask,
+    atoms: tuple[EvidenceAtom, ...],
+) -> tuple[tuple[EvidenceAtom, ...], tuple[str, ...], tuple[EvidenceIssue, ...]]:
+    if not atoms:
+        return (), (), ()
+
+    accepted: list[EvidenceAtom] = []
+    rejected_ids: list[str] = []
+    issues: list[EvidenceIssue] = []
+    allowed_atom_types = set(task.allowed_atom_types)
+    for atom in atoms:
+        issue = _atom_guardrail_issue(atom, allowed_atom_types)
+        if issue is not None:
+            rejected_ids.append(atom.atom_id)
+            issues.append(issue)
+            continue
+        accepted.append(atom)
+    return tuple(accepted), tuple(rejected_ids), tuple(issues)
+
+
+def _atom_guardrail_issue(
+    atom: EvidenceAtom,
+    allowed_atom_types: set[str],
+) -> EvidenceIssue | None:
+    if not EvidenceAtomType.is_core_type(atom.atom_type):
+        return EvidenceIssue(
+            code="model_output_atom_type_unknown",
+            severity="warning",
+            message=f"모델 출력 atom '{atom.atom_id}'의 atom_type이 v0 vocabulary에 없습니다.",
+        )
+    if allowed_atom_types and atom.atom_type not in allowed_atom_types:
+        return EvidenceIssue(
+            code="model_output_atom_type_not_allowed",
+            severity="warning",
+            message=f"모델 출력 atom '{atom.atom_id}'의 atom_type이 task 허용 목록 밖입니다.",
+        )
+    if not atom.source_unit_ids and not atom.source_artifact_ids:
+        return EvidenceIssue(
+            code="model_output_missing_provenance",
+            severity="warning",
+            message=f"모델 출력 atom '{atom.atom_id}'에 source_unit_ids/source_artifact_ids가 없습니다.",
+        )
+    return None
+
+
+def _drop_normalizations_for_rejected_atoms(
+    normalizations: tuple[NormalizationResult, ...],
+    rejected_atom_ids: tuple[str, ...],
+) -> tuple[NormalizationResult, ...]:
+    if not normalizations or not rejected_atom_ids:
+        return normalizations
+    rejected = set(rejected_atom_ids)
+    return tuple(
+        normalization
+        for normalization in normalizations
+        if normalization.target_id not in rejected
+    )
 
 
 def _with_produced_ids(
