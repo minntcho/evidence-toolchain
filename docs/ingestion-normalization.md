@@ -50,6 +50,11 @@ Bundle은 아직 증빙 의미를 판단하지 않습니다.
 확장자, magic bytes, MIME, open probe가 충돌할 수 있으므로 `matched_by`,
 `rejected_by`, `issues`를 남겨야 합니다.
 
+FileKindRouter는 route와 근거를 함께 남긴다.
+예를 들어 `.pdf` 확장자와 `%PDF` magic signature가 함께 확인되면 `pdf`
+route를 선택할 수 있지만, 확장자와 signature가 충돌하면 `unknown` route와
+`file_signature_mismatch` issue를 남겨야 합니다.
+
 ### `SafetyDecision`
 
 reader 실행 전에 적용된 safety check 결과입니다.
@@ -73,6 +78,12 @@ X-Y matching 대상은 `EvidenceAtom`입니다.
 
 Attachment, artifact, unit, route decision, safety decision, issue를 묶는
 bundle-level ingestion output입니다.
+
+### `UnsupportedReader`
+
+지원하지 않는 attachment를 억지로 읽지 않고 `unsupported_attachment` artifact와
+`unsupported_media_type` issue로 보존합니다.
+UnsupportedReader는 semantic extraction을 수행하지 않으며 `EvidenceUnit`을 만들지 않습니다.
 
 ## 해야 하는 일
 
