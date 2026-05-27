@@ -62,10 +62,29 @@ class LocalInvestigationRunner:
         """현재 agenda에 이미 올라온 task chain만 deterministic하게 실행합니다."""
 
         next_state = state
+        seen_task_fingerprints: set[tuple[object, ...]] = set()
         for _ in range(max(0, max_steps)):
             if not next_state.agenda:
                 return next_state
+            task = next_state.agenda[0]
+            task_fingerprint = _task_fingerprint(task)
+            if task_fingerprint in seen_task_fingerprints:
+                return self._record_stopped(
+                    next_state,
+                    reason="repeated_task_detected",
+                    task_id=task.task_id,
+                )
+            seen_task_fingerprints.add(task_fingerprint)
+            before_signature = _progress_signature(next_state)
             next_state = self.run_once(next_state)
+            if next_state.metadata.get("stop_reason"):
+                return next_state
+            if _progress_signature(next_state) == before_signature:
+                return self._record_stopped(
+                    next_state,
+                    reason="no_progress_detected",
+                    task_id=task.task_id,
+                )
         return next_state
 
     def _plan_next_tasks(self, state: InvestigationState) -> InvestigationState:
@@ -291,6 +310,26 @@ class LocalInvestigationRunner:
             {"reason": "max_iterations_exhausted"},
         )
 
+    def _record_stopped(
+        self,
+        state: InvestigationState,
+        *,
+        reason: str,
+        task_id: str,
+    ) -> InvestigationState:
+        return self._record_event(
+            replace(
+                state,
+                metadata={
+                    **state.metadata,
+                    "runner": self.producer,
+                    "stop_reason": reason,
+                },
+            ),
+            InvestigationEventType.STOPPED,
+            {"reason": reason, "task_id": task_id},
+        )
+
     def _record_event(
         self,
         state: InvestigationState,
@@ -327,6 +366,32 @@ def _need_spec_for_task(
         if need_spec.x_id == task.target_claim_id:
             return need_spec
     return None
+
+
+def _task_fingerprint(task: InvestigationTask) -> tuple[object, ...]:
+    return (
+        task.task_type,
+        task.target_claim_id,
+        task.target_need_id,
+        task.target_artifact_ids,
+        task.target_unit_ids,
+        task.allowed_atom_types,
+        task.reason,
+        task.question,
+        tuple(sorted((str(key), str(value)) for key, value in task.metadata.items())),
+    )
+
+
+def _progress_signature(state: InvestigationState) -> tuple[object, ...]:
+    return (
+        tuple(task.task_id for task in state.agenda),
+        tuple(task.task_id for task in state.completed_tasks),
+        tuple(unit.unit_id for unit in state.inventory.units),
+        tuple(atom.atom_id for atom in state.atoms),
+        tuple(result.target_id for result in state.normalization_results),
+        len(state.events),
+        state.metadata.get("stop_reason"),
+    )
 
 
 def _merge_inventory_units(

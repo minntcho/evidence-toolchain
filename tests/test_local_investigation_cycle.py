@@ -54,6 +54,17 @@ class _UnitEchoAtomizer:
         )
 
 
+class _StuckRunner:
+    def run_agenda(self, state, *, max_steps):
+        from evidence_toolchain import LocalInvestigationRunner
+
+        class Runner(LocalInvestigationRunner):
+            def run_once(self, state):
+                return state
+
+        return Runner(planner=_NoPlanner()).run_agenda(state, max_steps=max_steps)
+
+
 def test_local_investigation_runner_run_agenda_completes_retrieve_to_atomize_cycle():
     from evidence_toolchain import (
         CandidateUnitRetriever,
@@ -159,3 +170,127 @@ def test_local_investigation_runner_run_agenda_does_not_plan_when_agenda_is_empt
     updated = runner.run_agenda(state, max_steps=2)
 
     assert updated is state
+
+
+def test_local_investigation_runner_run_agenda_stops_on_repeated_task_fingerprint():
+    from evidence_toolchain import (
+        InvestigationTask,
+        InvestigationTaskType,
+        LocalInvestigationRunner,
+    )
+
+    task_a = InvestigationTask(
+        task_id="task_a",
+        task_type=InvestigationTaskType.REQUEST_MANUAL_REVIEW,
+        target_claim_id="x_001",
+        target_need_id="usage_amount",
+        reason="same_gap",
+    )
+    task_b = InvestigationTask(
+        task_id="task_b",
+        task_type=InvestigationTaskType.REQUEST_MANUAL_REVIEW,
+        target_claim_id="x_001",
+        target_need_id="usage_amount",
+        reason="same_gap",
+    )
+    state = replace(_state_with_inventory(), agenda=(task_a, task_b))
+    runner = LocalInvestigationRunner(planner=_NoPlanner())
+
+    updated = runner.run_agenda(state, max_steps=3)
+    payload = updated.to_dict()
+
+    assert [task["task_id"] for task in payload["completed_tasks"]] == ["task_a"]
+    assert payload["agenda"][0]["task_id"] == "task_b"
+    assert payload["metadata"]["stop_reason"] == "repeated_task_detected"
+    assert payload["events"][-1]["event_type"] == "stopped"
+    assert payload["events"][-1]["payload"] == {
+        "reason": "repeated_task_detected",
+        "task_id": "task_b",
+    }
+
+
+def test_local_investigation_runner_run_agenda_stops_when_no_progress_is_made():
+    from evidence_toolchain import InvestigationTask, InvestigationTaskType
+
+    task = InvestigationTask(
+        task_id="task_stuck",
+        task_type=InvestigationTaskType.REQUEST_MANUAL_REVIEW,
+    )
+    state = replace(_state_with_inventory(), agenda=(task,))
+
+    updated = _StuckRunner().run_agenda(state, max_steps=3)
+    payload = updated.to_dict()
+
+    assert payload["agenda"][0]["task_id"] == "task_stuck"
+    assert payload["metadata"]["stop_reason"] == "no_progress_detected"
+    assert payload["events"][-1]["event_type"] == "stopped"
+    assert payload["events"][-1]["payload"] == {
+        "reason": "no_progress_detected",
+        "task_id": "task_stuck",
+    }
+
+
+def test_local_investigation_runner_run_agenda_stops_on_iteration_budget():
+    from evidence_toolchain import (
+        CandidateUnitRetriever,
+        EvidenceAtomType,
+        EvidenceUnit,
+        InvestigationBudget,
+        InvestigationTask,
+        InvestigationTaskType,
+        LocalInvestigationRunner,
+        Need,
+        NeedSpec,
+        NeedType,
+    )
+
+    unit = EvidenceUnit(
+        unit_id="unit_usage",
+        artifact_id="artifact_pdf_page_1",
+        unit_type="text_span",
+        producer="pdfplumber_extract",
+        text="전력 사용량 6.4 MWh",
+    )
+    retrieve_task = InvestigationTask(
+        task_id="gap_x_001_usage_amount_001",
+        task_type=InvestigationTaskType.RETRIEVE_CANDIDATE_UNITS,
+        target_claim_id="x_001",
+        target_need_id=NeedType.USAGE_AMOUNT,
+        allowed_atom_types=(
+            EvidenceAtomType.USAGE_AMOUNT,
+            EvidenceAtomType.CURRENCY_AMOUNT,
+        ),
+    )
+    state = replace(
+        _state_with_inventory(unit),
+        budget=InvestigationBudget(max_iterations=1),
+        need_specs=(
+            NeedSpec(
+                x_id="x_001",
+                needs=(
+                    Need(
+                        need_id=NeedType.USAGE_AMOUNT,
+                        need_type=NeedType.USAGE_AMOUNT,
+                        target_unit="kWh",
+                        acceptable_units=("kWh", "MWh"),
+                    ),
+                ),
+            ),
+        ),
+        agenda=(retrieve_task,),
+    )
+    runner = LocalInvestigationRunner(
+        planner=_NoPlanner(),
+        unit_retriever=CandidateUnitRetriever(),
+        llm_atomizer=_UnitEchoAtomizer(),
+    )
+
+    updated = runner.run_agenda(state, max_steps=3)
+    payload = updated.to_dict()
+
+    assert [task["task_id"] for task in payload["completed_tasks"]] == [
+        "gap_x_001_usage_amount_001"
+    ]
+    assert payload["agenda"][0]["task_type"] == "atomize_unit_cluster"
+    assert payload["metadata"]["stop_reason"] == "max_iterations_exhausted"
+    assert payload["events"][-1]["event_type"] == "budget_exhausted"

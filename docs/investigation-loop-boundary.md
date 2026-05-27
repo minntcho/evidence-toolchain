@@ -205,6 +205,8 @@ LocalInvestigationRunner는 `CandidateUnitRetriever`가 주입되면 `retrieve_c
 `run_agenda(max_steps=...)`는 이미 올라온 agenda만 deterministic하게 실행합니다.
 이 helper는 `retrieve_candidate_units -> atomize_unit_cluster` 같은 queued task chain을
 로컬에서 검증하기 위한 것이며, run_agenda는 새 planner task를 요청하지 않습니다.
+같은 task fingerprint가 다시 나타나면 `repeated_task_detected`로 멈춥니다.
+runner가 agenda, completed task, unit, atom, normalization, event를 전혀 바꾸지 못하면 `no_progress_detected`로 멈춥니다.
 
 다음은 아직 구현하지 않습니다.
 
