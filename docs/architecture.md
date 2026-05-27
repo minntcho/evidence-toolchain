@@ -27,6 +27,7 @@ Atomizer는 EvidenceAtom 후보만 만든다.
 NeedSpec은 declared X claim을 탐색 가능한 need로 낮춘다.
 NormalizationResult는 비교 가능한 재료를 만든다.
 Resolver만 support/contradict를 판단한다.
+Resolution gap bridge는 resolver gap을 NeedLedgerEntry와 InvestigationTask로 번역한다.
 Investigation loop는 부족한 단서를 채우기 위한 task를 오케스트레이션한다.
 LLM/VLM은 resolver authority가 아니다.
 ```
@@ -118,6 +119,10 @@ LLMNormalizerPort
 LocalInvestigationRunner
 ```
 
+`ResolutionGapPlanner`는 `EvidenceResolutionGraph`의 missing/contradict gap을
+`NeedLedgerEntry`와 `InvestigationTask` agenda로 번역합니다. 이 bridge는 resolver를 다시
+실행하지 않고, runner나 provider도 호출하지 않습니다.
+
 `LocalInvestigationRunner`는 fake/model port를 호출할 수 있지만, provider SDK나 LangGraph를
 core에 묶지 않습니다. 모델 output atom은 core vocabulary, `allowed_atom_types`,
 provenance guardrail을 통과해야 state에 들어갑니다.
@@ -166,6 +171,8 @@ ResolutionEdge
 ClaimResolution
 EvidenceResolutionGraph
 HardGateResolver
+ResolutionGapPlan
+ResolutionGapPlanner
 InvestigationState
 InvestigationTask
 InvestigationTaskResult
