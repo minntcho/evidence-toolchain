@@ -207,6 +207,10 @@ def test_ingestion_normalization_doc_is_indexed_and_layered():
     assert "`producer`는 atom을 만든 주체를 보존합니다." in text
     assert "`normalized`는 best-effort helper field다." in text
     assert "AtomizerResult는 EvidenceReport도 아니고 ResolutionGraph도 아닙니다." in text
+    assert "SimpleTextAtomizer는 deterministic baseline atomizer입니다." in text
+    assert "SimpleTextAtomizer는 LLM/VLM adapter가 아니다." in text
+    assert "usage_amount" in text
+    assert "service_period" in text
     assert "UnsupportedReader" in text
     assert "PlainTextReader" in text
     assert "DelimitedTableReader" in text

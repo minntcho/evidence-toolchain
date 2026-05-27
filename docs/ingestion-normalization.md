@@ -135,6 +135,28 @@ EvidenceAtom 후보 묶음입니다.
 AtomizerResult는 EvidenceReport도 아니고 ResolutionGraph도 아닙니다.
 Support edge, contradiction edge, `x_id` 연결은 이 계층에 들어오면 안 됩니다.
 
+### `SimpleTextAtomizer`
+
+SimpleTextAtomizer는 deterministic baseline atomizer입니다.
+`text_span`과 `table_cell` EvidenceUnit에서 명확한 숫자, 단위, 날짜 패턴만
+EvidenceAtom 후보로 올립니다.
+
+초기 범위는 좁게 유지합니다.
+
+```text
+usage_amount
+currency_amount
+service_period
+date
+```
+
+SimpleTextAtomizer는 LLM/VLM adapter가 아니다.
+복잡한 row grouping, table semantics, OCR repair, unit conversion authority,
+support/contradict 판정은 수행하지 않습니다.
+특히 `currency_amount`는 usage support로 바로 쓰기 위한 값이 아니라,
+나중에 resolver가 "금액 후보라서 사용량 support로 쓰면 안 된다"라고 설명할 수 있게
+provenance가 있는 semantic candidate로 보존하는 값입니다.
+
 ### `UnsupportedReader`
 
 지원하지 않는 attachment를 억지로 읽지 않고 `unsupported_attachment` artifact와
