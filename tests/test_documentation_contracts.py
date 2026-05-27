@@ -272,6 +272,7 @@ def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundar
     assert "DeclaredClaim" in text
     assert "derive_need_spec" in text
     assert "EvidenceResolutionGraph" in text
+    assert "HardGateResolver" in text
     assert "ResolutionEdge" in text
     assert "ClaimResolution" in text
     assert "ResolutionRelation" in text
@@ -289,7 +290,9 @@ def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundar
     assert "현재 구현된 것" in text
     assert "아직 구현하지 않은 것" in text
     assert "NeedSpec 없는 simple resolver로 가지 않는다." in text
-    assert "hard gate / soft score resolver" in text
+    assert "v0 hard-gate edge와 claim resolution을 만듭니다." in text
+    assert "이 resolver는 normalizer를 자동 호출하지" in text
+    assert "soft score resolver" in text
 
 
 def test_supporting_architecture_docs_are_localized_and_indexed():
