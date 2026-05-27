@@ -44,6 +44,7 @@ Downstream system은 추출된 증거가 declared input을 지지하는지, 반�
 - [Capability 레지스트리](docs/capability-registry.md)
 - [실패 모드](docs/failure-modes.md)
 - [Adapter 경계](docs/adapter-boundary.md)
+- [첨부 정규화](docs/ingestion-normalization.md)
 - [합성 증거 테스트킷](docs/synthetic-evidence.md)
 
 ## 개발 빠른 시작

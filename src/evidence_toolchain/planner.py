@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from evidence_toolchain.artifacts import EvidenceDocument
+from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.observations import EvidenceObservation, observe_document
 
 
@@ -10,13 +11,6 @@ from evidence_toolchain.observations import EvidenceObservation, observe_documen
 class CapabilityStep:
     name: str
     reason: str
-
-
-@dataclass(frozen=True)
-class EvidenceIssue:
-    code: str
-    severity: str
-    message: str
 
 
 @dataclass(frozen=True)

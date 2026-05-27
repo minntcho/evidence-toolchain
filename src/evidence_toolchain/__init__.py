@@ -7,6 +7,16 @@ from evidence_toolchain.capabilities import (
     ManualReviewCapabilityRunner,
     StaticCapabilityRunner,
 )
+from evidence_toolchain.ingestion import (
+    AttachmentBundle,
+    EvidenceArtifact,
+    EvidenceInventory,
+    EvidenceUnit,
+    RawAttachment,
+    RouteDecision,
+    SafetyDecision,
+)
+from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.observations import EvidenceObservation, observe_document
 from evidence_toolchain.planner import EvidenceToolPlan, plan_document
 from evidence_toolchain.preflight import EvidencePreflight, preflight_document
@@ -28,6 +38,14 @@ __all__ = [
     "EvidenceDocument",
     "EvidenceCapability",
     "EvidenceEvent",
+    "EvidenceIssue",
+    "AttachmentBundle",
+    "RawAttachment",
+    "RouteDecision",
+    "SafetyDecision",
+    "EvidenceArtifact",
+    "EvidenceUnit",
+    "EvidenceInventory",
     "EvidenceObservation",
     "EvidencePreflight",
     "EvidenceReport",
