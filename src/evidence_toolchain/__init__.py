@@ -57,6 +57,7 @@ from evidence_toolchain.investigation_ports import (
     LLMPlannerPort,
     VLMObserverPort,
 )
+from evidence_toolchain.investigation_gaps import ResolutionGapPlan, ResolutionGapPlanner
 from evidence_toolchain.investigation_runner import LocalInvestigationRunner
 from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.observations import EvidenceObservation, observe_document
@@ -163,6 +164,8 @@ __all__ = [
     "FakeVLMObserver",
     "FakeLLMAtomizer",
     "FakeLLMNormalizer",
+    "ResolutionGapPlan",
+    "ResolutionGapPlanner",
     "LocalInvestigationRunner",
     "FileKindRouter",
     "SafetyLimits",

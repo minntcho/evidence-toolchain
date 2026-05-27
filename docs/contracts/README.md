@@ -31,6 +31,8 @@ Need
 NeedSpec
 NormalizationResult
 EvidenceResolutionGraph
+ResolutionGapPlan
+ResolutionGapPlanner
 InvestigationState
 InvestigationTask
 InvestigationTaskResult
