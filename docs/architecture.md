@@ -30,6 +30,7 @@ Resolver만 support/contradict를 판단한다.
 Resolution gap bridge는 resolver gap을 NeedLedgerEntry와 InvestigationTask로 번역한다.
 CandidateUnitRetriever는 retrieve_candidate_units task를 EvidenceInventory 안의 EvidenceUnit 후보 선택으로 접지한다.
 LocalInvestigationRunner는 주입된 CandidateUnitRetriever로 retrieve_candidate_units를 실행할 수 있다.
+LocalInvestigationRunner는 주입된 NormalizationAdapter로 queued normalize_candidate를 실행할 수 있다.
 Investigation loop는 부족한 단서를 채우기 위한 task를 오케스트레이션한다.
 LLM/VLM은 resolver authority가 아니다.
 ```
@@ -135,6 +136,9 @@ core에 묶지 않습니다. 모델 output atom은 core vocabulary, `allowed_ato
 provenance guardrail을 통과해야 state에 들어갑니다.
 또한 `CandidateUnitRetriever`가 주입되면 `retrieve_candidate_units` task를 실행하고,
 선택된 unit이 있을 때 follow-up `atomize_unit_cluster` task를 agenda 앞에 추가합니다.
+`NormalizationAdapter`가 주입되면 agenda에 올라온 `normalize_candidate` task를 실행해
+선택된 `EvidenceAtom` 후보를 `NormalizationResult`로 낮출 수 있습니다. 이 단계도
+`ResolutionEdge`나 `ClaimResolution.status`를 만들지 않습니다.
 
 ## Compatibility document workflow
 

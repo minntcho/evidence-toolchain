@@ -21,7 +21,7 @@ from evidence_toolchain.investigation_ports import (
 )
 from evidence_toolchain.investigation_retrieval import CandidateUnitRetriever
 from evidence_toolchain.issues import EvidenceIssue
-from evidence_toolchain.normalization import NormalizationResult
+from evidence_toolchain.normalization import NormalizationAdapter, NormalizationResult
 
 
 @dataclass(frozen=True)
@@ -32,6 +32,7 @@ class LocalInvestigationRunner:
     vlm_observer: VLMObserverPort | None = None
     llm_atomizer: LLMAtomizerPort | None = None
     llm_normalizer: LLMNormalizerPort | None = None
+    normalizer: NormalizationAdapter | None = None
     unit_retriever: CandidateUnitRetriever | None = None
     artifact_bytes: dict[str, bytes] | None = None
     producer: str = "local_investigation_runner_v0"
@@ -143,7 +144,7 @@ class LocalInvestigationRunner:
                 task_id=task.task_id,
                 status=InvestigationTaskStatus.COMPLETED,
                 produced_normalization_result_ids=tuple(result.target_id for result in results),
-                metadata={"producer": self.llm_normalizer.producer if self.llm_normalizer else None},
+                metadata={"producer": self._normalizer_producer()},
             )
             return self._complete_task(state, task, result=result, normalizations=results)
 
@@ -233,11 +234,24 @@ class LocalInvestigationRunner:
         state: InvestigationState,
         task: InvestigationTask,
     ) -> tuple[NormalizationResult, ...]:
-        if self.llm_normalizer is None:
-            return ()
         target_atom_ids = tuple(str(atom_id) for atom_id in task.metadata.get("target_atom_ids", ()))
         atoms = _select_atoms(state.atoms, target_atom_ids)
+        if self.normalizer is not None:
+            return tuple(
+                result
+                for atom in atoms
+                for result in self.normalizer.normalize_atom_value(atom)
+            )
+        if self.llm_normalizer is None:
+            return ()
         return self.llm_normalizer.normalize(task, atoms=atoms)
+
+    def _normalizer_producer(self) -> str | None:
+        if self.normalizer is not None:
+            return self.normalizer.producer
+        if self.llm_normalizer is not None:
+            return self.llm_normalizer.producer
+        return None
 
     def _complete_task(
         self,

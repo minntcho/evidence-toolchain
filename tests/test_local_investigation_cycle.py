@@ -161,6 +161,81 @@ def test_local_investigation_runner_run_agenda_completes_retrieve_to_atomize_cyc
     ]
 
 
+def test_local_investigation_runner_run_agenda_can_normalize_queued_atom_candidates():
+    from evidence_toolchain import (
+        DeterministicNormalizer,
+        EvidenceAtomType,
+        EvidenceUnit,
+        InvestigationTask,
+        InvestigationTaskType,
+        LocalInvestigationRunner,
+        NormalizedType,
+    )
+
+    unit = EvidenceUnit(
+        unit_id="unit_usage",
+        artifact_id="artifact_pdf_page_1",
+        unit_type="text_span",
+        producer="pdfplumber_extract",
+        text="electricity usage 6.4 MWh",
+    )
+    atomize_task = InvestigationTask(
+        task_id="task_atomize_usage",
+        task_type=InvestigationTaskType.ATOMIZE_UNIT_CLUSTER,
+        target_unit_ids=("unit_usage",),
+        allowed_atom_types=(EvidenceAtomType.USAGE_AMOUNT,),
+    )
+    normalize_task = InvestigationTask(
+        task_id="task_normalize_usage",
+        task_type=InvestigationTaskType.NORMALIZE_CANDIDATE,
+        metadata={"target_atom_ids": ("atom_from_cycle_001",)},
+    )
+    state = replace(
+        _state_with_inventory(unit),
+        agenda=(atomize_task, normalize_task),
+    )
+    runner = LocalInvestigationRunner(
+        planner=_NoPlanner(),
+        llm_atomizer=_UnitEchoAtomizer(),
+        normalizer=DeterministicNormalizer(),
+    )
+
+    updated = runner.run_agenda(state, max_steps=2)
+    payload = updated.to_dict()
+
+    assert payload["agenda"] == []
+    assert [task["task_id"] for task in payload["completed_tasks"]] == [
+        "task_atomize_usage",
+        "task_normalize_usage",
+    ]
+    assert payload["completed_tasks"][1]["produced_normalization_result_ids"] == [
+        "atom_from_cycle_001"
+    ]
+    assert payload["completed_tasks"][1]["metadata"] == {
+        "producer": "deterministic_normalizer_v0"
+    }
+    assert payload["normalization_results"] == [
+        {
+            "target_id": "atom_from_cycle_001",
+            "target_kind": "atom",
+            "normalized_type": NormalizedType.QUANTITY,
+            "normalized": {
+                "value": 6400,
+                "unit": "kWh",
+                "dimension": "energy",
+                "source_value": 6.4,
+                "source_unit": "MWh",
+                "original_text": "electricity usage 6.4 MWh",
+                "metadata": {"conversion": "MWh_to_kWh"},
+            },
+            "producer": "deterministic_normalizer_v0",
+            "confidence": 1.0,
+            "issues": [],
+            "metadata": {},
+        }
+    ]
+
+
 def test_local_investigation_runner_run_agenda_does_not_plan_when_agenda_is_empty():
     from evidence_toolchain import LocalInvestigationRunner
 
