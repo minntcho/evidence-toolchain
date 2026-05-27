@@ -69,6 +69,11 @@ observation에서 읽은 사용량 후보는 EvidenceAtom으로 보존합니다.
 `InvestigationState.inventory.units`와 `InvestigationState.atoms`에 append할 수 있습니다.
 그래도 resolver edge나 claim status는 만들지 않습니다.
 
+model output atom은 core atom vocabulary와 task의 `allowed_atom_types`를 통과해야 합니다.
+또한 source_unit_ids 또는 source_artifact_ids provenance가 없으면 state에 append하지 않습니다.
+이 gate는 모델 출력으로 판정하는 권한이 아니라, 출처와 vocabulary가 확인된 후보만 다음 resolver 입력으로
+넘기는 ingestion 이후의 안전장치입니다.
+
 ## Controller
 
 모델끼리 직접 서로 호출하지 않는다.
