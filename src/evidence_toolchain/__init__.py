@@ -34,6 +34,18 @@ from evidence_toolchain.ingestion import (
     SafetyDecision,
     merge_evidence_inventories,
 )
+from evidence_toolchain.investigation import (
+    InvestigationBudget,
+    InvestigationEvent,
+    InvestigationEventType,
+    InvestigationState,
+    InvestigationTask,
+    InvestigationTaskResult,
+    InvestigationTaskStatus,
+    InvestigationTaskType,
+    NeedLedgerEntry,
+    NeedLedgerStatus,
+)
 from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.observations import EvidenceObservation, observe_document
 from evidence_toolchain.planner import EvidenceToolPlan, plan_document
@@ -120,6 +132,16 @@ __all__ = [
     "EvidenceArtifact",
     "EvidenceUnit",
     "EvidenceInventory",
+    "InvestigationBudget",
+    "InvestigationEvent",
+    "InvestigationEventType",
+    "InvestigationState",
+    "InvestigationTask",
+    "InvestigationTaskResult",
+    "InvestigationTaskStatus",
+    "InvestigationTaskType",
+    "NeedLedgerEntry",
+    "NeedLedgerStatus",
     "FileKindRouter",
     "SafetyLimits",
     "SafetyPolicy",
