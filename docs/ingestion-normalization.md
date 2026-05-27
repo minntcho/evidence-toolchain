@@ -116,6 +116,18 @@ PDF profile은 text extraction이 아니다.
 Page count, encrypted 여부, rough text-layer marker 같은 cheap signal만 보존하며,
 text span, table, field extraction은 별도 reader/capability가 담당해야 합니다.
 
+### `PdfPlumberExtractReader`
+
+PdfPlumberExtractReader는 born-digital PDF의 text와 word bbox를
+`text_span` EvidenceUnit, `word_box` EvidenceUnit으로 낮춥니다.
+이 reader는 `pdfplumber` adapter이며 PDF profile reader를 대체하지 않습니다.
+기본 `ingest_attachment` PDF route는 cheap profile을 만들고, text/word extraction은
+후속 interrogation loop나 capability가 필요할 때 별도로 호출해야 합니다.
+
+PdfPlumberExtractReader는 EvidenceAtom을 만들지 않는다.
+`사용량 6.4 MWh` 같은 text span과 `6.4` 같은 word box를 관찰 단위로 보존할 뿐,
+usage_amount, unit, period 같은 semantic 후보 판단은 후속 atomizer 계층이 담당합니다.
+
 ### `ImageProfileReader`
 
 ImageProfileReader는 image attachment를 image artifact와 image profile metadata
