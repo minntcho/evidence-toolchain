@@ -20,6 +20,18 @@ Declared X claim
 문서에서 관찰된 원시 단서를 `EvidenceUnit`으로 보존한 뒤, 의미 후보인 `EvidenceAtom`으로 올리고,
 마지막 resolver가 X와 atom 사이의 관계를 판단합니다.
 
+정규화는 이 사이의 별도 계층입니다.
+
+```text
+EvidenceAtom / Need
+-> NormalizationAdapter
+-> NormalizationResult
+-> Resolver
+```
+
+정규화는 support/contradict 판단이 아니다.
+정규화는 값, 단위, 기간, 날짜, 금액, 식별자를 비교 가능한 재료로 바꿀 뿐입니다.
+
 ## 책임 경계
 
 ### X
@@ -107,6 +119,39 @@ Atom은 "이 단서가 usage amount처럼 보인다"를 말할 수 있습니다.
 
 `normalized`가 있더라도 best-effort helper입니다. 단위 호환성, tolerance, hard gate,
 support 여부는 resolver가 다시 판단해야 합니다.
+
+### NormalizationResult
+
+`NormalizationResult`는 atom, need, claim을 resolver가 비교 가능한 형태로 낮춘 결과입니다.
+
+v0 normalized value contract는 다음 shape를 포함합니다.
+
+```text
+NormalizedQuantity
+NormalizedPeriod
+NormalizedDate
+NormalizedCurrency
+NormalizedIdentifier
+```
+
+`NormalizedQuantity`는 value, unit, dimension, source value/unit을 보존합니다.
+`NormalizedPeriod`는 start date, end date, granularity를 보존합니다.
+`NormalizedDate`는 date와 bill date, payment due date 같은 optional role을 보존합니다.
+`NormalizedCurrency`는 currency amount를 usage quantity와 분리해서 보존합니다.
+`NormalizedIdentifier`는 site, supplier, meter id 같은 식별자 후보를 보존합니다.
+
+`NormalizationAdapter`는 tool 또는 deterministic normalizer가 구현해야 하는 interface입니다.
+`normalize_atom_value`는 EvidenceAtom 후보를 normalized comparison material로 낮추고,
+`normalize_claim_need`는 NeedSpec의 개별 need를 normalized comparison material로 낮춥니다.
+
+정규화 계층은 다음을 하지 않습니다.
+
+```text
+이 atom이 X를 support한다고 판단하지 않는다.
+currency_amount를 usage_amount로 승격하지 않는다.
+site alias가 정책상 충분한지 판단하지 않는다.
+period overlap이 X를 만족한다고 확정하지 않는다.
+```
 
 ### EvidenceResolutionGraph
 
@@ -237,6 +282,13 @@ X claim을 NeedSpec으로 낮추는 baseline contract, 그리고 X-Y graph recor
 갖고 있습니다.
 
 ```text
+NormalizationAdapter
+NormalizationResult
+NormalizedQuantity
+NormalizedPeriod
+NormalizedDate
+NormalizedCurrency
+NormalizedIdentifier
 DeclaredClaim
 Need
 NeedSpec
@@ -292,11 +344,16 @@ status, edge ids, supporting/rejected atom ids, missing need ids를 보존합니
 이 계약들은 solver가 아닙니다. 현재 구현은 edge와 resolution을 계산하지 않고,
 계산된 결과를 담을 수 있는 public-ish shape만 제공합니다.
 
+정규화 계약도 마찬가지입니다. 현재 구현은 `NormalizationResult`와 normalized value shape,
+그리고 `NormalizationAdapter` interface를 제공합니다. 하지만 deterministic unit conversion,
+period parsing, date role parsing은 아직 수행하지 않습니다.
+
 ## 아직 구현하지 않은 것
 
 다음은 architecture target이지만 아직 구현된 runtime contract가 아닙니다.
 
 ```text
+deterministic quantity/period normalizer
 hard gate / soft score resolver
 aggregation support solver
 derivation support solver
