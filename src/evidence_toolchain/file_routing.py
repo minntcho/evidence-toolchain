@@ -3,11 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from evidence_toolchain.ingestion import (
+    AttachmentBundle,
     EvidenceArtifact,
     EvidenceInventory,
     RawAttachment,
     RouteDecision,
     SafetyDecision,
+    merge_evidence_inventories,
 )
 from evidence_toolchain.issues import EvidenceIssue
 from evidence_toolchain.readers import (
@@ -225,6 +227,31 @@ def ingest_attachment(
         attachment=attachment,
         route_decision=route_decision,
         safety_decision=safety_decision,
+    )
+
+
+def ingest_bundle(
+    bundle: AttachmentBundle,
+    *,
+    router: FileKindRouter | None = None,
+    safety_policy: SafetyPolicy | None = None,
+) -> EvidenceInventory:
+    """AttachmentBundle의 모든 raw attachment를 하나의 EvidenceInventory로 합칩니다."""
+
+    active_router = router or FileKindRouter()
+    active_safety = safety_policy or SafetyPolicy()
+    inventories = tuple(
+        ingest_attachment(
+            bundle.bundle_id,
+            attachment,
+            router=active_router,
+            safety_policy=active_safety,
+        )
+        for attachment in bundle.attachments
+    )
+    return merge_evidence_inventories(
+        bundle_id=bundle.bundle_id,
+        inventories=inventories,
     )
 
 

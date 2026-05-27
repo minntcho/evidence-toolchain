@@ -79,6 +79,17 @@ X-Y matching 대상은 `EvidenceAtom`입니다.
 Attachment, artifact, unit, route decision, safety decision, issue를 묶는
 bundle-level ingestion output입니다.
 
+`merge_evidence_inventories`는 single-attachment inventory들을 입력 순서대로
+하나의 bundle-level inventory로 합칩니다.
+이 merge는 semantic routing이 아니다.
+Attachment, artifact, unit, route decision, safety decision, issue를 결합할 뿐
+EvidenceAtom이나 X-Y graph edge를 만들지 않습니다.
+
+`ingest_bundle`은 `AttachmentBundle`의 각 `RawAttachment`에 같은 router와
+safety policy를 적용한 뒤 결과 inventory를 merge합니다.
+Bundle ingestion은 reader orchestration의 얇은 계층이며, archive expansion이나
+semantic evidence classification을 수행하지 않습니다.
+
 ### `UnsupportedReader`
 
 지원하지 않는 attachment를 억지로 읽지 않고 `unsupported_attachment` artifact와
