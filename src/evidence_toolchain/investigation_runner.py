@@ -136,7 +136,20 @@ class LocalInvestigationRunner:
                 produced_atom_ids=tuple(atom.atom_id for atom in atoms),
                 metadata={"producer": self.llm_atomizer.producer if self.llm_atomizer else None},
             )
-            return self._complete_task(state, task, result=result, atoms=atoms)
+            next_state = self._complete_task(state, task, result=result, atoms=atoms)
+            normalize_task = self._normalize_task_for_atoms(
+                source_task=task,
+                produced_atom_ids=next_state.completed_tasks[-1].produced_atom_ids,
+                agenda=next_state.agenda,
+            )
+            if normalize_task is None:
+                return next_state
+            next_state = replace(next_state, agenda=(normalize_task,) + next_state.agenda)
+            return self._record_event(
+                next_state,
+                InvestigationEventType.TASK_PLANNED,
+                {"task_ids": [normalize_task.task_id], "source_task_id": task.task_id},
+            )
 
         if task.task_type == InvestigationTaskType.NORMALIZE_CANDIDATE:
             results = self._execute_normalizer_task(state, task)
@@ -252,6 +265,26 @@ class LocalInvestigationRunner:
         if self.llm_normalizer is not None:
             return self.llm_normalizer.producer
         return None
+
+    def _normalize_task_for_atoms(
+        self,
+        *,
+        source_task: InvestigationTask,
+        produced_atom_ids: tuple[str, ...],
+        agenda: tuple[InvestigationTask, ...],
+    ) -> InvestigationTask | None:
+        if not produced_atom_ids or self._normalizer_producer() is None:
+            return None
+        if _has_pending_normalize_task(agenda, produced_atom_ids):
+            return None
+        return InvestigationTask(
+            task_id=f"{source_task.task_id}_normalize_001",
+            task_type=InvestigationTaskType.NORMALIZE_CANDIDATE,
+            target_claim_id=source_task.target_claim_id,
+            target_need_id=source_task.target_need_id,
+            metadata={"target_atom_ids": produced_atom_ids},
+            reason="normalize_produced_atom_candidates",
+        )
 
     def _complete_task(
         self,
@@ -380,6 +413,23 @@ def _need_spec_for_task(
         if need_spec.x_id == task.target_claim_id:
             return need_spec
     return None
+
+
+def _has_pending_normalize_task(
+    agenda: tuple[InvestigationTask, ...],
+    target_atom_ids: tuple[str, ...],
+) -> bool:
+    expected = set(target_atom_ids)
+    for task in agenda:
+        if task.task_type != InvestigationTaskType.NORMALIZE_CANDIDATE:
+            continue
+        pending = {
+            str(atom_id)
+            for atom_id in task.metadata.get("target_atom_ids", ())
+        }
+        if pending == expected:
+            return True
+    return False
 
 
 def _task_fingerprint(task: InvestigationTask) -> tuple[object, ...]:
