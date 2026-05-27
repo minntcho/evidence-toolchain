@@ -53,6 +53,21 @@ class LocalInvestigationRunner:
         )
         return self._execute_task(state, task)
 
+    def run_agenda(
+        self,
+        state: InvestigationState,
+        *,
+        max_steps: int,
+    ) -> InvestigationState:
+        """현재 agenda에 이미 올라온 task chain만 deterministic하게 실행합니다."""
+
+        next_state = state
+        for _ in range(max(0, max_steps)):
+            if not next_state.agenda:
+                return next_state
+            next_state = self.run_once(next_state)
+        return next_state
+
     def _plan_next_tasks(self, state: InvestigationState) -> InvestigationState:
         plan = self.planner.plan_next_tasks(state)
         next_state = replace(
