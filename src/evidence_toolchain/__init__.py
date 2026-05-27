@@ -51,6 +51,13 @@ from evidence_toolchain.reports import (
     emit_evidence_report,
     write_evidence_report,
 )
+from evidence_toolchain.resolution import (
+    ClaimResolution,
+    EvidenceResolutionGraph,
+    ResolutionEdge,
+    ResolutionRelation,
+    ResolutionStatus,
+)
 from evidence_toolchain.routers import ObservationRouter, RuleObservationRouter
 from evidence_toolchain.runners import run_capability_steps, run_document
 from evidence_toolchain.runtime import (
@@ -73,6 +80,11 @@ __all__ = [
     "NeedSpec",
     "NeedType",
     "derive_need_spec",
+    "ResolutionRelation",
+    "ResolutionStatus",
+    "ResolutionEdge",
+    "ClaimResolution",
+    "EvidenceResolutionGraph",
     "SimpleTextAtomizer",
     "atomize_inventory",
     "AttachmentBundle",

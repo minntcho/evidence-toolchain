@@ -232,14 +232,20 @@ NEEDS_REVIEW
 
 ## 현재 구현된 것
 
-현재 repository는 ingestion normalization, atom candidate contract, 그리고
-X claim을 NeedSpec으로 낮추는 baseline contract를 갖고 있습니다.
+현재 repository는 ingestion normalization, atom candidate contract,
+X claim을 NeedSpec으로 낮추는 baseline contract, 그리고 X-Y graph record contract를
+갖고 있습니다.
 
 ```text
 DeclaredClaim
 Need
 NeedSpec
 NeedType
+ResolutionRelation
+ResolutionStatus
+ResolutionEdge
+ClaimResolution
+EvidenceResolutionGraph
 AttachmentBundle
 RawAttachment
 RouteDecision
@@ -277,15 +283,24 @@ derive_need_spec
 `site_identity`, `supplier_identity` need로 낮춥니다. 이 함수는 검색 요구사항을 만들 뿐
 EvidenceAtom retrieval이나 support 판정은 수행하지 않습니다.
 
+`ResolutionEdge`는 `x_id`, `atom_id`, `need_id`, `relation`, `basis`, `confidence`,
+`issues`를 보존하는 graph edge record입니다. `ClaimResolution`은 하나의 X claim에 대한
+status, edge ids, supporting/rejected atom ids, missing need ids를 보존합니다.
+`EvidenceResolutionGraph`는 bundle 안의 claim ids, atom ids, edge, resolution을 묶습니다.
+`ResolutionRelation`과 `ResolutionStatus`는 v0 string vocabulary입니다.
+
+이 계약들은 solver가 아닙니다. 현재 구현은 edge와 resolution을 계산하지 않고,
+계산된 결과를 담을 수 있는 public-ish shape만 제공합니다.
+
 ## 아직 구현하지 않은 것
 
 다음은 architecture target이지만 아직 구현된 runtime contract가 아닙니다.
 
 ```text
-EvidenceResolutionGraph
 hard gate / soft score resolver
 aggregation support solver
 derivation support solver
+support set selection
 LLM/VLM atomizer adapter
 OCR/VLM interrogation loop
 archive recursive expansion
@@ -299,7 +314,7 @@ manual review queue output
 EvidenceInventory -> NeedSpec 없는 simple resolver로 가지 않는다.
 먼저 X model과 NeedSpec을 정의한다.
 그 다음 atom retrieval과 ResolutionGraph edge contract를 연다.
-그 다음 support set solving과 review queue를 붙인다.
+그 다음 hard gate / soft score resolver, support set solving, review queue를 붙인다.
 ```
 
 ## 설계 원칙
