@@ -52,7 +52,9 @@ InvestigationTask
 InvestigationTaskResult
 AdapterAcceptanceCheck
 AdapterAcceptanceReport
+AttachmentReaderPort
 run_basic_resolution_adapter_acceptance
+run_reader_resolution_adapter_acceptance
 ```
 
 이 목록은 downstream policy를 정의하지 않습니다. 어디까지가 core evidence state인지,
