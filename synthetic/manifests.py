@@ -55,6 +55,53 @@ class SyntheticCaseManifest:
             },
         }
 
+    def to_experiment_manifest_payload(self) -> dict[str, object]:
+        truth = self.ground_truth
+        return {
+            "schema_version": "experiment_manifest_v0",
+            "experiment_id": self.case_id,
+            "bundle_id": f"{self.case_id}_bundle",
+            "attachments": [
+                {
+                    "attachment_id": f"{self.case_id}_evidence",
+                    "path": "evidence.txt",
+                    "declared_media_type": "text/plain",
+                }
+            ],
+            "claims": [
+                {
+                    "x_id": "x_usage_amount_001",
+                    "fields": {
+                        "amount": truth["amount"],
+                        "unit": truth["unit"],
+                    },
+                }
+            ],
+            "budget": {"max_iterations": 3},
+            "metadata": {
+                "case_id": self.case_id,
+                "source": "synthetic_generator",
+                "ground_truth_keys": sorted(str(key) for key in truth),
+            },
+        }
+
+    def to_expected_behavior_payload(self) -> dict[str, object]:
+        return {
+            "claim_resolutions": [
+                {
+                    "x_id": "x_usage_amount_001",
+                    "status": "supported_direct",
+                    "missing_need_ids": [],
+                    "supporting_atom_types": ["usage_amount"],
+                    "rejected_atom_types": [],
+                }
+            ],
+            "metadata": {
+                "case_id": self.case_id,
+                "source": "synthetic_generator",
+            },
+        }
+
 
 def load_manifest(case_id: str) -> SyntheticCaseManifest:
     path = MANIFEST_DIR / f"{case_id}.json"

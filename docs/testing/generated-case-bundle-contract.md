@@ -9,7 +9,9 @@ Generated case bundle은 synthetic evidence generation이 commit하는 test targ
 ```text
 generated/<case_id>/
 +-- evidence.<ext>
-`-- expected.json
++-- expected.json
++-- experiment.json
+`-- expected-behavior.json
 ```
 
 Case directory는 가장 작은 complete generated artifact입니다. Input material과 comparison target을 함께 두어 test가 real consumer가 실행할 path와 같은 path를 실행할 수 있게 합니다.
@@ -24,17 +26,26 @@ manifest
 -> compare with generated/<case_id>/expected.json
 ```
 
+The same generated directory can drive the experiment harness:
+
+```text
+generated/<case_id>/experiment.json
+-> evidence-toolchain run-experiment
+-> ExperimentRunTrace
+-> compare with generated/<case_id>/expected-behavior.json
+```
+
 ## Evidence 파일
 
 `evidence.<ext>`는 toolchain이 읽는 file입니다.
 
 첫 generator foundation에서는 `evidence.txt`를 control fixture로 사용하는 것이 허용됩니다. PDF, OCR, image dependency를 추가하지 않고 deterministic metadata와 content를 담을 수 있기 때문입니다. 이후 milestone에서는 `evidence.pdf`, `evidence.jpg`, `evidence.png`, spreadsheet format을 format family별 slice로 추가할 수 있습니다.
 
-Extension은 test surface의 일부입니다. Tool selection은 container, media type, document condition에 자주 의존하므로, 새 file format은 하나의 broad generator rewrite에 묶기보다 separate slice로 도입해야 합니다.
+Extension은 test surface의 일부입니다. Tool selection은 container, media type, document condition을 자주 보존하므로, 새 file format은 하나의 broad generator rewrite로 묶기보다 separate slice로 진입해야 합니다.
 
 ## Expected 파일
 
-`expected.json`은 generated case의 test oracle입니다.
+`expected.json`는 generated case의 test oracle입니다.
 
 이 file은 generated artifact, Ground truth, Expected toolchain behavior를 설명해야 합니다. Core package가 Downstream decision을 내리게 해서는 안 됩니다.
 
@@ -73,6 +84,21 @@ Minimum shape:
 
 Ground truth는 synthetic world가 알고 있는 value입니다. Expected toolchain behavior는 evidence toolchain이 observe, plan, extract, issue, 또는 review로 보내야 하는 behavior입니다. 이 둘을 분리하면 synthetic truth가 automatic trust가 되는 일을 막습니다.
 
+## Experiment harness files
+
+`experiment.json`는 generated evidence file과 최소 declared claim을 묶습니다. 현재 slice에서는 deterministic resolution cycle이 안정적으로 처리하는 `amount` + `unit` claim만 생성합니다. site, supplier, activity, period truth는 `expected.json`에 남아 있지만, 아직 resolver authority로 승격하지 않습니다.
+
+`expected-behavior.json`는 generated case가 현재 harness에서 만들어야 하는 claim resolution expectation입니다. 이 파일은 `run-experiment`의 `--expected` 입력으로 사용할 수 있습니다.
+
+Example:
+
+```powershell
+evidence-toolchain run-experiment .\generated\utility_bill_basic\experiment.json `
+  --trace-out .\generated\utility_bill_basic\out\trace.json `
+  --expected .\generated\utility_bill_basic\expected-behavior.json `
+  --expected-report-out .\generated\utility_bill_basic\out\expected-report.json
+```
+
 ## 강하게 assert할 것
 
 Test는 다음을 강하게 assert할 수 있습니다.
@@ -80,10 +106,13 @@ Test는 다음을 강하게 assert할 수 있습니다.
 - generated case directory existence
 - `evidence.<ext>` existence
 - `expected.json` existence
+- `experiment.json` existence
+- `expected-behavior.json` existence
 - stable `case_id`
 - expected artifact format과 media type
 - Ground truth와 Expected toolchain behavior separation
 - 현재 format slice에 대한 selected capability, fallback, issue
+- generated experiment files can drive `run-experiment`
 
 ## freeze하지 말아야 할 것
 
@@ -94,11 +123,14 @@ Test는 다음을 freeze하지 말아야 합니다.
 - final renderer internal
 - future PDF, image, spreadsheet generation library
 - Downstream adapter schema
+- future full-claim resolver coverage for site, supplier, activity, or period
 
 ## 해서는 안 되는 일
 
 Generated case bundle은 core runtime authority가 되면 안 됩니다.
 
-Core package는 test에서 `evidence.<ext>`를 읽을 수 있지만, synthetic generator를 import하거나 `expected.json`을 runtime policy source로 취급하면 안 됩니다.
+Core package는 test에서 `evidence.<ext>`를 읽을 수 있지만 synthetic generator를 import하거나 `expected.json`을 runtime policy source로 취급하면 안 됩니다.
 
-`expected.json`은 OCR, table extraction, manual review가 expected라고 말할 수 있습니다. 하지만 business claim이 finally valid, committed, reportable, policy-approved하다고 말하면 안 됩니다. 그런 Downstream judgment는 core package 밖의 adapter, validator, review workflow에 속합니다.
+`expected.json`는 OCR, table extraction, manual review가 expected라고 말할 수 있습니다. 하지만 business claim이 finally valid, committed, reportable, policy-approved하다고 말하면 안 됩니다. 그런 Downstream judgment는 core package 밖의 adapter, validator, review workflow에 속합니다.
+
+`expected-behavior.json`도 마찬가지로 runtime authority가 아닙니다. 그것은 generated case가 현재 local harness에서 기대하는 비교값일 뿐입니다.
