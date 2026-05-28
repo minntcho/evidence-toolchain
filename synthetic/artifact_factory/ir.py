@@ -10,14 +10,18 @@ class DocumentIntent:
     archetype: str
     role: str
     carrier: str
+    carrier_profile: str | None = None
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload: dict[str, object] = {
             "document_id": self.document_id,
             "archetype": self.archetype,
             "role": self.role,
             "carrier": self.carrier,
         }
+        if self.carrier_profile is not None:
+            payload["carrier_profile"] = self.carrier_profile
+        return payload
 
 
 @dataclass(frozen=True)
