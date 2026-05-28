@@ -1,5 +1,10 @@
 """Contracts for the synthetic artifact factory testkit."""
 
+from synthetic.artifact_factory.compiler import (
+    compile_ir_to_bundle_plan,
+    compile_scenario_ir,
+    compile_scenario_to_bundle_plan,
+)
 from synthetic.artifact_factory.ir import ConfusionEdge, DocumentIntent, ScenarioIR
 from synthetic.artifact_factory.plans import (
     ArtifactPlan,
@@ -40,4 +45,7 @@ __all__ = [
     "ToolResult",
     "TraceEntry",
     "TraceLayer",
+    "compile_ir_to_bundle_plan",
+    "compile_scenario_ir",
+    "compile_scenario_to_bundle_plan",
 ]
