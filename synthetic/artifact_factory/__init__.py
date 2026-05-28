@@ -25,6 +25,10 @@ from synthetic.artifact_factory.tools import (
     ToolRegistry,
     ToolResult,
 )
+from synthetic.artifact_factory.tool_planner import (
+    compile_bundle_plan_to_tool_plan,
+    compile_scenario_to_tool_plan,
+)
 
 __all__ = [
     "ArtifactState",
@@ -46,6 +50,8 @@ __all__ = [
     "TraceEntry",
     "TraceLayer",
     "compile_ir_to_bundle_plan",
+    "compile_bundle_plan_to_tool_plan",
     "compile_scenario_ir",
     "compile_scenario_to_bundle_plan",
+    "compile_scenario_to_tool_plan",
 ]
