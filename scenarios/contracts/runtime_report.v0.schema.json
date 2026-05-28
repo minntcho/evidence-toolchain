@@ -6,7 +6,8 @@
     "case_id",
     "status",
     "artifacts",
-    "predicates"
+    "predicates",
+    "links"
   ],
   "additionalProperties": false,
   "properties": {
@@ -29,8 +30,10 @@
           "artifact_id",
           "path",
           "carrier",
+          "reader",
           "reader_status",
-          "observation_count"
+          "observation_count",
+          "issue_count"
         ],
         "additionalProperties": false,
         "properties": {
@@ -49,6 +52,10 @@
               "xlsx"
             ]
           },
+          "reader": {
+            "type": "string",
+            "minLength": 1
+          },
           "reader_status": {
             "type": "string",
             "enum": [
@@ -57,6 +64,10 @@
             ]
           },
           "observation_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "issue_count": {
             "type": "integer",
             "minimum": 0
           }
@@ -76,13 +87,43 @@
           "id": {
             "type": "string"
           },
+          "artifact_id": {
+            "type": "string",
+            "minLength": 1
+          },
           "status": {
             "type": "string",
             "enum": [
               "passed",
               "failed"
             ]
+          },
+          "message": {
+            "type": "string"
           }
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "required": [
+        "manifest",
+        "carrier_trace",
+        "verification_report"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "manifest": {
+          "type": "string",
+          "const": "_synthetic/manifest.json"
+        },
+        "carrier_trace": {
+          "type": "string",
+          "const": "_synthetic/carrier_trace.json"
+        },
+        "verification_report": {
+          "type": "string",
+          "const": "_synthetic/verification_report.json"
         }
       }
     }
