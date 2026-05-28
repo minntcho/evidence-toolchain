@@ -13,6 +13,7 @@ Test는 toolchain의 역할을 정의하는 behavior를 보호해야 합니다. 
 3. [Failure Mode Test Strategy](failure-mode-test-strategy.md)
 4. [Generated Case Bundle Contract](generated-case-bundle-contract.md)
 5. [Adapter Acceptance](adapter-acceptance.md)
+6. [Synthetic E2E Runner Contract](synthetic-e2e-runner-contract.md)
 
 ## 테스트 authority 규칙
 
