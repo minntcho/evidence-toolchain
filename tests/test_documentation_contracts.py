@@ -113,7 +113,10 @@ def test_architecture_doc_summarizes_current_pipeline_and_legacy_report_path():
     assert "LocalInvestigationRunner는 주입된 NormalizationAdapter로 queued normalize_candidate를 실행할 수 있다." in doc
     assert "LocalInvestigationRunner는 atomize_unit_cluster가 만든 atom id를 normalize_candidate follow-up task로 이어 줄 수 있다." in doc
     assert "LocalInvestigationRunner는 주입된 ResolverPort로 draft EvidenceResolutionGraph를 갱신할 수 있다." in doc
+    assert "run_resolution_cycle은 deterministic reference controller로 NeedSpec, gap plan, local runner, resolver를 연결한다." in doc
     assert "LocalInvestigationRunner retrieve_candidate_units 자동 실행" not in doc
+    assert "provider-backed end-to-end EvidenceInventory -> ResolutionGraph orchestration" in doc
+    assert "automatic end-to-end EvidenceInventory -> ResolutionGraph orchestration" not in doc
     assert "기존 `EvidenceDocument -> EvidenceReport` 경로는 compatibility document workflow입니다." in doc
     assert "현재 구현된 것" in doc
     assert "아직 구현하지 않은 것" in doc
@@ -166,6 +169,9 @@ def test_contract_docs_are_indexed_and_define_allowed_boundaries():
         "ResolutionGapPlanner",
         "EvidenceUnitRetrievalResult",
         "CandidateUnitRetriever",
+        "SimpleUnitClusterAtomizer",
+        "EvidenceResolutionRun",
+        "run_resolution_cycle",
         "ResolverPort",
         "InvestigationState",
         "InvestigationTask",
@@ -301,6 +307,7 @@ def test_investigation_loop_boundary_doc_is_indexed_and_keeps_model_authority_bo
     assert "agenda가 있으면 첫 task 하나를 fake/model port로 실행해" in text
     assert "이 runner는 provider SDK, LangGraph, resolver 구현을 직접 import하지 않습니다." in text
     assert "retrieve_candidate_units -> atomize_unit_cluster -> normalize_candidate" in text
+    assert "`run_resolution_cycle`은 이 local runner를 실제 deterministic 부품과 묶는 reference" in text
     assert "fake adapter는 외부 모델을 호출하지 않습니다." in text
 
 
@@ -370,6 +377,9 @@ def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundar
     assert "derive_need_spec" in text
     assert "EvidenceResolutionGraph" in text
     assert "HardGateResolver" in text
+    assert "EvidenceResolutionRun" in text
+    assert "SimpleUnitClusterAtomizer" in text
+    assert "run_resolution_cycle" in text
     assert "ResolutionEdge" in text
     assert "ClaimResolution" in text
     assert "ResolutionRelation" in text
@@ -381,6 +391,8 @@ def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundar
     assert "정규화는 support/contradict 판단이 아니다." in text
     assert "DeterministicNormalizer는 resolver가 아니다." in text
     assert "DeterministicNormalizer는 optional/reference adapter입니다." in text
+    assert "provider/model-backed normalization orchestration" in text
+    assert "automatic normalization orchestration" not in text
     assert "core flow는 normalizer를 자동 호출하지 않는다." in text
     assert "LLM/VLM normalizer도 NormalizationAdapter contract를 따라야 합니다." in text
     assert "site/supplier alias와 ambiguous period는 deterministic scope 밖입니다." in text

@@ -219,6 +219,11 @@ import하지 않고, 주입된 port 결과를 `draft_graph`에 저장하며 `sta
 같은 task fingerprint가 다시 나타나면 `repeated_task_detected`로 멈춥니다.
 runner가 agenda, completed task, unit, atom, normalization, event를 전혀 바꾸지 못하면 `no_progress_detected`로 멈춥니다.
 
+`run_resolution_cycle`은 이 local runner를 실제 deterministic 부품과 묶는 reference
+controller입니다. provider 없이 `ResolutionGapPlanner -> CandidateUnitRetriever ->
+SimpleUnitClusterAtomizer -> DeterministicNormalizer -> HardGateResolver` 순서를 실행해
+초기 missing graph가 investigation 이후 draft graph로 갱신되는지 실연합니다.
+
 다음은 아직 구현하지 않습니다.
 
 ```text

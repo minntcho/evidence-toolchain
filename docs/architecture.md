@@ -33,6 +33,7 @@ LocalInvestigationRunner는 주입된 CandidateUnitRetriever로 retrieve_candida
 LocalInvestigationRunner는 주입된 NormalizationAdapter로 queued normalize_candidate를 실행할 수 있다.
 LocalInvestigationRunner는 atomize_unit_cluster가 만든 atom id를 normalize_candidate follow-up task로 이어 줄 수 있다.
 LocalInvestigationRunner는 주입된 ResolverPort로 draft EvidenceResolutionGraph를 갱신할 수 있다.
+run_resolution_cycle은 deterministic reference controller로 NeedSpec, gap plan, local runner, resolver를 연결한다.
 Investigation loop는 부족한 단서를 채우기 위한 task를 오케스트레이션한다.
 LLM/VLM은 resolver authority가 아니다.
 ```
@@ -150,6 +151,13 @@ NormalizationResult를 사용해 `draft_graph`를 갱신할 수 있습니다. ru
 `HardGateResolver`를 직접 import하지 않고, draft graph 저장과 `state_updated` event 기록만
 담당합니다.
 
+`run_resolution_cycle`은 provider 없이 현재 deterministic 부품을 실제 순서로 묶는 reference
+controller입니다. 이 controller는 `DeclaredClaim`을 `NeedSpec`으로 낮추고, need를
+정규화한 뒤 초기 `EvidenceResolutionGraph`의 gap을 `ResolutionGapPlanner`로 agenda화합니다.
+그 다음 `CandidateUnitRetriever`, `SimpleUnitClusterAtomizer`, `DeterministicNormalizer`,
+`HardGateResolver`를 주입한 `LocalInvestigationRunner`로 agenda를 실행합니다. 이 경로는
+실제 provider adapter가 아니라, core 부품들이 함께 굴러가는지 검증하는 local demo path입니다.
+
 ## Compatibility document workflow
 
 기존 `EvidenceDocument -> EvidenceReport` 경로는 compatibility document workflow입니다.
@@ -198,6 +206,7 @@ ResolutionGapPlan
 ResolutionGapPlanner
 EvidenceUnitRetrievalResult
 CandidateUnitRetriever
+SimpleUnitClusterAtomizer
 InvestigationState
 InvestigationTask
 InvestigationTaskResult
@@ -205,6 +214,8 @@ LLM/VLM model port protocols
 ResolverPort
 Fake model adapters
 LocalInvestigationRunner
+EvidenceResolutionRun
+run_resolution_cycle
 ```
 
 Reader baseline은 plain text, CSV/TSV, PDF profile, PDF text/word extraction,
@@ -216,7 +227,7 @@ image profile, XLSX sheet/cell inventory를 지원합니다. Archive, Office, em
 다음은 architecture target이지만 아직 닫힌 구현 축이 아닙니다.
 
 ```text
-automatic end-to-end EvidenceInventory -> ResolutionGraph orchestration
+provider-backed end-to-end EvidenceInventory -> ResolutionGraph orchestration
 soft score resolver
 aggregation support solver
 derivation support solver

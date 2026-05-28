@@ -334,6 +334,9 @@ ResolutionEdge
 ClaimResolution
 EvidenceResolutionGraph
 HardGateResolver
+EvidenceResolutionRun
+SimpleUnitClusterAtomizer
+run_resolution_cycle
 AttachmentBundle
 RawAttachment
 RouteDecision
@@ -382,6 +385,13 @@ status, edge ids, supporting/rejected atom ids, missing need ids를 보존합니
 v0 hard-gate edge와 claim resolution을 만듭니다. 이 resolver는 normalizer를 자동 호출하지
 않으며, aggregation, derivation, soft score, alias 판단은 수행하지 않습니다.
 
+`run_resolution_cycle`은 이 부품들을 provider 없이 실제 순서로 연결하는 deterministic
+reference controller입니다. 이 경로는 `NeedSpec` 생성, need normalization, 초기 missing
+graph, gap planning, candidate unit retrieval, unit-cluster atomization, atom normalization,
+draft graph refresh를 한 번에 실연합니다. 그래도 support/contradict edge는
+`HardGateResolver`가 만들고, reader/atomizer/normalizer/runner는 resolver authority가
+아닙니다.
+
 정규화 계약도 마찬가지입니다. 현재 구현은 `NormalizationResult`와 normalized value shape,
 `NormalizationAdapter` interface, 그리고 명확한 atom/need만 처리하는
 `DeterministicNormalizer` v0를 제공합니다. 이 adapter는 비교 재료만 만들고
@@ -399,7 +409,7 @@ derivation support solver
 support set selection
 site/supplier alias normalizer
 ambiguous period normalizer
-automatic normalization orchestration
+provider/model-backed normalization orchestration
 LLM/VLM atomizer adapter
 OCR/VLM interrogation loop
 archive recursive expansion
