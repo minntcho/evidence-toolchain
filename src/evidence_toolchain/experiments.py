@@ -157,6 +157,12 @@ def load_experiment_manifest(path: str | Path) -> ExperimentManifest:
     return experiment_manifest_from_dict(data)
 
 
+def load_experiment_expected_behavior(path: str | Path) -> ExperimentExpectedBehavior:
+    expected_path = Path(path)
+    data = json.loads(expected_path.read_text(encoding="utf-8"))
+    return experiment_expected_behavior_from_dict(data)
+
+
 def build_experiment_run_trace(
     *,
     manifest: ExperimentManifest,
@@ -284,6 +290,18 @@ def experiment_manifest_from_dict(data: dict[str, Any]) -> ExperimentManifest:
     )
 
 
+def experiment_expected_behavior_from_dict(
+    data: dict[str, Any],
+) -> ExperimentExpectedBehavior:
+    return ExperimentExpectedBehavior(
+        claim_resolutions=tuple(
+            _expected_claim_resolution_from_dict(item)
+            for item in _required_list(data, "claim_resolutions")
+        ),
+        metadata=dict(data.get("metadata", {})),
+    )
+
+
 def _attachment_spec_from_dict(data: Any) -> ExperimentAttachmentSpec:
     if not isinstance(data, dict):
         raise ValueError("attachments 항목은 object여야 합니다.")
@@ -292,6 +310,25 @@ def _attachment_spec_from_dict(data: Any) -> ExperimentAttachmentSpec:
         path=str(data["path"]),
         declared_media_type=_optional_string(data.get("declared_media_type")),
         detected_media_type=_optional_string(data.get("detected_media_type")),
+        metadata=dict(data.get("metadata", {})),
+    )
+
+
+def _expected_claim_resolution_from_dict(data: Any) -> ExpectedClaimResolution:
+    if not isinstance(data, dict):
+        raise ValueError("claim_resolutions items must be objects")
+    return ExpectedClaimResolution(
+        x_id=str(data["x_id"]),
+        status=_optional_string(data.get("status")),
+        missing_need_ids=_optional_string_tuple_or_none(
+            data.get("missing_need_ids")
+        ),
+        supporting_atom_types=_optional_string_tuple_or_none(
+            data.get("supporting_atom_types")
+        ),
+        rejected_atom_types=_optional_string_tuple_or_none(
+            data.get("rejected_atom_types")
+        ),
         metadata=dict(data.get("metadata", {})),
     )
 
@@ -359,6 +396,14 @@ def _optional_string(value: Any) -> str | None:
     if value is None:
         return None
     return str(value)
+
+
+def _optional_string_tuple_or_none(value: Any) -> tuple[str, ...] | None:
+    if value is None:
+        return None
+    if not isinstance(value, list | tuple):
+        raise ValueError("expected value must be a list when provided")
+    return tuple(str(item) for item in value)
 
 
 def _to_json_compatible(value: Any) -> Any:
