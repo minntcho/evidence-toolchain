@@ -15,6 +15,9 @@ Downstream system이 입력 claim과 증거 후보를 비교할 수 있게 준�
 ```text
 AttachmentBundle -> RawAttachment -> EvidenceArtifact -> EvidenceUnit -> EvidenceInventory
 EvidenceInventory -> EvidenceAtom -> NeedSpec -> NormalizationResult -> EvidenceResolutionGraph
+ExperimentManifest -> AttachmentBundle + DeclaredClaim + InvestigationBudget
+ExperimentRunTrace -> ExperimentManifest + EvidenceResolutionRun
+ExperimentExpectedBehavior + ExperimentRunTrace -> ExpectedBehaviorReport
 InvestigationState / InvestigationTask / InvestigationTaskResult
 ```
 
@@ -34,6 +37,9 @@ LocalInvestigationRunner는 주입된 NormalizationAdapter로 queued normalize_c
 LocalInvestigationRunner는 atomize_unit_cluster가 만든 atom id를 normalize_candidate follow-up task로 이어 줄 수 있다.
 LocalInvestigationRunner는 주입된 ResolverPort로 draft EvidenceResolutionGraph를 갱신할 수 있다.
 run_resolution_cycle은 deterministic reference controller로 NeedSpec, gap plan, local runner, resolver를 연결한다.
+ExperimentManifest는 재현 가능한 실험 입력을 AttachmentBundle, DeclaredClaim, InvestigationBudget으로 고정한다.
+ExperimentRunTrace는 실행 결과를 보존하지만 ExpectedBehavior oracle이나 Downstream verdict가 아니다.
+ExpectedBehavior oracle은 trace와 test expectation을 비교하지만 runtime authority가 아니다.
 Investigation loop는 부족한 단서를 채우기 위한 task를 오케스트레이션한다.
 LLM/VLM은 resolver authority가 아니다.
 ```
@@ -191,6 +197,12 @@ EvidenceInventory
 EvidenceAtom
 AtomizerResult
 SimpleTextAtomizer
+ExperimentAttachmentSpec
+ExperimentManifest
+ExperimentRunTrace
+ExperimentExpectedBehavior
+ExpectedClaimResolution
+ExpectedBehaviorReport
 DeclaredClaim
 Need
 NeedSpec

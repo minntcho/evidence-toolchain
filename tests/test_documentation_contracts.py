@@ -355,6 +355,68 @@ def test_ingestion_normalization_doc_is_indexed_and_layered():
     assert "해서는 안 되는 일" in text
 
 
+def test_experiment_manifest_doc_is_indexed_and_keeps_oracle_out_of_input_contract():
+    doc_path = Path("docs/experiment-manifest.md")
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+    contracts_index = Path("docs/contracts/README.md").read_text(encoding="utf-8")
+
+    assert doc_path.exists()
+    assert "experiment-manifest.md" in docs_index
+    assert "ExperimentManifest" in contracts_index
+    assert "ExperimentAttachmentSpec" in contracts_index
+
+    text = doc_path.read_text(encoding="utf-8")
+    assert "실험 manifest" in text
+    assert "AttachmentBundle" in text
+    assert "DeclaredClaim" in text
+    assert "InvestigationBudget" in text
+    assert "allowed_capabilities" in text
+    assert "ExpectedBehavior oracle은 다음 slice" in text
+    assert "Downstream judgment를 encode하지 않는다" in text
+
+
+def test_experiment_run_trace_doc_is_indexed_and_separates_trace_from_oracle():
+    doc_path = Path("docs/experiment-run-trace.md")
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+    contracts_index = Path("docs/contracts/README.md").read_text(encoding="utf-8")
+
+    assert doc_path.exists()
+    assert "experiment-run-trace.md" in docs_index
+    assert "ExperimentRunTrace" in contracts_index
+
+    text = doc_path.read_text(encoding="utf-8")
+    assert "실행 trace" in text
+    assert "ExperimentManifest" in text
+    assert "EvidenceResolutionRun" in text
+    assert "initial_graph" in text
+    assert "gap_plan" in text
+    assert "investigation_state" in text
+    assert "final_graph" in text
+    assert "ExpectedBehavior oracle이 아니다" in text
+    assert "Downstream verdict가 아니다" in text
+
+
+def test_expected_behavior_oracle_doc_is_indexed_and_keeps_policy_out():
+    doc_path = Path("docs/expected-behavior-oracle.md")
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+    contracts_index = Path("docs/contracts/README.md").read_text(encoding="utf-8")
+
+    assert doc_path.exists()
+    assert "expected-behavior-oracle.md" in docs_index
+    assert "ExperimentExpectedBehavior" in contracts_index
+    assert "ExpectedBehaviorReport" in contracts_index
+
+    text = doc_path.read_text(encoding="utf-8")
+    assert "ExpectedBehavior oracle" in text
+    assert "ExperimentRunTrace" in text
+    assert "ExpectedClaimResolution" in text
+    assert "ExpectedBehaviorReport" in text
+    assert "claim_status" in text
+    assert "supporting_atom_types" in text
+    assert "test expectation" in text
+    assert "runtime authority가 아니다" in text
+
+
 def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundaries():
     doc_path = Path("docs/evidence-linking-architecture.md")
     docs_index = Path("docs/index.md").read_text(encoding="utf-8")
