@@ -48,6 +48,12 @@ from synthetic.artifact_factory.tool_planner import (
     compile_bundle_plan_to_tool_plan,
     compile_scenario_to_tool_plan,
 )
+from synthetic.artifact_factory.xlsx_tools import (
+    SupplierBreakdownWorkbookBuilderTool,
+    XlsxWorkbookRendererTool,
+    build_xlsx_artifact_bundle,
+    xlsx_execution_registry,
+)
 
 __all__ = [
     "ArtifactState",
@@ -63,6 +69,7 @@ __all__ = [
     "ScenarioDocumentSpec",
     "ScenarioIR",
     "ScenarioSpec",
+    "SupplierBreakdownWorkbookBuilderTool",
     "SyntheticTool",
     "ToolContext",
     "ToolDescriptor",
@@ -73,8 +80,10 @@ __all__ = [
     "ToolResult",
     "TraceEntry",
     "TraceLayer",
+    "XlsxWorkbookRendererTool",
     "artifact_plan_states",
     "build_csv_artifact_bundle",
+    "build_xlsx_artifact_bundle",
     "compile_ir_to_bundle_plan",
     "compile_bundle_plan_to_tool_plan",
     "compile_scenario_ir",
@@ -86,4 +95,5 @@ __all__ = [
     "execute_tool_plan",
     "infer_state_type",
     "validate_tool_plan_against_registry",
+    "xlsx_execution_registry",
 ]
