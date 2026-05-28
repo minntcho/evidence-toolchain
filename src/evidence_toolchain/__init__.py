@@ -1,6 +1,11 @@
 """문서 증거의 observation, planning, extraction, reporting을 다루는 패키지입니다."""
 
 from evidence_toolchain.artifacts import EvidenceDocument
+from evidence_toolchain.adapter_acceptance import (
+    AdapterAcceptanceCheck,
+    AdapterAcceptanceReport,
+    run_basic_resolution_adapter_acceptance,
+)
 from evidence_toolchain.atoms import AtomizerResult, EvidenceAtom, EvidenceAtomType
 from evidence_toolchain.atomizers import SimpleTextAtomizer, atomize_inventory
 from evidence_toolchain.capabilities import (
@@ -136,6 +141,9 @@ from evidence_toolchain.runtime import (
 
 __all__ = [
     "EvidenceDocument",
+    "AdapterAcceptanceCheck",
+    "AdapterAcceptanceReport",
+    "run_basic_resolution_adapter_acceptance",
     "EvidenceCapability",
     "EvidenceEvent",
     "EvidenceIssue",

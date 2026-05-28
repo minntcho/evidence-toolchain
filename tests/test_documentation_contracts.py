@@ -176,6 +176,9 @@ def test_contract_docs_are_indexed_and_define_allowed_boundaries():
         "InvestigationState",
         "InvestigationTask",
         "InvestigationTaskResult",
+        "AdapterAcceptanceCheck",
+        "AdapterAcceptanceReport",
+        "run_basic_resolution_adapter_acceptance",
     ):
         assert contract_name in contracts_text
     assert "contracts/README.md" in docs_index
@@ -194,6 +197,7 @@ def test_testing_strategy_docs_are_indexed_and_preserve_test_authority():
         "synthetic-evidence-cases.md",
         "router-planner-test-strategy.md",
         "failure-mode-test-strategy.md",
+        "adapter-acceptance.md",
     ]
     docs_index = Path("docs/index.md").read_text(encoding="utf-8")
     testing_index = Path("docs/testing/README.md")
