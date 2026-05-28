@@ -12,6 +12,9 @@ dependencies = [
     "pdfplumber>=0.11",
 ]
 
+[project.scripts]
+evidence-toolchain = "evidence_toolchain.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src", "."]
 include = ["evidence_toolchain*", "synthetic*"]

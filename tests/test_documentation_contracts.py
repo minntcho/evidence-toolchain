@@ -417,6 +417,22 @@ def test_expected_behavior_oracle_doc_is_indexed_and_keeps_policy_out():
     assert "runtime authority가 아니다" in text
 
 
+def test_experiment_cli_runner_doc_is_indexed_and_keeps_provider_authority_out():
+    doc_path = Path("docs/experiment-cli-runner.md")
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+
+    assert doc_path.exists()
+    assert "experiment-cli-runner.md" in docs_index
+
+    text = doc_path.read_text(encoding="utf-8")
+    assert "run-experiment" in text
+    assert "ExperimentManifest" in text
+    assert "ExperimentRunTrace" in text
+    assert "ExpectedBehaviorReport" in text
+    assert "provider tools" in text
+    assert "downstream policy sufficiency" in text
+
+
 def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundaries():
     doc_path = Path("docs/evidence-linking-architecture.md")
     docs_index = Path("docs/index.md").read_text(encoding="utf-8")
