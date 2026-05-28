@@ -3,7 +3,11 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from synthetic.artifact_factory.e2e import build_synthetic_case, verify_generated_case
+from synthetic.artifact_factory.e2e import (
+    build_synthetic_case,
+    run_synthetic_case,
+    verify_generated_case,
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -17,6 +21,10 @@ def main(argv: list[str] | None = None) -> int:
     verify_parser = subparsers.add_parser("verify")
     verify_parser.add_argument("case_dir")
 
+    run_parser = subparsers.add_parser("run")
+    run_parser.add_argument("scenario")
+    run_parser.add_argument("--out", required=True)
+
     args = parser.parse_args(argv)
     if args.command == "build":
         build_synthetic_case(Path(args.scenario), Path(args.out))
@@ -24,6 +32,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "verify":
         report = verify_generated_case(Path(args.case_dir))
         return 0 if report.status == "passed" else 1
+    if args.command == "run":
+        result = run_synthetic_case(Path(args.scenario), Path(args.out))
+        return 0 if result.runtime_report.status == "passed" else 1
     raise AssertionError(f"Unhandled command: {args.command}")
 
 

@@ -20,11 +20,14 @@ from synthetic.artifact_factory.csv_tools import (
     csv_execution_registry,
 )
 from synthetic.artifact_factory.e2e import (
+    RuntimeReport,
     SyntheticCaseBuildResult,
+    SyntheticCaseRunResult,
     SyntheticScenarioCase,
     VerificationReport,
     build_synthetic_case,
     load_scenario_case,
+    run_synthetic_case,
     verify_generated_case,
 )
 from synthetic.artifact_factory.executor import (
@@ -80,6 +83,7 @@ __all__ = [
     "ErpExportBuilderTool",
     "GeneratedArtifactBundle",
     "PdfTextRendererTool",
+    "RuntimeReport",
     "ScenarioConfusionSpec",
     "ScenarioDocumentSpec",
     "ScenarioIR",
@@ -87,6 +91,7 @@ __all__ = [
     "SupplierMonthlyStatementBuilderTool",
     "SupplierBreakdownWorkbookBuilderTool",
     "SyntheticCaseBuildResult",
+    "SyntheticCaseRunResult",
     "SyntheticScenarioCase",
     "SyntheticTool",
     "ToolContext",
@@ -117,6 +122,7 @@ __all__ = [
     "infer_state_type",
     "load_scenario_case",
     "pdf_execution_registry",
+    "run_synthetic_case",
     "validate_tool_plan_against_registry",
     "verify_generated_case",
     "xlsx_execution_registry",

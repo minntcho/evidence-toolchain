@@ -21,7 +21,7 @@ evidence-synthetic = "synthetic.artifact_factory.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src", "."]
-include = ["evidence_toolchain*", "synthetic*"]
+include = ["evidence_toolchain*", "evidence_synthetic_runtime*", "synthetic*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src", "."]

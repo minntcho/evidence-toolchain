@@ -79,6 +79,9 @@ runtime_tmp/input
 The reader runtime sees input/ only. It must not read `_synthetic/`, latent
 oracle files, render plans, or carrier traces.
 
+`run` reaches the evidence-toolchain reader through a separate runtime bridge;
+the synthetic artifact factory package remains generation and verification code.
+
 The runtime command writes:
 
 ```text
@@ -125,22 +128,33 @@ The runtime report records reader and predicate outcomes:
       "artifact_id": "export",
       "path": "input/export.csv",
       "carrier": "csv",
+      "reader": "delimited_table_reader",
       "reader_status": "ingested",
-      "observation_count": 3
+      "observation_count": 3,
+      "issue_count": 0
     }
   ],
   "predicates": [
     {
       "id": "artifact_ingested",
-      "status": "passed"
+      "artifact_id": "export",
+      "status": "passed",
+      "message": "export was ingested by delimited_table_reader."
     },
     {
       "id": "minimum_observation_count",
+      "artifact_id": "export",
       "status": "passed",
       "actual": 3,
-      "expected_min": 1
+      "expected_min": 1,
+      "message": "export produced 3 observations; expected at least 1."
     }
-  ]
+  ],
+  "links": {
+    "manifest": "_synthetic/manifest.json",
+    "carrier_trace": "_synthetic/carrier_trace.json",
+    "verification_report": "_synthetic/verification_report.json"
+  }
 }
 ```
 

@@ -50,19 +50,33 @@ def test_runtime_report_schema_captures_reader_and_predicate_results() -> None:
     schema = _load_json("scenarios/contracts/runtime_report.v0.schema.json")
 
     assert schema["$id"] == "synthetic.runtime_report.v0"
-    assert schema["required"] == ["case_id", "status", "artifacts", "predicates"]
+    assert schema["required"] == [
+        "case_id",
+        "status",
+        "artifacts",
+        "predicates",
+        "links",
+    ]
     assert schema["properties"]["status"]["enum"] == ["passed", "failed"]
     artifact = schema["properties"]["artifacts"]["items"]
     assert artifact["required"] == [
         "artifact_id",
         "path",
         "carrier",
+        "reader",
         "reader_status",
         "observation_count",
+        "issue_count",
     ]
     assert artifact["properties"]["carrier"]["enum"] == ["csv", "xlsx"]
     predicate = schema["properties"]["predicates"]["items"]
     assert predicate["properties"]["status"]["enum"] == ["passed", "failed"]
+    assert "message" in predicate["properties"]
+    assert schema["properties"]["links"]["required"] == [
+        "manifest",
+        "carrier_trace",
+        "verification_report",
+    ]
 
 
 def test_synthetic_e2e_runner_contract_doc_sets_v0_program_boundary() -> None:
