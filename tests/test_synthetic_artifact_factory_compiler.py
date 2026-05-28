@@ -65,6 +65,7 @@ def test_compile_ir_to_bundle_plan_groups_confusions_by_artifact() -> None:
     payload = bundle_plan.to_dict()
 
     assert payload["scenario_id"] == "supplier_correction_bundle_001"
+    assert payload["rng_seed"] == 14821
     assert payload["expected_syndrome"] == {
         "conflicting_values": True,
         "correction_relation_required": True,

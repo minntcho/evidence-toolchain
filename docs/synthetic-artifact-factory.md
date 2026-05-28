@@ -215,6 +215,13 @@ ToolInvocation
 모든 random은 invocation seed와 ToolContext의 rng에서 나와야 합니다. 전역 random을 쓰면
 재현 가능한 synthetic fixture가 아닙니다.
 
+```text
+ScenarioIR.rng_seed -> BundlePlan.rng_seed -> ToolInvocation.seed
+```
+
+Phase 1 fixed-stack planner는 이 seed를 invocation 순서에 따라 안정적으로 나누어 줍니다.
+이 값은 생성 tool의 재현성을 위한 입력일 뿐이며 runtime evidence authority가 아닙니다.
+
 ### ToolResult
 
 Tool은 output state와 검증 가능한 실행 정보를 반환합니다.

@@ -91,6 +91,22 @@ def test_compile_scenario_to_tool_plan_composes_scenario_compilers() -> None:
     assert direct == staged
 
 
+def test_compile_scenario_to_tool_plan_assigns_deterministic_invocation_seeds() -> None:
+    tool_plan = compile_scenario_to_tool_plan(_supplier_correction_spec())
+    payload = tool_plan.to_dict()
+
+    assert payload["rng_seed"] == 14821
+    assert [item["seed"] for item in payload["invocations"][:4]] == [
+        14822,
+        14823,
+        14824,
+        14825,
+    ]
+    assert len({item["seed"] for item in payload["invocations"]}) == len(
+        payload["invocations"]
+    )
+
+
 def test_compile_bundle_plan_to_tool_plan_rejects_unknown_carrier() -> None:
     bundle_plan = BundlePlan(
         scenario_id="unsupported_carrier",
