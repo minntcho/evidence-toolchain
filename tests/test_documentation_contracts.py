@@ -228,6 +228,9 @@ def test_generated_case_bundle_contract_is_indexed_and_scope_limited():
     assert "case directory" in text
     assert "evidence.<ext>" in text
     assert "expected.json" in text
+    assert "experiment.json" in text
+    assert "expected-behavior.json" in text
+    assert "run-experiment" in text
     assert "Ground truth" in text
     assert "Expected toolchain behavior" in text
     assert "해서는 안 되는 일" in text
