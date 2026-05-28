@@ -102,6 +102,11 @@ from evidence_toolchain.resolution import (
     ResolutionRelation,
     ResolutionStatus,
 )
+from evidence_toolchain.resolution_cycle import (
+    EvidenceResolutionRun,
+    SimpleUnitClusterAtomizer,
+    run_resolution_cycle,
+)
 from evidence_toolchain.routers import ObservationRouter, RuleObservationRouter
 from evidence_toolchain.runners import run_capability_steps, run_document
 from evidence_toolchain.runtime import (
@@ -130,6 +135,8 @@ __all__ = [
     "ClaimResolution",
     "EvidenceResolutionGraph",
     "HardGateResolver",
+    "EvidenceResolutionRun",
+    "SimpleUnitClusterAtomizer",
     "NormalizationAdapter",
     "NormalizationResult",
     "NormalizationTargetKind",
@@ -207,4 +214,5 @@ __all__ = [
     "write_evidence_report",
     "run_capability_steps",
     "run_document",
+    "run_resolution_cycle",
 ]

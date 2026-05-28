@@ -37,6 +37,9 @@ ResolutionGapPlan
 ResolutionGapPlanner
 EvidenceUnitRetrievalResult
 CandidateUnitRetriever
+SimpleUnitClusterAtomizer
+EvidenceResolutionRun
+run_resolution_cycle
 ResolverPort
 InvestigationState
 InvestigationTask
