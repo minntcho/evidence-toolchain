@@ -1,0 +1,24 @@
+scenario_id: supplier_breakdown_workbook_basic
+seed: 41001
+
+evidence_need:
+  subject: electricity_usage
+  site_hint: OCH-01
+  period_hint: 2025-03
+  amount: 6.4
+  unit: MWh
+
+documents:
+  - id: breakdown
+    archetype: supplier_breakdown_workbook
+    role: corrected_source
+    carrier: xlsx
+
+expected_predicates:
+  - id: artifact_ingested
+    artifact_id: breakdown
+    expected: true
+
+  - id: minimum_observation_count
+    artifact_id: breakdown
+    min_count: 1

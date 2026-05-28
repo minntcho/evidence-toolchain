@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "synthetic.expected_predicates.v0",
+  "type": "object",
+  "required": [
+    "predicates"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "predicates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "artifact_id"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "artifact_ingested",
+              "minimum_observation_count"
+            ]
+          },
+          "artifact_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expected": {
+            "type": "boolean"
+          },
+          "min_count": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    }
+  }
+}
