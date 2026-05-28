@@ -1,6 +1,83 @@
 import json
 
 
+def _minimal_text_pdf_bytes(text="usage 6.4 MWh"):
+    stream = f"BT /F1 12 Tf 72 720 Td ({text}) Tj ET".encode("ascii")
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        (
+            b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+            b"/Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>"
+        ),
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        b"<< /Length "
+        + str(len(stream)).encode("ascii")
+        + b" >>\nstream\n"
+        + stream
+        + b"\nendstream",
+    ]
+    content = bytearray(b"%PDF-1.4\n")
+    offsets = [0]
+    for index, body in enumerate(objects, start=1):
+        offsets.append(len(content))
+        content.extend(f"{index} 0 obj\n".encode("ascii"))
+        content.extend(body)
+        content.extend(b"\nendobj\n")
+    xref_offset = len(content)
+    content.extend(f"xref\n0 {len(objects) + 1}\n".encode("ascii"))
+    content.extend(b"0000000000 65535 f \n")
+    for offset in offsets[1:]:
+        content.extend(f"{offset:010d} 00000 n \n".encode("ascii"))
+    content.extend(
+        (
+            f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\n"
+            f"startxref\n{xref_offset}\n%%EOF\n"
+        ).encode("ascii")
+    )
+    return bytes(content)
+
+
+def _pdf_attachment(tmp_path):
+    from evidence_toolchain import RawAttachment
+
+    path = tmp_path / "reader-acceptance.pdf"
+    path.write_bytes(_minimal_text_pdf_bytes())
+    return RawAttachment.from_path(
+        path,
+        attachment_id="reader_acceptance_pdf",
+        declared_media_type="application/pdf",
+    )
+
+
+def _usage_claim_and_expected_behavior():
+    from evidence_toolchain import (
+        DeclaredClaim,
+        ExpectedClaimResolution,
+        ExperimentExpectedBehavior,
+    )
+
+    return (
+        (
+            DeclaredClaim(
+                x_id="x_pdf_usage_001",
+                fields={"amount": 6400, "unit": "kWh"},
+            ),
+        ),
+        ExperimentExpectedBehavior(
+            claim_resolutions=(
+                ExpectedClaimResolution(
+                    x_id="x_pdf_usage_001",
+                    status="supported_after_unit_normalization",
+                    missing_need_ids=(),
+                    supporting_atom_types=("usage_amount",),
+                    rejected_atom_types=(),
+                ),
+            ),
+        ),
+    )
+
+
 def test_basic_resolution_adapter_acceptance_passes_reference_adapters():
     from evidence_toolchain import (
         DeterministicNormalizer,
@@ -83,5 +160,104 @@ def test_adapter_acceptance_helper_stays_provider_and_framework_neutral():
         encoding="utf-8"
     )
 
-    for forbidden in ("openai", "langgraph", "requests", "httpx"):
+    for forbidden in ("openai", "langgraph", "requests", "httpx", "pdfplumber"):
         assert forbidden not in source
+
+
+def test_reader_resolution_adapter_acceptance_passes_pdfplumber_inventory(tmp_path):
+    import pytest
+
+    pytest.importorskip("pdfplumber")
+
+    from evidence_toolchain import (
+        PdfPlumberExtractReader,
+        run_reader_resolution_adapter_acceptance,
+    )
+
+    claims, expected = _usage_claim_and_expected_behavior()
+    report = run_reader_resolution_adapter_acceptance(
+        adapter_name="pdfplumber_reader",
+        reader=PdfPlumberExtractReader(),
+        sample_attachment=_pdf_attachment(tmp_path),
+        claims=claims,
+        expected_behavior=expected,
+    )
+    payload = report.to_dict()
+
+    assert payload["passed"] is True
+    assert payload["metadata"]["reader_producer"] == "pdfplumber_extract"
+    assert payload["metadata"]["inventory_issue_codes"] == []
+    assert payload["metadata"]["inventory_unit_count"] >= 1
+    assert payload["trace"]["run"]["inventory"]["units"][0]["producer"] == (
+        "pdfplumber_extract"
+    )
+    assert payload["trace"]["run"]["final_graph"]["resolutions"][0]["status"] == (
+        "supported_after_unit_normalization"
+    )
+    assert payload["expected_behavior_report"]["passed"] is True
+    assert "reader_inventory_units_present" in [
+        check["name"] for check in payload["checks"]
+    ]
+
+
+def test_reader_resolution_adapter_acceptance_reports_missing_dependency(tmp_path):
+    from evidence_toolchain import (
+        PdfPlumberExtractReader,
+        run_reader_resolution_adapter_acceptance,
+    )
+
+    claims, expected = _usage_claim_and_expected_behavior()
+    report = run_reader_resolution_adapter_acceptance(
+        adapter_name="pdfplumber_missing",
+        reader=PdfPlumberExtractReader(pdfplumber_module=None),
+        sample_attachment=_pdf_attachment(tmp_path),
+        claims=claims,
+        expected_behavior=expected,
+    )
+    payload = report.to_dict()
+
+    assert payload["passed"] is False
+    assert payload["metadata"]["inventory_issue_codes"] == [
+        "pdfplumber_dependency_missing"
+    ]
+    assert payload["trace"]["run"]["final_graph"]["resolutions"][0]["status"] == (
+        "insufficient"
+    )
+    failed_checks = [
+        check for check in payload["checks"] if check["passed"] is False
+    ]
+    assert "reader_inventory_units_present" in [
+        check["name"] for check in failed_checks
+    ]
+    assert payload["expected_behavior_report"]["passed"] is False
+
+
+def test_reader_resolution_adapter_acceptance_reports_extraction_failure(tmp_path):
+    from evidence_toolchain import (
+        PdfPlumberExtractReader,
+        run_reader_resolution_adapter_acceptance,
+    )
+
+    class FailingPdfPlumber:
+        def open(self, path):
+            del path
+            raise RuntimeError("boom")
+
+    claims, expected = _usage_claim_and_expected_behavior()
+    report = run_reader_resolution_adapter_acceptance(
+        adapter_name="pdfplumber_failed",
+        reader=PdfPlumberExtractReader(pdfplumber_module=FailingPdfPlumber()),
+        sample_attachment=_pdf_attachment(tmp_path),
+        claims=claims,
+        expected_behavior=expected,
+    )
+    payload = report.to_dict()
+
+    assert payload["passed"] is False
+    assert payload["metadata"]["inventory_issue_codes"] == [
+        "pdf_text_extract_failed"
+    ]
+    assert payload["trace"]["run"]["final_graph"]["resolutions"][0]["status"] == (
+        "insufficient"
+    )
+    assert payload["expected_behavior_report"]["passed"] is False

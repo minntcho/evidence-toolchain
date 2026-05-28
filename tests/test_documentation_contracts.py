@@ -178,7 +178,9 @@ def test_contract_docs_are_indexed_and_define_allowed_boundaries():
         "InvestigationTaskResult",
         "AdapterAcceptanceCheck",
         "AdapterAcceptanceReport",
+        "AttachmentReaderPort",
         "run_basic_resolution_adapter_acceptance",
+        "run_reader_resolution_adapter_acceptance",
     ):
         assert contract_name in contracts_text
     assert "contracts/README.md" in docs_index
@@ -215,6 +217,17 @@ def test_testing_strategy_docs_are_indexed_and_preserve_test_authority():
         assert "강하게 assert할 것" in text
         assert "freeze하지 말아야 할 것" in text
         assert "해서는 안 되는 일" in text
+
+
+def test_adapter_acceptance_doc_describes_reader_backed_real_tool_smoke():
+    text = Path("docs/testing/adapter-acceptance.md").read_text(encoding="utf-8")
+
+    assert "run_reader_resolution_adapter_acceptance" in text
+    assert "PdfPlumberExtractReader" in text
+    assert "reader-backed" in text
+    assert "pdfplumber_dependency_missing" in text
+    assert "pdf_text_extract_failed" in text
+    assert "EvidenceInventory -> EvidenceAtom -> EvidenceResolutionGraph" in text
 
 
 def test_generated_case_bundle_contract_is_indexed_and_scope_limited():
