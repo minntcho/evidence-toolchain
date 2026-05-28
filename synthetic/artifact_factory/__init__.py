@@ -31,6 +31,12 @@ from synthetic.artifact_factory.plans import (
     ToolInvocation,
     ToolPlan,
 )
+from synthetic.artifact_factory.pdf_tools import (
+    PdfTextRendererTool,
+    SupplierMonthlyStatementBuilderTool,
+    build_pdf_artifact_bundle,
+    pdf_execution_registry,
+)
 from synthetic.artifact_factory.specs import (
     ScenarioConfusionSpec,
     ScenarioDocumentSpec,
@@ -65,10 +71,12 @@ __all__ = [
     "DocumentIntent",
     "ErpExportBuilderTool",
     "GeneratedArtifactBundle",
+    "PdfTextRendererTool",
     "ScenarioConfusionSpec",
     "ScenarioDocumentSpec",
     "ScenarioIR",
     "ScenarioSpec",
+    "SupplierMonthlyStatementBuilderTool",
     "SupplierBreakdownWorkbookBuilderTool",
     "SyntheticTool",
     "ToolContext",
@@ -83,6 +91,7 @@ __all__ = [
     "XlsxWorkbookRendererTool",
     "artifact_plan_states",
     "build_csv_artifact_bundle",
+    "build_pdf_artifact_bundle",
     "build_xlsx_artifact_bundle",
     "compile_ir_to_bundle_plan",
     "compile_bundle_plan_to_tool_plan",
@@ -94,6 +103,7 @@ __all__ = [
     "default_tool_registry",
     "execute_tool_plan",
     "infer_state_type",
+    "pdf_execution_registry",
     "validate_tool_plan_against_registry",
     "xlsx_execution_registry",
 ]
