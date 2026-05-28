@@ -29,6 +29,12 @@ AtomizerResult
 DeclaredClaim
 Need
 NeedSpec
+ExperimentAttachmentSpec
+ExperimentManifest
+ExperimentRunTrace
+ExperimentExpectedBehavior
+ExpectedClaimResolution
+ExpectedBehaviorReport
 NormalizationResult
 EvidenceResolutionGraph
 ResolutionEdge
