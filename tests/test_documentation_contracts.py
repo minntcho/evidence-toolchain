@@ -392,6 +392,24 @@ def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundar
     assert "soft score resolver" in text
 
 
+def test_adapter_boundary_matches_current_resolver_contract_language():
+    text = Path("docs/adapter-boundary.md").read_text(encoding="utf-8")
+    downstream_section = text.split("## Downstream 언어", 1)[1].split(
+        "## Adapter 예시",
+        1,
+    )[0]
+
+    assert "Core resolver 언어" in text
+    assert "EvidenceResolutionGraph" in text
+    assert "ResolutionEdge" in text
+    assert "ClaimResolution" in text
+    assert "resolver의 evidence relation status" in text
+    assert "최종 domain authority verdict" in text
+    assert "domain claim approval" in downstream_section
+    assert "policy sufficiency threshold" in downstream_section
+    assert "claim\nsupport\ncontradiction" not in downstream_section
+
+
 def test_supporting_architecture_docs_are_localized_and_indexed():
     docs_index = Path("docs/index.md").read_text(encoding="utf-8")
     readme = Path("README.md").read_text(encoding="utf-8")
@@ -415,7 +433,7 @@ def test_supporting_architecture_docs_are_localized_and_indexed():
         "docs/adapter-boundary.md": [
             "Adapter 경계",
             "Core package는 독립적으로 유지되어야 합니다",
-            "Core는 최종 validation status를 결정하면 안 됩니다",
+            "Core resolver는 evidence relation status를 만들 수 있지만",
         ],
         "docs/synthetic-evidence.md": [
             "합성 증거 테스트킷",

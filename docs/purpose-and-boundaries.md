@@ -31,10 +31,11 @@ Core는 다음에 답할 수 있습니다.
 - 어떤 extraction capability를 시도해야 하는가
 - 어떤 candidate field가 발견되었는가
 - 각 candidate value가 어디에서 왔는가
-- requested value가 supported, contradicted, missing, uncertain 중 어디에 해당하는가
+- requested 또는 declared input과 evidence candidate의 relation이 supported, contradicted, missing, uncertain 중 어디에 해당하는가
 - 어떤 extraction issue 또는 review trigger를 보존해야 하는가
 
-이 답들은 evidence-processing output입니다. 최종 domain approval이 아닙니다.
+이 답들은 evidence-processing output입니다. resolver가 만든 evidence relation status도
+최종 domain approval이 아닙니다.
 
 ## Core가 판단해서는 안 되는 것
 
@@ -63,14 +64,25 @@ EvidenceToolPlan
 EvidenceIssue
 EvidenceCheck
 EvidenceReport
+DeclaredClaim
+NeedSpec
+EvidenceAtom
+NormalizationResult
+EvidenceResolutionGraph
+ResolutionEdge
+ClaimResolution
 ```
+
+`DeclaredClaim`, `ResolutionEdge`, `ClaimResolution`은 core resolver가 evidence relation을
+기록하기 위한 말입니다. 이 이름들은 Downstream approval authority를 뜻하지 않습니다.
 
 Downstream 또는 consumer-specific language는 optional adapter의 일부라는 점이 분명하지 않다면 core package 밖에 머물러야 합니다.
 
 Downstream language 예시:
 
 ```text
-claim
+domain claim approval
+policy sufficiency threshold
 policy approval
 commit
 receipt

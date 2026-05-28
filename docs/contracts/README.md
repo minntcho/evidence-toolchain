@@ -31,6 +31,8 @@ Need
 NeedSpec
 NormalizationResult
 EvidenceResolutionGraph
+ResolutionEdge
+ClaimResolution
 ResolutionGapPlan
 ResolutionGapPlanner
 EvidenceUnitRetrievalResult
@@ -55,7 +57,8 @@ Core contract는 evidence-processing state를 설명할 수 있습니다.
 - confidence
 - issue
 - review trigger
-- support, contradiction, missing, uncertainty state
+- resolver evidence relation state
+- support, contradiction, missing, uncertainty state inside an evidence relation graph
 
 Core contract는 Downstream authority를 encode하면 안 됩니다.
 
