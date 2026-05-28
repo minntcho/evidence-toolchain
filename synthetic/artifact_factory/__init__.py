@@ -19,6 +19,14 @@ from synthetic.artifact_factory.csv_tools import (
     build_csv_artifact_bundle,
     csv_execution_registry,
 )
+from synthetic.artifact_factory.e2e import (
+    SyntheticCaseBuildResult,
+    SyntheticScenarioCase,
+    VerificationReport,
+    build_synthetic_case,
+    load_scenario_case,
+    verify_generated_case,
+)
 from synthetic.artifact_factory.executor import (
     GeneratedArtifactBundle,
     artifact_plan_states,
@@ -78,6 +86,8 @@ __all__ = [
     "ScenarioSpec",
     "SupplierMonthlyStatementBuilderTool",
     "SupplierBreakdownWorkbookBuilderTool",
+    "SyntheticCaseBuildResult",
+    "SyntheticScenarioCase",
     "SyntheticTool",
     "ToolContext",
     "ToolDescriptor",
@@ -88,10 +98,12 @@ __all__ = [
     "ToolResult",
     "TraceEntry",
     "TraceLayer",
+    "VerificationReport",
     "XlsxWorkbookRendererTool",
     "artifact_plan_states",
     "build_csv_artifact_bundle",
     "build_pdf_artifact_bundle",
+    "build_synthetic_case",
     "build_xlsx_artifact_bundle",
     "compile_ir_to_bundle_plan",
     "compile_bundle_plan_to_tool_plan",
@@ -103,7 +115,9 @@ __all__ = [
     "default_tool_registry",
     "execute_tool_plan",
     "infer_state_type",
+    "load_scenario_case",
     "pdf_execution_registry",
     "validate_tool_plan_against_registry",
+    "verify_generated_case",
     "xlsx_execution_registry",
 ]

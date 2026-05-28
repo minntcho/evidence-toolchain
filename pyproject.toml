@@ -17,6 +17,7 @@ pdf = [
 
 [project.scripts]
 evidence-toolchain = "evidence_toolchain.cli:main"
+evidence-synthetic = "synthetic.artifact_factory.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src", "."]
