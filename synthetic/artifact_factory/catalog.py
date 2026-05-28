@@ -63,6 +63,13 @@ def default_tool_descriptors() -> tuple[ToolDescriptor, ...]:
             output_state="logical_document_model",
         ),
         _descriptor(
+            "archetype.erp_export.build",
+            kind="archetype_builder",
+            input_state="artifact_plan",
+            output_state="logical_document_model",
+            supported_carriers=("csv",),
+        ),
+        _descriptor(
             "confusion.later_correction_overrides_initial",
             kind="confusion_operator",
             input_state="logical_document_model",

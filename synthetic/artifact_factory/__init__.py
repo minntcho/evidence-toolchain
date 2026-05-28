@@ -13,6 +13,17 @@ from synthetic.artifact_factory.compiler import (
     compile_scenario_ir,
     compile_scenario_to_bundle_plan,
 )
+from synthetic.artifact_factory.csv_tools import (
+    CsvRendererTool,
+    ErpExportBuilderTool,
+    build_csv_artifact_bundle,
+    csv_execution_registry,
+)
+from synthetic.artifact_factory.executor import (
+    GeneratedArtifactBundle,
+    artifact_plan_states,
+    execute_tool_plan,
+)
 from synthetic.artifact_factory.ir import ConfusionEdge, DocumentIntent, ScenarioIR
 from synthetic.artifact_factory.plans import (
     ArtifactPlan,
@@ -43,8 +54,11 @@ __all__ = [
     "ArtifactPlan",
     "BundlePlan",
     "ConfusionEdge",
+    "CsvRendererTool",
     "DescriptorOnlyTool",
     "DocumentIntent",
+    "ErpExportBuilderTool",
+    "GeneratedArtifactBundle",
     "ScenarioConfusionSpec",
     "ScenarioDocumentSpec",
     "ScenarioIR",
@@ -59,13 +73,17 @@ __all__ = [
     "ToolResult",
     "TraceEntry",
     "TraceLayer",
+    "artifact_plan_states",
+    "build_csv_artifact_bundle",
     "compile_ir_to_bundle_plan",
     "compile_bundle_plan_to_tool_plan",
     "compile_scenario_ir",
     "compile_scenario_to_bundle_plan",
     "compile_scenario_to_tool_plan",
+    "csv_execution_registry",
     "default_tool_descriptors",
     "default_tool_registry",
+    "execute_tool_plan",
     "infer_state_type",
     "validate_tool_plan_against_registry",
 ]
