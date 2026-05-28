@@ -25,6 +25,7 @@ def test_document_heading_and_navigation_labels_are_korean():
         "docs/orchestration-boundary.md",
         "docs/investigation-loop-boundary.md",
         "docs/synthetic-evidence.md",
+        "docs/synthetic-artifact-factory.md",
         "docs/ingestion-normalization.md",
         "docs/contracts/evidence-check.md",
         "docs/testing/generated-case-bundle-contract.md",
@@ -38,6 +39,7 @@ def test_document_heading_and_navigation_labels_are_korean():
         "Capability 레지스트리",
         "실패 모드",
         "합성 증거 테스트킷",
+        "Synthetic Evidence Artifact Factory",
         "테스트킷 경계",
         "라우팅 원칙",
         "입력",
@@ -451,6 +453,30 @@ def test_experiment_cli_runner_doc_is_indexed_and_keeps_provider_authority_out()
     assert "ExpectedBehaviorReport" in text
     assert "provider tools" in text
     assert "downstream policy sufficiency" in text
+
+
+def test_synthetic_artifact_factory_doc_defines_spec_to_tool_boundary():
+    doc_path = Path("docs/synthetic-artifact-factory.md")
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+    readme = Path("README.md").read_text(encoding="utf-8")
+
+    assert doc_path.exists()
+    assert "synthetic-artifact-factory.md" in docs_index
+    assert "Synthetic Evidence Artifact Factory" in readme
+
+    text = doc_path.read_text(encoding="utf-8")
+    assert "ScenarioSpec -> ScenarioIR -> BundlePlan -> ToolPlan" in text
+    assert "ToolInvocationDAG" in text
+    assert "ToolDescriptor" in text
+    assert "ArtifactState" in text
+    assert "TraceLayer" in text
+    assert "EvidenceConfusionOperator" in text
+    assert "CarrierOperator" in text
+    assert "ArtifactVerifier" in text
+    assert "Syndrome precondition verifier" in text
+    assert "_synthetic/" in text
+    assert "evidence-toolchain core는 input artifact만" in text
+    assert "ScenarioSpec이 직접 reportlab, Pillow, OpenCV, openpyxl, email lib를 호출하면 안 된다." in text
 
 
 def test_evidence_linking_architecture_doc_is_indexed_and_sets_authority_boundaries():
