@@ -470,6 +470,7 @@ def test_synthetic_artifact_factory_doc_defines_spec_to_tool_boundary():
     assert "ToolDescriptor" in text
     assert "ArtifactState" in text
     assert "TraceLayer" in text
+    assert "ScenarioIR.rng_seed -> BundlePlan.rng_seed -> ToolInvocation.seed" in text
     assert "EvidenceConfusionOperator" in text
     assert "CarrierOperator" in text
     assert "ArtifactVerifier" in text

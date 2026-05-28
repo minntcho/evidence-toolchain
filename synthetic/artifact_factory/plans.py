@@ -35,15 +35,19 @@ class ArtifactPlan:
 @dataclass(frozen=True)
 class BundlePlan:
     scenario_id: str
+    rng_seed: int | None = None
     artifacts: tuple[ArtifactPlan, ...] = ()
     expected_syndrome: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload: dict[str, object] = {
             "scenario_id": self.scenario_id,
             "artifacts": [artifact.to_dict() for artifact in self.artifacts],
             "expected_syndrome": dict(self.expected_syndrome),
         }
+        if self.rng_seed is not None:
+            payload["rng_seed"] = self.rng_seed
+        return payload
 
 
 @dataclass(frozen=True)
@@ -73,10 +77,14 @@ class ToolInvocation:
 @dataclass(frozen=True)
 class ToolPlan:
     scenario_id: str
+    rng_seed: int | None = None
     invocations: tuple[ToolInvocation, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload: dict[str, object] = {
             "scenario_id": self.scenario_id,
             "invocations": [invocation.to_dict() for invocation in self.invocations],
         }
+        if self.rng_seed is not None:
+            payload["rng_seed"] = self.rng_seed
+        return payload

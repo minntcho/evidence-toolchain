@@ -39,6 +39,7 @@ def compile_ir_to_bundle_plan(scenario_ir: ScenarioIR) -> BundlePlan:
     )
     return BundlePlan(
         scenario_id=scenario_ir.scenario_id,
+        rng_seed=scenario_ir.rng_seed,
         artifacts=artifacts,
         expected_syndrome=dict(scenario_ir.expected_syndrome),
     )
