@@ -230,3 +230,85 @@ def test_run_convergence_cycle_rejects_unauthorized_patch_producer():
     assert report.claim_alignment_status != "supported_after_unit_normalization"
     assert report.evidence_convergence_status != "evidence_converged"
     assert [trigger.code for trigger in report.review_triggers] == ["patch_rejected"]
+
+
+def test_bad_patch_rejection_is_visible_to_expected_behavior_oracle():
+    from evidence_toolchain import (
+        ExpectedClaimConvergence,
+        ExperimentAttachmentSpec,
+        ExperimentExpectedBehavior,
+        ExperimentManifest,
+        build_experiment_run_trace,
+        evaluate_expected_behavior,
+    )
+    from evidence_toolchain.convergence.capabilities import QUANTITY, utility_usage_schema
+    from evidence_toolchain.convergence.patches import CapabilitySpec, MaskPatch
+    from evidence_toolchain.convergence.runner import PatchProducer, run_convergence_cycle
+
+    schema = utility_usage_schema()
+    bad_spec = CapabilitySpec(
+        name="llm_schema_assigner",
+        handles_mask=schema.required_mask,
+        input_required_mask=0,
+        handles_gap_kinds=frozenset({"missing"}),
+        may_set_present_mask=schema.required_mask,
+        may_set_assigned_mask=schema.required_mask,
+        cost=1,
+        kind="llm",
+    )
+
+    def bad_patch(candidate, _inventory, _claims, _schema):
+        return MaskPatch(
+            candidate_id=candidate.candidate_id,
+            producer="fake_llm",
+            capability_name="llm_schema_assigner",
+            set_aligned_mask=QUANTITY,
+            alignment_updates={QUANTITY: {"status": "fake_support"}},
+        )
+
+    manifest = ExperimentManifest(
+        experiment_id="convergence_bad_patch_rejected",
+        bundle_id="bundle_001",
+        attachments=(
+            ExperimentAttachmentSpec(
+                attachment_id="raw_usage_csv",
+                path="usage.csv",
+                declared_media_type="text/csv",
+            ),
+        ),
+        claims=(_claim(),),
+    )
+    run = run_convergence_cycle(
+        inventory=_inventory(),
+        claims=manifest.claims,
+        capabilities=(PatchProducer(bad_spec, bad_patch),),
+        run_id="run_bad_patch",
+    )
+    trace = build_experiment_run_trace(manifest=manifest, run=run)
+
+    expected_report = evaluate_expected_behavior(
+        trace=trace,
+        expected=ExperimentExpectedBehavior(
+            claim_convergences=(
+                ExpectedClaimConvergence(
+                    x_id="claim_001",
+                    claim_alignment_status="not_evaluated",
+                    evidence_convergence_status="needs_review_unresolved_gap",
+                    selected_support_set=(),
+                    review_trigger_codes=("patch_rejected",),
+                    partial_failure_codes=(),
+                    unresolved_gaps=("site", "period", "activity", "quantity", "unit"),
+                ),
+            )
+        ),
+    )
+
+    assert expected_report.passed is True
+    assert [check.name for check in expected_report.checks] == [
+        "claim_alignment_status",
+        "evidence_convergence_status",
+        "selected_support_set",
+        "review_trigger_codes",
+        "partial_failure_codes",
+        "unresolved_gaps",
+    ]

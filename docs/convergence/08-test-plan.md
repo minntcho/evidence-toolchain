@@ -129,6 +129,29 @@ Slice 4: bad patch rejected
 
 The fourth slice is required because it proves the trust boundary.
 
+## File-backed fixture matrix
+
+The current file-backed convergence fixtures live under `tests/fixtures/` and
+drive `run-convergence` through `ExperimentExpectedBehavior.claim_convergences`.
+
+```text
+convergence_clean_support
+  expected: evidence_converged
+
+convergence_nonblocking_issue
+  expected: evidence_converged
+  expected partial_failure_codes: nonblocking_failure
+
+convergence_candidate_conflict
+  expected: needs_review_due_to_candidate_conflict
+  expected review_trigger_codes: candidate_conflict
+  expected unresolved_gaps: quantity
+```
+
+The bad patch rejected slice remains a runner-level fixture because it requires
+injecting a fake `PatchProducer`. It should still be asserted through
+`ExperimentExpectedBehavior.claim_convergences` so the trust-boundary behavior is
+visible from the same expected-behavior surface.
 ## Slice 1: clean support
 
 ### Purpose

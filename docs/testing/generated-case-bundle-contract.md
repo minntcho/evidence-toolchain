@@ -106,6 +106,19 @@ evidence-toolchain run-convergence .\generated\convergence_clean_support\experim
   --expected-report-out .\generated\convergence_clean_support\out\expected-report.json
 ```
 
+Convergence file-backed fixtures currently cover:
+
+```text
+convergence_clean_support
+convergence_nonblocking_issue
+convergence_candidate_conflict
+```
+
+The bad patch rejected convergence slice is intentionally runner-level because
+it needs a fake `PatchProducer`. It is still checked through
+`ExperimentExpectedBehavior.claim_convergences`, not by projecting into
+`EvidenceResolutionGraph`.
+
 ## 강하게 assert할 것
 
 Test는 다음을 강하게 assert할 수 있습니다.
