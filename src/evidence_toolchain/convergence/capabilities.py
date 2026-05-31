@@ -71,13 +71,16 @@ def seed_usage_candidate(
     *,
     schema: EvidenceSchema | None = None,
     candidate_id: str = "cand_001",
+    metadata: dict[str, Any] | None = None,
 ) -> EvidenceCandidate:
     active_schema = schema or utility_usage_schema()
+    candidate_metadata = {"bundle_id": inventory.bundle_id}
+    candidate_metadata.update(metadata or {})
     return EvidenceCandidate(
         candidate_id=candidate_id,
         claim_id=claim.x_id,
         schema_id=active_schema.schema_id,
-        metadata={"bundle_id": inventory.bundle_id},
+        metadata=candidate_metadata,
     )
 
 
@@ -91,7 +94,7 @@ def propose_simple_slot_assignment(
     payload_updates: dict[int, Any] = {}
     source_ref_updates: dict[int, tuple[str, ...]] = {}
 
-    for unit in inventory.units:
+    for unit in _candidate_units(candidate, inventory):
         slot_bit = _slot_bit_for_unit(unit)
         if slot_bit is None or slot_bit not in _schema_bits(active_schema):
             continue
@@ -194,6 +197,25 @@ def _slot_bit_for_unit(unit: EvidenceUnit) -> int | None:
     if header is None:
         return None
     return _SLOT_BY_HEADER.get(str(header).strip().lower())
+
+
+def _candidate_units(
+    candidate: EvidenceCandidate,
+    inventory: EvidenceInventory,
+) -> tuple[EvidenceUnit, ...]:
+    row = candidate.metadata.get("row")
+    artifact_id = candidate.metadata.get("artifact_id")
+    if row is None and artifact_id is None:
+        return inventory.units
+
+    units: list[EvidenceUnit] = []
+    for unit in inventory.units:
+        if row is not None and unit.locator.get("row") != row:
+            continue
+        if artifact_id is not None and unit.artifact_id != artifact_id:
+            continue
+        units.append(unit)
+    return tuple(units)
 
 
 def _payload_value_for_slot(unit: EvidenceUnit, slot_bit: int) -> Any | None:
