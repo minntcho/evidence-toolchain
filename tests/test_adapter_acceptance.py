@@ -78,6 +78,96 @@ def _usage_claim_and_expected_behavior():
     )
 
 
+def _convergence_inventory():
+    from evidence_toolchain import EvidenceInventory, EvidenceUnit
+
+    return EvidenceInventory(
+        bundle_id="convergence_acceptance_bundle_001",
+        attachments=(),
+        artifacts=(),
+        route_decisions=(),
+        units=(
+            EvidenceUnit(
+                unit_id="cell_site",
+                artifact_id="artifact_usage",
+                unit_type="table_cell",
+                producer="acceptance_fixture_reader",
+                text="OCH-01",
+                locator={"row": 2, "column": 1, "header": "site"},
+            ),
+            EvidenceUnit(
+                unit_id="cell_period",
+                artifact_id="artifact_usage",
+                unit_type="table_cell",
+                producer="acceptance_fixture_reader",
+                text="2025-03",
+                locator={"row": 2, "column": 2, "header": "period"},
+            ),
+            EvidenceUnit(
+                unit_id="cell_activity",
+                artifact_id="artifact_usage",
+                unit_type="table_cell",
+                producer="acceptance_fixture_reader",
+                text="electricity",
+                locator={"row": 2, "column": 3, "header": "activity"},
+            ),
+            EvidenceUnit(
+                unit_id="cell_quantity",
+                artifact_id="artifact_usage",
+                unit_type="table_cell",
+                producer="acceptance_fixture_reader",
+                text="6.4",
+                value=6.4,
+                locator={"row": 2, "column": 4, "header": "amount"},
+            ),
+            EvidenceUnit(
+                unit_id="cell_unit",
+                artifact_id="artifact_usage",
+                unit_type="table_cell",
+                producer="acceptance_fixture_reader",
+                text="MWh",
+                locator={"row": 2, "column": 5, "header": "unit"},
+            ),
+        ),
+    )
+
+
+def _convergence_claim_and_expected_behavior(*, status="evidence_converged"):
+    from evidence_toolchain import (
+        DeclaredClaim,
+        ExpectedClaimConvergence,
+        ExperimentExpectedBehavior,
+    )
+
+    return (
+        (
+            DeclaredClaim(
+                x_id="x_usage_001",
+                fields={
+                    "site": "OCH-01",
+                    "period": "2025-03",
+                    "activity": "electricity",
+                    "amount": 6400,
+                    "unit": "kWh",
+                },
+            ),
+        ),
+        ExperimentExpectedBehavior(
+            claim_convergences=(
+                ExpectedClaimConvergence(
+                    x_id="x_usage_001",
+                    claim_alignment_status="supported_after_unit_normalization",
+                    evidence_convergence_status=status,
+                    selected_support_set=("cand_001",),
+                    review_trigger_codes=(),
+                    partial_failure_codes=(),
+                    unresolved_gaps=(),
+                ),
+            ),
+        ),
+    )
+
+
 def test_basic_resolution_adapter_acceptance_passes_reference_adapters():
     from evidence_toolchain import (
         DeterministicNormalizer,
@@ -230,6 +320,70 @@ def test_reader_resolution_adapter_acceptance_reports_missing_dependency(tmp_pat
         check["name"] for check in failed_checks
     ]
     assert payload["expected_behavior_report"]["passed"] is False
+
+
+def test_convergence_adapter_acceptance_passes_reference_kernel():
+    from evidence_toolchain import run_convergence_adapter_acceptance
+
+    claims, expected = _convergence_claim_and_expected_behavior()
+
+    report = run_convergence_adapter_acceptance(
+        adapter_name="reference_convergence",
+        inventory=_convergence_inventory(),
+        claims=claims,
+        expected_behavior=expected,
+    )
+    payload = report.to_dict()
+
+    assert payload["adapter_name"] == "reference_convergence"
+    assert payload["passed"] is True
+    assert payload["metadata"]["scenario"] == "convergence_adapter_acceptance_v0"
+    assert payload["metadata"]["inventory_unit_count"] == 5
+    assert [check["name"] for check in payload["checks"]] == [
+        "convergence_inventory_units_present",
+        "convergence_blocking_issues_absent",
+        "trace_json_serializable",
+        "expected_behavior.claim_alignment_status",
+        "expected_behavior.evidence_convergence_status",
+        "expected_behavior.selected_support_set",
+        "expected_behavior.review_trigger_codes",
+        "expected_behavior.partial_failure_codes",
+        "expected_behavior.unresolved_gaps",
+    ]
+    assert payload["trace"]["run"]["report"]["claim_reports"][0][
+        "evidence_convergence_status"
+    ] == "evidence_converged"
+    assert payload["expected_behavior_report"]["passed"] is True
+    json.dumps(payload, ensure_ascii=False)
+
+
+def test_convergence_adapter_acceptance_reports_failed_expected_behavior():
+    from evidence_toolchain import run_convergence_adapter_acceptance
+
+    claims, expected = _convergence_claim_and_expected_behavior(
+        status="needs_review_due_to_candidate_conflict"
+    )
+
+    report = run_convergence_adapter_acceptance(
+        adapter_name="reference_convergence_mismatch",
+        inventory=_convergence_inventory(),
+        claims=claims,
+        expected_behavior=expected,
+    )
+    payload = report.to_dict()
+
+    assert payload["passed"] is False
+    assert payload["trace"]["run"]["report"]["claim_reports"][0][
+        "evidence_convergence_status"
+    ] == "evidence_converged"
+    failed_checks = [
+        check for check in payload["checks"] if check["passed"] is False
+    ]
+    assert [check["name"] for check in failed_checks] == [
+        "expected_behavior.evidence_convergence_status"
+    ]
+    assert failed_checks[0]["expected"] == "needs_review_due_to_candidate_conflict"
+    assert failed_checks[0]["actual"] == "evidence_converged"
 
 
 def test_reader_resolution_adapter_acceptance_reports_extraction_failure(tmp_path):
