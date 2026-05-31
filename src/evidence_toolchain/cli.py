@@ -110,17 +110,42 @@ def _run_convergence(args: argparse.Namespace) -> int:
         },
     )
     trace_path = write_experiment_run_trace(trace, args.trace_out)
+
+    expected_report = None
+    expected_report_path = None
+    if args.expected is not None:
+        expected = load_experiment_expected_behavior(args.expected)
+        expected_report = evaluate_expected_behavior(trace=trace, expected=expected)
+        expected_report_path = Path(args.expected_report_out) if args.expected_report_out else (
+            Path(args.trace_out).with_suffix(".expected-report.json")
+        )
+        expected_report_path.parent.mkdir(parents=True, exist_ok=True)
+        expected_report_path.write_text(
+            json.dumps(
+                expected_report.to_dict(),
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
     print(
         json.dumps(
             _convergence_summary_payload(
                 manifest_id=manifest.experiment_id,
                 trace_path=trace_path,
                 run=run,
+                expected_report_path=expected_report_path,
+                expected_report=expected_report,
             ),
             ensure_ascii=False,
             sort_keys=True,
         )
     )
+    if expected_report is not None and not expected_report.passed:
+        return 1
     return 0
 
 
@@ -183,6 +208,14 @@ def _build_parser() -> argparse.ArgumentParser:
         "--run-id",
         help="Optional run id. Defaults to '<experiment_id>_convergence_run'.",
     )
+    convergence_parser.add_argument(
+        "--expected",
+        help="Optional ExperimentExpectedBehavior JSON file to compare against.",
+    )
+    convergence_parser.add_argument(
+        "--expected-report-out",
+        help="Optional path for the ExpectedBehaviorReport JSON artifact.",
+    )
     convergence_parser.set_defaults(func=_run_convergence)
     return parser
 
@@ -233,8 +266,10 @@ def _convergence_summary_payload(
     manifest_id: str,
     trace_path: Path,
     run,
+    expected_report_path: Path | None = None,
+    expected_report=None,
 ) -> dict[str, object]:
-    return {
+    payload: dict[str, object] = {
         "claim_reports": [
             {
                 "claim_id": report.claim_id,
@@ -246,6 +281,12 @@ def _convergence_summary_payload(
         "experiment_id": manifest_id,
         "trace_path": str(trace_path),
     }
+    if expected_report is not None:
+        payload["expected_behavior"] = {
+            "passed": expected_report.passed,
+            "report_path": str(expected_report_path),
+        }
+    return payload
 
 
 if __name__ == "__main__":

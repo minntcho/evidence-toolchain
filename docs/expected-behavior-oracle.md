@@ -8,6 +8,7 @@ oracle input입니다. 이 oracle은 test expectation을 검증하는 도구이�
 ```text
 ExperimentExpectedBehavior
 ExpectedClaimResolution
+ExpectedClaimConvergence
 ExpectedBehaviorCheck
 ExpectedBehaviorReport
 ```
@@ -60,3 +61,34 @@ runtime trace를 수정하지 않는다.
 
 이 oracle은 테스트의 기대값 비교기입니다. 같은 trace라도 Downstream system은 다른 policy
 아래에서 다른 review workflow를 선택할 수 있습니다.
+
+## Convergence expected behavior
+
+`ExpectedClaimConvergence` represents expected values for a convergence report
+claim view.
+
+```text
+x_id
+claim_alignment_status
+evidence_convergence_status
+selected_support_set
+review_trigger_codes
+partial_failure_codes
+unresolved_gaps
+```
+
+For convergence traces, `evaluate_expected_behavior` reads
+`run.report.claim_reports` and creates these checks.
+
+```text
+claim_alignment_status
+evidence_convergence_status
+selected_support_set
+review_trigger_codes
+partial_failure_codes
+unresolved_gaps
+```
+
+`claim_resolutions` remains the expectation surface for the resolution graph.
+`claim_convergences` is the expectation surface for the convergence report.
+The oracle does not compare `downstream_verdict`.

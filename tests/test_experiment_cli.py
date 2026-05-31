@@ -99,6 +99,31 @@ def _write_expected(tmp_path, *, status):
     return expected_path
 
 
+def _write_convergence_expected(tmp_path, *, evidence_convergence_status):
+    expected_path = tmp_path / "convergence-expected.json"
+    expected_path.write_text(
+        json.dumps(
+            {
+                "claim_convergences": [
+                    {
+                        "x_id": "x_usage_001",
+                        "claim_alignment_status": (
+                            "supported_after_unit_normalization"
+                        ),
+                        "evidence_convergence_status": evidence_convergence_status,
+                        "selected_support_set": ["cand_001"],
+                        "review_trigger_codes": [],
+                        "partial_failure_codes": [],
+                        "unresolved_gaps": [],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    return expected_path
+
+
 def test_cli_run_experiment_writes_trace_and_expected_report(tmp_path, capsys):
     from evidence_toolchain.cli import main
 
@@ -206,3 +231,79 @@ def test_cli_run_convergence_writes_trace_and_summary(tmp_path, capsys):
         "experiment_id": "convergence_experiment_001",
         "trace_path": str(trace_path),
     }
+
+
+def test_cli_run_convergence_writes_expected_report(tmp_path, capsys):
+    from evidence_toolchain.cli import main
+
+    trace_path = tmp_path / "convergence-trace.json"
+    report_path = tmp_path / "convergence-expected-report.json"
+
+    exit_code = main(
+        [
+            "run-convergence",
+            str(_write_convergence_manifest(tmp_path)),
+            "--trace-out",
+            str(trace_path),
+            "--expected",
+            str(
+                _write_convergence_expected(
+                    tmp_path,
+                    evidence_convergence_status="evidence_converged",
+                )
+            ),
+            "--expected-report-out",
+            str(report_path),
+        ]
+    )
+
+    report_payload = json.loads(report_path.read_text(encoding="utf-8"))
+    summary_payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert report_payload["passed"] is True
+    assert [check["name"] for check in report_payload["checks"]] == [
+        "claim_alignment_status",
+        "evidence_convergence_status",
+        "selected_support_set",
+        "review_trigger_codes",
+        "partial_failure_codes",
+        "unresolved_gaps",
+    ]
+    assert summary_payload["expected_behavior"]["passed"] is True
+    assert summary_payload["expected_behavior"]["report_path"] == str(report_path)
+
+
+def test_cli_run_convergence_returns_nonzero_when_expected_behavior_fails(tmp_path):
+    from evidence_toolchain.cli import main
+
+    trace_path = tmp_path / "convergence-trace.json"
+    report_path = tmp_path / "convergence-expected-report.json"
+
+    exit_code = main(
+        [
+            "run-convergence",
+            str(_write_convergence_manifest(tmp_path)),
+            "--trace-out",
+            str(trace_path),
+            "--expected",
+            str(
+                _write_convergence_expected(
+                    tmp_path,
+                    evidence_convergence_status=(
+                        "needs_review_due_to_candidate_conflict"
+                    ),
+                )
+            ),
+            "--expected-report-out",
+            str(report_path),
+        ]
+    )
+
+    report_payload = json.loads(report_path.read_text(encoding="utf-8"))
+
+    assert exit_code == 1
+    assert trace_path.exists()
+    assert report_payload["passed"] is False
+    assert report_payload["checks"][1]["name"] == "evidence_convergence_status"
+    assert report_payload["checks"][1]["actual"] == "evidence_converged"

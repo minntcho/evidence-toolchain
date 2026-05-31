@@ -102,6 +102,20 @@ selected_support_set is array-shaped even in MVP
 patch events are visible in trace
 ```
 
+Expected behavior tests may read convergence reports directly.
+
+```text
+ExperimentExpectedBehavior.claim_convergences
+-> ExperimentRunTrace.run.report.claim_reports
+-> ExpectedBehaviorReport checks
+```
+
+These checks compare convergence view fields such as
+`claim_alignment_status`, `evidence_convergence_status`,
+`selected_support_set`, `review_trigger_codes`, `partial_failure_codes`, and
+`unresolved_gaps`. They do not project the convergence report into an
+`EvidenceResolutionGraph`, and they do not compare `downstream_verdict`.
+
 ## MVP vertical slices
 
 The first implementation batch should include four slices.
