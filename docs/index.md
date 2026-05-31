@@ -44,6 +44,9 @@ AttachmentBundle
 
 1. [Evidence Convergence Kernel North Star](convergence/00-north-star.md)
 2. [Evidence Convergence Kernel MVP Scope](convergence/01-mvp-scope.md)
+3. [Evidence Convergence Core Concepts](convergence/02-core-concepts.md)
+4. [Candidate Mask State](convergence/03-candidate-mask-state.md)
+5. [MaskPatch and PatchValidator](convergence/04-mask-patch-and-validator.md)
 
 ## 프로젝트 입장
 
