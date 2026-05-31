@@ -55,6 +55,7 @@ AdapterAcceptanceCheck
 AdapterAcceptanceReport
 AttachmentReaderPort
 run_basic_resolution_adapter_acceptance
+run_convergence_adapter_acceptance
 run_reader_resolution_adapter_acceptance
 ```
 

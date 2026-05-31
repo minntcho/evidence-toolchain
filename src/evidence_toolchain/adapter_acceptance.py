@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
 from evidence_toolchain.claims import DeclaredClaim
+from evidence_toolchain.convergence.patches import CapabilitySpec
+from evidence_toolchain.convergence.runner import PatchProducer, run_convergence_cycle
 from evidence_toolchain.experiments import (
     ExpectedBehaviorReport,
     ExpectedClaimResolution,
@@ -294,6 +296,60 @@ def run_reader_resolution_adapter_acceptance(
     )
 
 
+def run_convergence_adapter_acceptance(
+    *,
+    adapter_name: str,
+    inventory: EvidenceInventory,
+    claims: tuple[DeclaredClaim, ...],
+    expected_behavior: ExperimentExpectedBehavior,
+    capabilities: tuple[CapabilitySpec | PatchProducer, ...] | None = None,
+    max_steps: int = 10,
+) -> AdapterAcceptanceReport:
+    """Run an inventory through the convergence trace/oracle harness."""
+
+    checks = list(_convergence_inventory_checks(inventory))
+    run = run_convergence_cycle(
+        inventory=inventory,
+        claims=tuple(claims),
+        capabilities=capabilities,
+        run_id=f"{adapter_name}_convergence_acceptance_run",
+        max_steps=max(0, max_steps),
+    )
+    trace = build_experiment_run_trace(
+        manifest=_convergence_acceptance_manifest(
+            adapter_name=adapter_name,
+            inventory=inventory,
+            claims=tuple(claims),
+        ),
+        run=run,
+        metadata={
+            "acceptance_adapter": adapter_name,
+            "producer": "convergence_adapter_acceptance_v0",
+        },
+    )
+    checks.append(_trace_json_check(trace))
+
+    expected_report = evaluate_expected_behavior(
+        trace=trace,
+        expected=expected_behavior,
+    )
+    checks.extend(_expected_behavior_checks(expected_report))
+
+    return AdapterAcceptanceReport(
+        adapter_name=adapter_name,
+        passed=all(check.passed for check in checks),
+        checks=tuple(checks),
+        trace=trace,
+        expected_behavior_report=expected_report,
+        metadata={
+            "scenario": "convergence_adapter_acceptance_v0",
+            "inventory_issue_codes": _issue_codes(inventory),
+            "inventory_unit_count": len(inventory.units),
+            "report_claim_count": len(run.report.claim_reports),
+        },
+    )
+
+
 def _acceptance_manifest() -> ExperimentManifest:
     return ExperimentManifest(
         experiment_id="basic_resolution_adapter_acceptance",
@@ -339,6 +395,30 @@ def _reader_acceptance_manifest(
     )
 
 
+def _convergence_acceptance_manifest(
+    *,
+    adapter_name: str,
+    inventory: EvidenceInventory,
+    claims: tuple[DeclaredClaim, ...],
+) -> ExperimentManifest:
+    return ExperimentManifest(
+        experiment_id=f"{adapter_name}_convergence_acceptance",
+        bundle_id=inventory.bundle_id,
+        attachments=tuple(
+            ExperimentAttachmentSpec(
+                attachment_id=attachment.attachment_id,
+                path=str(attachment.path),
+                declared_media_type=attachment.declared_media_type,
+                detected_media_type=attachment.detected_media_type,
+                metadata=attachment.metadata,
+            )
+            for attachment in inventory.attachments
+        ),
+        claims=claims,
+        metadata={"scenario": "convergence_adapter_acceptance_v0"},
+    )
+
+
 def _acceptance_inventory() -> EvidenceInventory:
     return EvidenceInventory(
         bundle_id="acceptance_bundle_001",
@@ -380,6 +460,30 @@ def _reader_inventory_checks(
         ),
         AdapterAcceptanceCheck(
             name="reader_blocking_issues_absent",
+            passed=not blocking_issue_codes,
+            expected=[],
+            actual=blocking_issue_codes,
+            metadata={"issue_codes": _issue_codes(inventory)},
+        ),
+    )
+
+
+def _convergence_inventory_checks(
+    inventory: EvidenceInventory,
+) -> tuple[AdapterAcceptanceCheck, ...]:
+    blocking_issue_codes = [
+        issue.code for issue in inventory.issues if issue.severity == "blocking"
+    ]
+    return (
+        AdapterAcceptanceCheck(
+            name="convergence_inventory_units_present",
+            passed=bool(inventory.units),
+            expected="at_least_one_unit",
+            actual=len(inventory.units),
+            metadata={"issue_codes": _issue_codes(inventory)},
+        ),
+        AdapterAcceptanceCheck(
+            name="convergence_blocking_issues_absent",
             passed=not blocking_issue_codes,
             expected=[],
             actual=blocking_issue_codes,

@@ -46,6 +46,23 @@ reader-backed helper checks whether a tool-created `EvidenceInventory` keeps
 provenance and failure information all the way into trace and expected-behavior
 reports.
 
+The convergence helper is:
+
+```text
+run_convergence_adapter_acceptance
+```
+
+It keeps convergence acceptance on the same report surface while avoiding
+`EvidenceResolutionGraph` projection:
+
+```text
+EvidenceInventory + DeclaredClaim
+-> run_convergence_cycle
+-> ExperimentRunTrace(run=ConvergenceRun)
+-> ExperimentExpectedBehavior.claim_convergences comparison
+-> AdapterAcceptanceReport
+```
+
 The first real-tool smoke target is `PdfPlumberExtractReader`. It should record
 successful text/word extraction, `pdfplumber_dependency_missing`, and
 `pdf_text_extract_failed` as structured acceptance outcomes. A passing reader
@@ -62,6 +79,8 @@ publication approval, audit approval, or a final validation authority.
 - reader-backed real tool smoke preserves inventory issue codes in report metadata
 - reader-backed real tool smoke fails expected behavior when a real reader
   produces no usable units
+- convergence acceptance compares `claim_convergences` directly and does not
+  project into `EvidenceResolutionGraph`
 
 ## freeze하지 말아야 할 것
 

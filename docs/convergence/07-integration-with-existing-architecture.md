@@ -281,20 +281,26 @@ No existing experiment trace contract needs to change for the initial convergenc
 
 Existing adapter acceptance flows target reader and resolution adapters.
 
-Convergence can later get its own acceptance helper.
+Convergence has its own additive acceptance helper.
 
-Potential future helper:
+Current helper:
 
 ```text
 run_convergence_adapter_acceptance(
   inventory,
   claims,
-  patch_producers,
-  expected_convergence_behavior,
+  capabilities,
+  expected_behavior,
 )
 ```
 
-This should be additive. It must not break existing `run_basic_resolution_adapter_acceptance` or `run_reader_resolution_adapter_acceptance`.
+It runs `run_convergence_cycle`, wraps the result in `ExperimentRunTrace`, and
+compares `ExperimentExpectedBehavior.claim_convergences` directly against
+`run.report.claim_reports`. It does not project into `EvidenceResolutionGraph`.
+
+This is additive. It must not break existing
+`run_basic_resolution_adapter_acceptance` or
+`run_reader_resolution_adapter_acceptance`.
 
 ## Synthetic e2e relationship
 
