@@ -60,11 +60,19 @@ Example:
 
 ```powershell
 evidence-toolchain run-convergence .\experiment.json `
-  --trace-out .\out\convergence-trace.json
+  --trace-out .\out\convergence-trace.json `
+  --expected .\expected-behavior.json `
+  --expected-report-out .\out\convergence-expected-report.json
 ```
 
 The command writes an `ExperimentRunTrace` whose `run.report.claim_reports`
 contain convergence statuses such as `claim_alignment_status` and
-`evidence_convergence_status`. It does not run the expected-behavior oracle yet,
-because the current oracle reads `final_graph.resolutions` from the older
-resolution path.
+`evidence_convergence_status`.
+
+If an expected behavior file is supplied, `run-convergence` compares
+`ExperimentExpectedBehavior.claim_convergences` against
+`run.report.claim_reports` and writes an `ExpectedBehaviorReport`.
+
+The convergence runner does not project its report into an
+`EvidenceResolutionGraph`, and it does not decide downstream policy
+sufficiency.

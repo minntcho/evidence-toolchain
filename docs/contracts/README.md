@@ -34,6 +34,7 @@ ExperimentManifest
 ExperimentRunTrace
 ExperimentExpectedBehavior
 ExpectedClaimResolution
+ExpectedClaimConvergence
 ExpectedBehaviorReport
 NormalizationResult
 EvidenceResolutionGraph
