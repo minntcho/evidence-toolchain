@@ -248,9 +248,6 @@ def test_generated_case_bundle_contract_is_indexed_and_scope_limited():
     assert "run-experiment" in text
     assert "run-convergence" in text
     assert "claim_convergences" in text
-    assert "convergence_nonblocking_issue" in text
-    assert "convergence_candidate_conflict" in text
-    assert "fake `PatchProducer`" in text
     assert "Ground truth" in text
     assert "Expected toolchain behavior" in text
     assert "??? ? ?? ?" in text

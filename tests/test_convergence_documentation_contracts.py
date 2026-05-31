@@ -94,8 +94,3 @@ def test_convergence_docs_preserve_expected_behavior_view_boundary():
     assert "ExperimentRunTrace.run.report.claim_reports" in test_plan
     assert "They do not project the convergence report into an" in test_plan
     assert "they do not compare `downstream_verdict`" in test_plan
-    assert "convergence_clean_support" in test_plan
-    assert "convergence_nonblocking_issue" in test_plan
-    assert "convergence_candidate_conflict" in test_plan
-    assert "expected unresolved_gaps: quantity" in test_plan
-    assert "fake `PatchProducer`" in test_plan

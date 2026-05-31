@@ -152,7 +152,6 @@ The bad patch rejected slice remains a runner-level fixture because it requires
 injecting a fake `PatchProducer`. It should still be asserted through
 `ExperimentExpectedBehavior.claim_convergences` so the trust-boundary behavior is
 visible from the same expected-behavior surface.
-
 ## Slice 1: clean support
 
 ### Purpose
