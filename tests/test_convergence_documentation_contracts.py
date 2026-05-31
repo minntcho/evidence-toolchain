@@ -85,3 +85,12 @@ def test_convergence_docs_define_snapshot_ssot_and_strategy_views():
     assert "`EvidenceCaseSnapshot` is the code-level SSOT wrapper." in ssot_doc
     assert "`EvidenceInventory` remains the observation store." in ssot_doc
     assert "Strategy outputs reference `case_snapshot_id`." in ssot_doc
+
+
+def test_convergence_docs_preserve_expected_behavior_view_boundary():
+    test_plan = Path("docs/convergence/08-test-plan.md").read_text(encoding="utf-8")
+
+    assert "ExperimentExpectedBehavior.claim_convergences" in test_plan
+    assert "ExperimentRunTrace.run.report.claim_reports" in test_plan
+    assert "They do not project the convergence report into an" in test_plan
+    assert "they do not compare `downstream_verdict`" in test_plan

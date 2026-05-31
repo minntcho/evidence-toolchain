@@ -114,10 +114,28 @@ class ExpectedClaimResolution:
 
 
 @dataclass(frozen=True)
+class ExpectedClaimConvergence:
+    """Test expectation for one claim's convergence report view."""
+
+    x_id: str
+    claim_alignment_status: str | None = None
+    evidence_convergence_status: str | None = None
+    selected_support_set: tuple[str, ...] | None = None
+    review_trigger_codes: tuple[str, ...] | None = None
+    partial_failure_codes: tuple[str, ...] | None = None
+    unresolved_gaps: tuple[str, ...] | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return _to_json_compatible(self)
+
+
+@dataclass(frozen=True)
 class ExperimentExpectedBehavior:
     """Expected behavior oracle input for tests, not runtime authority."""
 
-    claim_resolutions: tuple[ExpectedClaimResolution, ...]
+    claim_resolutions: tuple[ExpectedClaimResolution, ...] = ()
+    claim_convergences: tuple[ExpectedClaimConvergence, ...] = ()
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -197,11 +215,8 @@ def evaluate_expected_behavior(
 ) -> ExpectedBehaviorReport:
     payload = trace.to_dict()
     run_payload = payload["run"]
-    final_graph = run_payload["final_graph"]
-    resolutions_by_claim = {
-        resolution["x_id"]: resolution
-        for resolution in final_graph["resolutions"]
-    }
+    resolutions_by_claim = _resolutions_by_claim(run_payload)
+    convergence_reports_by_claim = _convergence_reports_by_claim(run_payload)
     atom_types = _atom_types_by_id(run_payload)
     checks: list[ExpectedBehaviorCheck] = []
 
@@ -256,6 +271,75 @@ def evaluate_expected_behavior(
                 )
             )
 
+    for claim_expectation in expected.claim_convergences:
+        claim_report = convergence_reports_by_claim.get(claim_expectation.x_id)
+        if claim_report is None:
+            checks.append(
+                ExpectedBehaviorCheck(
+                    name="claim_convergence_present",
+                    x_id=claim_expectation.x_id,
+                    passed=False,
+                    expected="present",
+                    actual="missing",
+                )
+            )
+            continue
+
+        if claim_expectation.claim_alignment_status is not None:
+            checks.append(
+                _check(
+                    name="claim_alignment_status",
+                    x_id=claim_expectation.x_id,
+                    expected=claim_expectation.claim_alignment_status,
+                    actual=claim_report["claim_alignment_status"],
+                )
+            )
+        if claim_expectation.evidence_convergence_status is not None:
+            checks.append(
+                _check(
+                    name="evidence_convergence_status",
+                    x_id=claim_expectation.x_id,
+                    expected=claim_expectation.evidence_convergence_status,
+                    actual=claim_report["evidence_convergence_status"],
+                )
+            )
+        if claim_expectation.selected_support_set is not None:
+            checks.append(
+                _check(
+                    name="selected_support_set",
+                    x_id=claim_expectation.x_id,
+                    expected=list(claim_expectation.selected_support_set),
+                    actual=claim_report["selected_support_set"],
+                )
+            )
+        if claim_expectation.review_trigger_codes is not None:
+            checks.append(
+                _check(
+                    name="review_trigger_codes",
+                    x_id=claim_expectation.x_id,
+                    expected=list(claim_expectation.review_trigger_codes),
+                    actual=_codes_for_items(claim_report["review_triggers"]),
+                )
+            )
+        if claim_expectation.partial_failure_codes is not None:
+            checks.append(
+                _check(
+                    name="partial_failure_codes",
+                    x_id=claim_expectation.x_id,
+                    expected=list(claim_expectation.partial_failure_codes),
+                    actual=_codes_for_items(claim_report["partial_failures"]),
+                )
+            )
+        if claim_expectation.unresolved_gaps is not None:
+            checks.append(
+                _check(
+                    name="unresolved_gaps",
+                    x_id=claim_expectation.x_id,
+                    expected=list(claim_expectation.unresolved_gaps),
+                    actual=claim_report["unresolved_gaps"],
+                )
+            )
+
     return ExpectedBehaviorReport(
         passed=all(check.passed for check in checks),
         checks=tuple(checks),
@@ -296,7 +380,11 @@ def experiment_expected_behavior_from_dict(
     return ExperimentExpectedBehavior(
         claim_resolutions=tuple(
             _expected_claim_resolution_from_dict(item)
-            for item in _required_list(data, "claim_resolutions")
+            for item in _optional_list(data, "claim_resolutions")
+        ),
+        claim_convergences=tuple(
+            _expected_claim_convergence_from_dict(item)
+            for item in _optional_list(data, "claim_convergences")
         ),
         metadata=dict(data.get("metadata", {})),
     )
@@ -333,6 +421,29 @@ def _expected_claim_resolution_from_dict(data: Any) -> ExpectedClaimResolution:
     )
 
 
+def _expected_claim_convergence_from_dict(data: Any) -> ExpectedClaimConvergence:
+    if not isinstance(data, dict):
+        raise ValueError("claim_convergences items must be objects")
+    return ExpectedClaimConvergence(
+        x_id=str(data["x_id"]),
+        claim_alignment_status=_optional_string(data.get("claim_alignment_status")),
+        evidence_convergence_status=_optional_string(
+            data.get("evidence_convergence_status")
+        ),
+        selected_support_set=_optional_string_tuple_or_none(
+            data.get("selected_support_set")
+        ),
+        review_trigger_codes=_optional_string_tuple_or_none(
+            data.get("review_trigger_codes")
+        ),
+        partial_failure_codes=_optional_string_tuple_or_none(
+            data.get("partial_failure_codes")
+        ),
+        unresolved_gaps=_optional_string_tuple_or_none(data.get("unresolved_gaps")),
+        metadata=dict(data.get("metadata", {})),
+    )
+
+
 def _declared_claim_from_dict(data: Any) -> DeclaredClaim:
     if not isinstance(data, dict):
         raise ValueError("claims 항목은 object여야 합니다.")
@@ -355,10 +466,31 @@ def _budget_from_dict(data: dict[str, Any]) -> InvestigationBudget:
 
 
 def _atom_types_by_id(run_payload: dict[str, Any]) -> dict[str, str]:
+    investigation_state = run_payload.get("investigation_state", {})
     return {
         atom["atom_id"]: atom["atom_type"]
-        for atom in run_payload["investigation_state"]["atoms"]
+        for atom in investigation_state.get("atoms", [])
     }
+
+
+def _resolutions_by_claim(run_payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    final_graph = run_payload.get("final_graph", {})
+    return {
+        resolution["x_id"]: resolution
+        for resolution in final_graph.get("resolutions", [])
+    }
+
+
+def _convergence_reports_by_claim(run_payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    report = run_payload.get("report", {})
+    return {
+        claim_report["claim_id"]: claim_report
+        for claim_report in report.get("claim_reports", [])
+    }
+
+
+def _codes_for_items(items: list[dict[str, Any]]) -> list[str]:
+    return [str(item["code"]) for item in items]
 
 
 def _types_for_ids(atom_ids: list[str], atom_types: dict[str, str]) -> list[str]:
@@ -389,6 +521,13 @@ def _required_list(data: dict[str, Any], key: str) -> list[Any]:
     value = data[key]
     if not isinstance(value, list):
         raise ValueError(f"{key}는 list여야 합니다.")
+    return value
+
+
+def _optional_list(data: dict[str, Any], key: str) -> list[Any]:
+    value = data.get(key, [])
+    if not isinstance(value, list):
+        raise ValueError(f"{key} must be a list when provided")
     return value
 
 
