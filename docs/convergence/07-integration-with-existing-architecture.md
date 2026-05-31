@@ -175,7 +175,7 @@ These bridges are optional and should not be required for MVP.
 
 Convergence MVP may use `DeclaredClaim` fields directly with `EvidenceSchemaRegistry`.
 
-Future integration may derive schema focus from `NeedSpec`, but PR4 does not require that.
+Future integration may derive schema focus from `NeedSpec`, but the initial convergence integration does not require that.
 
 Recommended boundary:
 
@@ -275,7 +275,7 @@ ExperimentManifest
 -> ExperimentRunTrace(run=ConvergenceRun)
 ```
 
-No existing experiment trace contract needs to change for PR4.
+No existing experiment trace contract needs to change for the initial convergence integration.
 
 ## Adapter acceptance relationship
 
@@ -398,7 +398,7 @@ Do not move existing classes into convergence package during MVP.
 
 ## Non-goals
 
-Integration PRs must not introduce:
+Integration batches must not introduce:
 
 ```text
 large refactor of run_resolution_cycle

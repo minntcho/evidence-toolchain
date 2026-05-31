@@ -2,7 +2,7 @@
 
 이 문서는 Evidence Convergence Kernel MVP의 초기 테스트 계획을 정의합니다.
 
-PR4는 테스트 코드를 추가하지 않습니다. 이 문서는 다음 implementation PR들이 어떤 behavior를 증명해야 하는지 고정합니다.
+이 문서는 테스트 코드를 추가하지 않고, 다음 implementation 작업들이 어떤 behavior를 증명해야 하는지 고정합니다.
 
 ## Test philosophy
 
@@ -399,7 +399,7 @@ json.dumps(report.to_dict(), ensure_ascii=False)
 
 ## Future projection tests
 
-Projection is not MVP PR1 for implementation, but future tests should cover:
+Projection is not part of the first MVP implementation, but future tests should cover:
 
 ```text
 ConvergenceReport evidence_converged -> EvidenceResolutionGraph supported status
@@ -435,7 +435,7 @@ tests/convergence/test_convergence_report.py
 
 ## First implementation acceptance criteria
 
-The first code PR after docs should be accepted only if:
+The first implementation batch after docs should be accepted only if:
 
 ```text
 clean support passes

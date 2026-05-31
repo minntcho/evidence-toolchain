@@ -28,6 +28,20 @@ future VLM -> MaskPatch
 future manual adapter -> MaskPatch
 ```
 
+```mermaid
+flowchart LR
+    G["CandidateGap"] --> S["GapScheduler"]
+    S --> C["CapabilitySpec-selected capability"]
+    C --> P["MaskPatch"]
+    P --> V["PatchValidator"]
+    V -->|valid| A["patch_applied event"]
+    V -->|rejected| R["patch_rejected event"]
+    A --> N["Candidate state advances"]
+    R --> B["ConvergenceBoard trace"]
+    N --> B
+    B --> O["ConvergenceReport"]
+```
+
 ## MaskPatch shape
 
 MVP patch는 candidate 하나에 대한 proposed update입니다.
