@@ -1,0 +1,19 @@
+{
+  "claim_convergences": [
+    {
+      "claim_alignment_status": "supported_after_unit_normalization",
+      "evidence_convergence_status": "evidence_converged",
+      "partial_failure_codes": [],
+      "review_trigger_codes": [],
+      "selected_support_set": [
+        "cand_001"
+      ],
+      "unresolved_gaps": [],
+      "x_id": "x_usage_001"
+    }
+  ],
+  "metadata": {
+    "case_id": "convergence_clean_support",
+    "source": "fixture"
+  }
+}

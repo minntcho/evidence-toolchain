@@ -246,6 +246,8 @@ def test_generated_case_bundle_contract_is_indexed_and_scope_limited():
     assert "experiment.json" in text
     assert "expected-behavior.json" in text
     assert "run-experiment" in text
+    assert "run-convergence" in text
+    assert "claim_convergences" in text
     assert "Ground truth" in text
     assert "Expected toolchain behavior" in text
     assert "해서는 안 되는 일" in text
@@ -432,6 +434,7 @@ def test_expected_behavior_oracle_doc_is_indexed_and_keeps_policy_out():
     assert "ExpectedBehavior oracle" in text
     assert "ExperimentRunTrace" in text
     assert "ExpectedClaimResolution" in text
+    assert "ExpectedClaimConvergence" in text
     assert "ExpectedBehaviorReport" in text
     assert "claim_status" in text
     assert "supporting_atom_types" in text
@@ -448,9 +451,13 @@ def test_experiment_cli_runner_doc_is_indexed_and_keeps_provider_authority_out()
 
     text = doc_path.read_text(encoding="utf-8")
     assert "run-experiment" in text
+    assert "run-convergence" in text
     assert "ExperimentManifest" in text
     assert "ExperimentRunTrace" in text
     assert "ExpectedBehaviorReport" in text
+    assert "ExperimentExpectedBehavior.claim_convergences" in text
+    assert "run.report.claim_reports" in text
+    assert "does not run the expected-behavior oracle yet" not in text
     assert "provider tools" in text
     assert "downstream policy sufficiency" in text
 

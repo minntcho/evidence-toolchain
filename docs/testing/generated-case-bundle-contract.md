@@ -88,7 +88,7 @@ Ground truth는 synthetic world가 알고 있는 value입니다. Expected toolch
 
 `experiment.json`는 generated evidence file과 최소 declared claim을 묶습니다. 현재 slice에서는 deterministic resolution cycle이 안정적으로 처리하는 `amount` + `unit` claim만 생성합니다. site, supplier, activity, period truth는 `expected.json`에 남아 있지만, 아직 resolver authority로 승격하지 않습니다.
 
-`expected-behavior.json`는 generated case가 현재 harness에서 만들어야 하는 claim resolution expectation입니다. 이 파일은 `run-experiment`의 `--expected` 입력으로 사용할 수 있습니다.
+`expected-behavior.json`는 generated case가 현재 harness에서 만들어야 하는 expected behavior expectation입니다. Resolution fixture는 `claim_resolutions`를 쓸 수 있고, convergence fixture는 `claim_convergences`를 쓸 수 있습니다. 이 파일은 `run-experiment`와 `run-convergence`의 `--expected` 입력으로 사용할 수 있습니다.
 
 Example:
 
@@ -97,6 +97,13 @@ evidence-toolchain run-experiment .\generated\utility_bill_basic\experiment.json
   --trace-out .\generated\utility_bill_basic\out\trace.json `
   --expected .\generated\utility_bill_basic\expected-behavior.json `
   --expected-report-out .\generated\utility_bill_basic\out\expected-report.json
+```
+
+```powershell
+evidence-toolchain run-convergence .\generated\convergence_clean_support\experiment.json `
+  --trace-out .\generated\convergence_clean_support\out\trace.json `
+  --expected .\generated\convergence_clean_support\expected-behavior.json `
+  --expected-report-out .\generated\convergence_clean_support\out\expected-report.json
 ```
 
 ## 강하게 assert할 것
@@ -113,6 +120,7 @@ Test는 다음을 강하게 assert할 수 있습니다.
 - Ground truth와 Expected toolchain behavior separation
 - 현재 format slice에 대한 selected capability, fallback, issue
 - generated experiment files can drive `run-experiment`
+- convergence fixture files can drive `run-convergence`
 
 ## freeze하지 말아야 할 것
 
