@@ -15,6 +15,7 @@ from evidence_toolchain.experiments import (
 )
 from evidence_toolchain.file_routing import ingest_bundle
 from evidence_toolchain.investigation import InvestigationBudget
+from evidence_toolchain.convergence.runner import run_convergence_cycle
 from evidence_toolchain.resolution_cycle import run_resolution_cycle
 
 
@@ -88,6 +89,41 @@ def _run_experiment(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_convergence(args: argparse.Namespace) -> int:
+    manifest_path = Path(args.manifest)
+    manifest = load_experiment_manifest(manifest_path)
+    bundle = manifest.to_attachment_bundle(base_dir=manifest_path.parent)
+    inventory = ingest_bundle(bundle)
+    run = run_convergence_cycle(
+        inventory=inventory,
+        claims=manifest.claims,
+        run_id=args.run_id or f"{manifest.experiment_id}_convergence_run",
+        max_steps=max(0, args.max_steps),
+    )
+    trace = build_experiment_run_trace(
+        manifest=manifest,
+        run=run,
+        metadata={
+            "cli_command": "run-convergence",
+            "manifest_path": str(manifest_path),
+            "inventory_unit_count": len(inventory.units),
+        },
+    )
+    trace_path = write_experiment_run_trace(trace, args.trace_out)
+    print(
+        json.dumps(
+            _convergence_summary_payload(
+                manifest_id=manifest.experiment_id,
+                trace_path=trace_path,
+                run=run,
+            ),
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+    )
+    return 0
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="evidence-toolchain",
@@ -123,6 +159,31 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Optional run id. Defaults to '<experiment_id>_run'.",
     )
     run_parser.set_defaults(func=_run_experiment)
+
+    convergence_parser = subparsers.add_parser(
+        "run-convergence",
+        help="Run an ExperimentManifest through the convergence cycle.",
+    )
+    convergence_parser.add_argument(
+        "manifest",
+        help="Path to an experiment manifest JSON file.",
+    )
+    convergence_parser.add_argument(
+        "--trace-out",
+        required=True,
+        help="Path where the ExperimentRunTrace JSON artifact will be written.",
+    )
+    convergence_parser.add_argument(
+        "--max-steps",
+        type=int,
+        default=10,
+        help="Maximum convergence runner steps. Defaults to 10.",
+    )
+    convergence_parser.add_argument(
+        "--run-id",
+        help="Optional run id. Defaults to '<experiment_id>_convergence_run'.",
+    )
+    convergence_parser.set_defaults(func=_run_convergence)
     return parser
 
 
@@ -165,6 +226,26 @@ def _summary_payload(
             "report_path": str(expected_report_path),
         }
     return payload
+
+
+def _convergence_summary_payload(
+    *,
+    manifest_id: str,
+    trace_path: Path,
+    run,
+) -> dict[str, object]:
+    return {
+        "claim_reports": [
+            {
+                "claim_id": report.claim_id,
+                "claim_alignment_status": report.claim_alignment_status,
+                "evidence_convergence_status": report.evidence_convergence_status,
+            }
+            for report in run.report.claim_reports
+        ],
+        "experiment_id": manifest_id,
+        "trace_path": str(trace_path),
+    }
 
 
 if __name__ == "__main__":

@@ -42,3 +42,29 @@ framework orchestration, and does not decide downstream policy sufficiency.
 It is a fast local harness for proving that manifest, ingestion, resolution,
 trace, and oracle contracts can be wired together before real adapters are
 attached.
+
+## Convergence Runner
+
+The `run-convergence` command runs the same `ExperimentManifest` input through
+the Evidence Convergence Kernel instead of the resolution graph path:
+
+```text
+ExperimentManifest
+-> AttachmentBundle
+-> EvidenceInventory
+-> run_convergence_cycle
+-> ExperimentRunTrace
+```
+
+Example:
+
+```powershell
+evidence-toolchain run-convergence .\experiment.json `
+  --trace-out .\out\convergence-trace.json
+```
+
+The command writes an `ExperimentRunTrace` whose `run.report.claim_reports`
+contain convergence statuses such as `claim_alignment_status` and
+`evidence_convergence_status`. It does not run the expected-behavior oracle yet,
+because the current oracle reads `final_graph.resolutions` from the older
+resolution path.
