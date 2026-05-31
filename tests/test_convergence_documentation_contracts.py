@@ -33,14 +33,14 @@ def test_convergence_docs_are_indexed_and_preserve_mvp_boundary():
         assert Path("docs/convergence", filename).exists()
         assert f"convergence/{filename}" in docs_index
 
-    assert "Evidence Convergence Kernel은 전체 증빙 다발 reasoning을 해결하지 않는다." in combined
-    assert "MVP는 새 `EvidenceObservation` 모델을 만들지 않습니다." in combined
+    assert "Evidence Convergence Kernel? ?? ?? ?? reasoning? ???? ???." in combined
+    assert "MVP? ? `EvidenceObservation` ??? ??? ????." in combined
     assert "MVP observation = EvidenceUnit" in combined
     assert "MVP observation store = EvidenceInventory" in combined
 
-    assert "Capability는 candidate state를 직접 변경하지 않는다." in combined
-    assert "PatchValidator만 patch를 적용할 수 있다." in combined
-    assert "Convergence pass는 downstream verdict가 아니다" in combined
+    assert "Capability? candidate state? ?? ???? ???." in combined
+    assert "PatchValidator? patch? ??? ? ??." in combined
+    assert "Convergence pass? downstream verdict? ???" in combined
 
     assert "EvidenceBundleGraph" in combined
     assert "SupportSetSelector" in combined
@@ -76,12 +76,12 @@ def test_convergence_docs_define_snapshot_ssot_and_strategy_views():
     ).read_text(encoding="utf-8")
 
     assert "convergence/09-ssot-and-strategy-boundary.md" in docs_index
-    assert "SSOT는 증빙 케이스 스냅샷이다." in ssot_doc
+    assert "SSOT? ?? ??? ?????." in ssot_doc
     assert "Strategies produce views." in ssot_doc
     assert "Views do not mutate the snapshot." in ssot_doc
-    assert "EvidenceResolutionGraph와 ConvergenceReport는 strategy-specific materialized view다." in ssot_doc
-    assert "Projection은 명시적 adapter다." in ssot_doc
-    assert "downstream verdict는 core authority가 아니다." in ssot_doc
+    assert "EvidenceResolutionGraph? ConvergenceReport? strategy-specific materialized view?." in ssot_doc
+    assert "Projection? ??? adapter?." in ssot_doc
+    assert "downstream verdict? core authority? ???." in ssot_doc
     assert "`EvidenceCaseSnapshot` is the code-level SSOT wrapper." in ssot_doc
     assert "`EvidenceInventory` remains the observation store." in ssot_doc
     assert "Strategy outputs reference `case_snapshot_id`." in ssot_doc
@@ -94,3 +94,8 @@ def test_convergence_docs_preserve_expected_behavior_view_boundary():
     assert "ExperimentRunTrace.run.report.claim_reports" in test_plan
     assert "They do not project the convergence report into an" in test_plan
     assert "they do not compare `downstream_verdict`" in test_plan
+    assert "convergence_clean_support" in test_plan
+    assert "convergence_nonblocking_issue" in test_plan
+    assert "convergence_candidate_conflict" in test_plan
+    assert "expected unresolved_gaps: quantity" in test_plan
+    assert "fake `PatchProducer`" in test_plan

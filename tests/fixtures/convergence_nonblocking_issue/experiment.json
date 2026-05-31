@@ -1,0 +1,29 @@
+{
+  "attachments": [
+    {
+      "attachment_id": "raw_usage_csv",
+      "declared_media_type": "text/csv",
+      "path": "usage.csv"
+    },
+    {
+      "attachment_id": "profile_notes",
+      "declared_media_type": "text/plain",
+      "path": "notes.txt"
+    }
+  ],
+  "bundle_id": "bundle_001",
+  "claims": [
+    {
+      "fields": {
+        "activity": "electricity",
+        "amount": 6400,
+        "period": "2025-03",
+        "site": "OCH-01",
+        "unit": "kWh"
+      },
+      "x_id": "x_usage_001"
+    }
+  ],
+  "experiment_id": "convergence_nonblocking_issue",
+  "schema_version": "experiment_manifest_v0"
+}

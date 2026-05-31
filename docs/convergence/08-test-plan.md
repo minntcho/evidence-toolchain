@@ -1,24 +1,24 @@
 # Evidence Convergence Kernel Test Plan
 
-이 문서는 Evidence Convergence Kernel MVP의 초기 테스트 계획을 정의합니다.
+? ??? Evidence Convergence Kernel MVP? ?? ??? ??? ?????.
 
-이 문서는 테스트 코드를 추가하지 않고, 다음 implementation 작업들이 어떤 behavior를 증명해야 하는지 고정합니다.
+? ??? ??? ??? ???? ??, ?? implementation ???? ?? behavior? ???? ??? ?????.
 
 ## Test philosophy
 
-MVP 테스트의 목표는 full bundle reasoning을 검증하는 것이 아닙니다.
+MVP ???? ??? full bundle reasoning? ???? ?? ????.
 
-목표는 다음 kernel invariant를 검증하는 것입니다.
+??? ?? kernel invariant? ???? ????.
 
 ```text
-EvidenceInventory를 입력으로 받을 수 있다.
-Candidate를 seed할 수 있다.
-CandidateGap을 계산할 수 있다.
-GapScheduler가 bounded capability를 고를 수 있다.
-Capability가 MaskPatch만 제안한다.
-PatchValidator가 invalid patch를 막는다.
-Valid patch만 candidate state를 전진시킨다.
-ConvergenceReport가 alignment/convergence status를 분리해서 낸다.
+EvidenceInventory? ???? ?? ? ??.
+Candidate? seed? ? ??.
+CandidateGap? ??? ? ??.
+GapScheduler? bounded capability? ?? ? ??.
+Capability? MaskPatch? ????.
+PatchValidator? invalid patch? ???.
+Valid patch? candidate state? ?????.
+ConvergenceReport? alignment/convergence status? ???? ??.
 ```
 
 ## Test layers
@@ -128,6 +128,30 @@ Slice 4: bad patch rejected
 ```
 
 The fourth slice is required because it proves the trust boundary.
+
+## File-backed fixture matrix
+
+The current file-backed convergence fixtures live under `tests/fixtures/` and
+drive `run-convergence` through `ExperimentExpectedBehavior.claim_convergences`.
+
+```text
+convergence_clean_support
+  expected: evidence_converged
+
+convergence_nonblocking_issue
+  expected: evidence_converged
+  expected partial_failure_codes: nonblocking_failure
+
+convergence_candidate_conflict
+  expected: needs_review_due_to_candidate_conflict
+  expected review_trigger_codes: candidate_conflict
+  expected unresolved_gaps: quantity
+```
+
+The bad patch rejected slice remains a runner-level fixture because it requires
+injecting a fake `PatchProducer`. It should still be asserted through
+`ExperimentExpectedBehavior.claim_convergences` so the trust-boundary behavior is
+visible from the same expected-behavior surface.
 
 ## Slice 1: clean support
 
