@@ -2,11 +2,21 @@ from __future__ import annotations
 
 from dataclasses import dataclass, fields, is_dataclass, replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from evidence_toolchain.claims import DeclaredClaim
-from evidence_toolchain.convergence.board import ConvergenceBoard, ConvergenceEvent
+from evidence_toolchain.convergence.board import (
+    ConvergenceBoard,
+    ConvergenceEvent,
+    PartialFailure,
+    ReviewTrigger,
+)
 from evidence_toolchain.convergence.capabilities import (
+    ACTIVITY,
+    PERIOD,
+    QUANTITY,
+    SITE,
+    UNIT,
     deterministic_normalizer_spec,
     propose_deterministic_normalization,
     propose_simple_alignment,
@@ -29,6 +39,18 @@ from evidence_toolchain.convergence.validator import apply_patch, validate_patch
 from evidence_toolchain.ingestion import EvidenceInventory
 
 
+PatchProducerFn = Callable[
+    [EvidenceCandidate, EvidenceInventory, tuple[DeclaredClaim, ...], EvidenceSchema],
+    MaskPatch,
+]
+
+
+@dataclass(frozen=True)
+class PatchProducer:
+    spec: CapabilitySpec
+    produce_patch: PatchProducerFn
+
+
 @dataclass(frozen=True)
 class ConvergenceRun:
     run_id: str
@@ -48,13 +70,18 @@ def run_convergence_cycle(
     inventory: EvidenceInventory,
     claims: tuple[DeclaredClaim, ...],
     schema_registry: EvidenceSchema | None = None,
-    capabilities: tuple[CapabilitySpec, ...] | None = None,
+    capabilities: tuple[CapabilitySpec | PatchProducer, ...] | None = None,
     run_id: str | None = None,
     max_steps: int = 10,
 ) -> ConvergenceRun:
     active_run_id = run_id or f"convergence_{inventory.bundle_id}"
     schema = schema_registry or utility_usage_schema()
-    active_capabilities = capabilities or _default_capabilities(schema)
+    active_producers = _normalize_patch_producers(capabilities, schema)
+    active_capabilities = tuple(producer.spec for producer in active_producers)
+    producer_by_name = {
+        producer.spec.name: producer
+        for producer in active_producers
+    }
     board = _seed_board(active_run_id, inventory, claims, schema)
     stop_reason = "max_steps_exhausted"
 
@@ -82,13 +109,14 @@ def run_convergence_cycle(
             break
 
         capability = selected[0]
+        producer = producer_by_name[capability.name]
         board = _append_event(
             board,
             "capability_selected",
             candidate_id=candidate.candidate_id,
             capability_name=capability.name,
         )
-        patch = _propose_patch(capability, candidate, inventory, claims, schema)
+        patch = producer.produce_patch(candidate, inventory, claims, schema)
         board = _append_event(
             board,
             "patch_proposed",
@@ -96,6 +124,17 @@ def run_convergence_cycle(
             capability_name=capability.name,
             metadata={"touched_mask": patch.touched_mask},
         )
+        if not patch.touched_mask:
+            stop_reason = "no_progress"
+            board = _append_event(
+                board,
+                "stopped",
+                candidate_id=candidate.candidate_id,
+                capability_name=capability.name,
+                metadata={"reason": stop_reason},
+            )
+            break
+
         validation = validate_patch(candidate, patch, capability, schema)
 
         if not validation.accepted:
@@ -107,6 +146,18 @@ def run_convergence_cycle(
                 metadata={
                     "errors": tuple(error.code for error in validation.errors),
                 },
+            )
+            board = _append_review_trigger(
+                board,
+                ReviewTrigger(
+                    code="patch_rejected",
+                    message="PatchValidator rejected a proposed patch.",
+                    metadata={
+                        "candidate_id": candidate.candidate_id,
+                        "capability_name": capability.name,
+                        "errors": tuple(error.code for error in validation.errors),
+                    },
+                ),
             )
             stop_reason = "patch_rejected"
             break
@@ -123,11 +174,12 @@ def run_convergence_cycle(
     else:
         stop_reason = "max_steps_exhausted"
 
+    board = _detect_simple_conflicts(board, schema)
     report = _finalize_report(
         run_id=active_run_id,
         inventory=inventory,
         claims=claims,
-        candidates=board.candidates,
+        board=board,
         schema=schema,
     )
     board = _append_event(
@@ -154,31 +206,94 @@ def _default_capabilities(schema: EvidenceSchema) -> tuple[CapabilitySpec, ...]:
     )
 
 
+def _normalize_patch_producers(
+    capabilities: tuple[CapabilitySpec | PatchProducer, ...] | None,
+    schema: EvidenceSchema,
+) -> tuple[PatchProducer, ...]:
+    selected = capabilities or _default_capabilities(schema)
+    return tuple(
+        capability
+        if isinstance(capability, PatchProducer)
+        else _builtin_patch_producer(capability)
+        for capability in selected
+    )
+
+
+def _builtin_patch_producer(spec: CapabilitySpec) -> PatchProducer:
+    return PatchProducer(
+        spec=spec,
+        produce_patch=lambda candidate, inventory, claims, schema: _propose_builtin_patch(
+            spec,
+            candidate,
+            inventory,
+            claims,
+            schema,
+        ),
+    )
+
+
 def _seed_board(
     run_id: str,
     inventory: EvidenceInventory,
     claims: tuple[DeclaredClaim, ...],
     schema: EvidenceSchema,
 ) -> ConvergenceBoard:
-    candidates = tuple(
-        seed_usage_candidate(
-            inventory,
-            claim,
-            schema=schema,
-            candidate_id=f"cand_{index:03d}",
-        )
-        for index, claim in enumerate(claims, start=1)
-    )
+    candidates = _seed_candidates(inventory, claims, schema)
     board = ConvergenceBoard(
         board_id=f"{run_id}_board",
         run_id=run_id,
         inventory=inventory,
         claims=claims,
         candidates=candidates,
+        partial_failures=_partial_failures_from_inventory(inventory),
     )
     for candidate in candidates:
         board = _append_event(board, "candidate_seeded", candidate_id=candidate.candidate_id)
     return board
+
+
+def _seed_candidates(
+    inventory: EvidenceInventory,
+    claims: tuple[DeclaredClaim, ...],
+    schema: EvidenceSchema,
+) -> tuple[EvidenceCandidate, ...]:
+    row_keys = _candidate_row_keys(inventory)
+    candidates: list[EvidenceCandidate] = []
+    for claim in claims:
+        if row_keys:
+            for artifact_id, row in row_keys:
+                candidates.append(
+                    seed_usage_candidate(
+                        inventory,
+                        claim,
+                        schema=schema,
+                        candidate_id=f"cand_{len(candidates) + 1:03d}",
+                        metadata={"artifact_id": artifact_id, "row": row},
+                    )
+                )
+        else:
+            candidates.append(
+                seed_usage_candidate(
+                    inventory,
+                    claim,
+                    schema=schema,
+                    candidate_id=f"cand_{len(candidates) + 1:03d}",
+                )
+            )
+    return tuple(candidates)
+
+
+def _candidate_row_keys(inventory: EvidenceInventory) -> tuple[tuple[str, int], ...]:
+    row_keys: set[tuple[str, int]] = set()
+    for unit in inventory.units:
+        row = unit.locator.get("row")
+        header = unit.locator.get("header") or unit.metadata.get("slot")
+        if row is None or header is None:
+            continue
+        if str(header).strip().lower() not in _SEED_HEADERS:
+            continue
+        row_keys.add((unit.artifact_id, int(row)))
+    return tuple(sorted(row_keys))
 
 
 def _next_action(
@@ -194,7 +309,7 @@ def _next_action(
     return None, None, ()
 
 
-def _propose_patch(
+def _propose_builtin_patch(
     capability: CapabilitySpec,
     candidate: EvidenceCandidate,
     inventory: EvidenceInventory,
@@ -258,16 +373,29 @@ def _append_event(
     )
 
 
+def _append_review_trigger(
+    board: ConvergenceBoard,
+    trigger: ReviewTrigger,
+) -> ConvergenceBoard:
+    return replace(board, review_triggers=board.review_triggers + (trigger,))
+
+
 def _finalize_report(
     *,
     run_id: str,
     inventory: EvidenceInventory,
     claims: tuple[DeclaredClaim, ...],
-    candidates: tuple[EvidenceCandidate, ...],
+    board: ConvergenceBoard,
     schema: EvidenceSchema,
 ) -> ConvergenceReport:
     claim_reports = tuple(
-        _claim_report(claim, candidates, schema)
+        _claim_report(
+            claim,
+            board.candidates,
+            schema,
+            board.review_triggers,
+            board.partial_failures,
+        )
         for claim in claims
     )
     return ConvergenceReport(
@@ -281,6 +409,8 @@ def _claim_report(
     claim: DeclaredClaim,
     candidates: tuple[EvidenceCandidate, ...],
     schema: EvidenceSchema,
+    review_triggers: tuple[ReviewTrigger, ...],
+    partial_failures: tuple[PartialFailure, ...],
 ) -> ClaimConvergenceReport:
     claim_candidates = tuple(
         candidate for candidate in candidates if candidate.claim_id == claim.x_id
@@ -304,7 +434,14 @@ def _claim_report(
             if candidate.normalized_mask
             else "supported_direct"
         )
-        evidence_convergence_status = "evidence_converged"
+        evidence_convergence_status = (
+            "needs_review_due_to_candidate_conflict"
+            if any(trigger.code == "candidate_conflict" for trigger in review_triggers)
+            else "evidence_converged"
+        )
+    elif any(trigger.code == "patch_rejected" for trigger in review_triggers):
+        claim_alignment_status = "not_evaluated"
+        evidence_convergence_status = "needs_review_unresolved_gap"
     elif any(
         compute_candidate_gap(candidate, schema).missing_mask
         for candidate in claim_candidates
@@ -323,6 +460,88 @@ def _claim_report(
         selected_support_set=tuple(candidate.candidate_id for candidate in selected[:1]),
         candidate_ids=tuple(candidate.candidate_id for candidate in claim_candidates),
         unresolved_gaps=unresolved_gaps,
+        review_triggers=review_triggers,
+        partial_failures=partial_failures,
+    )
+
+
+def _partial_failures_from_inventory(
+    inventory: EvidenceInventory,
+) -> tuple[PartialFailure, ...]:
+    failures: list[PartialFailure] = []
+    for issue in inventory.issues:
+        if issue.severity == "blocking":
+            continue
+        failures.append(
+            PartialFailure(
+                code="nonblocking_failure",
+                message=issue.message,
+                metadata={
+                    "issue_code": issue.code,
+                    "issue_severity": issue.severity,
+                },
+            )
+        )
+    return tuple(failures)
+
+
+def _detect_simple_conflicts(
+    board: ConvergenceBoard,
+    schema: EvidenceSchema,
+) -> ConvergenceBoard:
+    updated = board
+    for claim in board.claims:
+        claim_candidates = tuple(
+            candidate for candidate in board.candidates if candidate.claim_id == claim.x_id
+        )
+        selected = tuple(
+            candidate
+            for candidate in claim_candidates
+            if candidate.aligned_mask & schema.required_mask == schema.required_mask
+        )
+        if not selected:
+            continue
+        selected_candidate = selected[0]
+        for candidate in claim_candidates:
+            if candidate.candidate_id == selected_candidate.candidate_id:
+                continue
+            if _candidate_conflicts(selected_candidate, candidate):
+                updated = _append_review_trigger(
+                    updated,
+                    ReviewTrigger(
+                        code="candidate_conflict",
+                        message="A second candidate conflicts with the selected support candidate.",
+                        metadata={
+                            "selected_candidate_id": selected_candidate.candidate_id,
+                            "conflicting_candidate_id": candidate.candidate_id,
+                        },
+                    ),
+                )
+    return updated
+
+
+def _candidate_conflicts(
+    selected: EvidenceCandidate,
+    candidate: EvidenceCandidate,
+) -> bool:
+    context_bits = (SITE, PERIOD, ACTIVITY)
+    if any(_candidate_value(selected, bit) != _candidate_value(candidate, bit) for bit in context_bits):
+        return False
+    if _candidate_value(selected, UNIT) != _candidate_value(candidate, UNIT):
+        return False
+    selected_quantity = _candidate_value(selected, QUANTITY)
+    candidate_quantity = _candidate_value(candidate, QUANTITY)
+    return (
+        selected_quantity is not None
+        and candidate_quantity is not None
+        and selected_quantity != candidate_quantity
+    )
+
+
+def _candidate_value(candidate: EvidenceCandidate, slot_bit: int) -> Any:
+    return candidate.normalized_payload_by_slot.get(
+        slot_bit,
+        candidate.payload_by_slot.get(slot_bit),
     )
 
 
@@ -361,3 +580,21 @@ def _to_json_compatible(value: Any) -> Any:
     if isinstance(value, tuple | list):
         return [_to_json_compatible(item) for item in value]
     return value
+
+
+_SEED_HEADERS = frozenset(
+    {
+        "site",
+        "location",
+        "period",
+        "service period",
+        "activity",
+        "fuel",
+        "amount",
+        "quantity",
+        "usage",
+        "usage amount",
+        "unit",
+        "uom",
+    }
+)
