@@ -406,7 +406,7 @@ Existing expected behavior and resolution contracts use `EvidenceResolutionGraph
 
 Projection can bridge convergence reports into that shape.
 
-### Why out of MVP docs PR
+### Why out of MVP docs
 
 Projection is useful but should not block the convergence kernel MVP.
 
@@ -436,7 +436,7 @@ patch_rejections
 unresolved_gaps
 ```
 
-### Why out of MVP docs PR
+### Why out of MVP docs
 
 First implementation can test reports directly.
 

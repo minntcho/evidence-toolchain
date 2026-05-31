@@ -143,6 +143,8 @@ normalized_mask ⊆ assigned_mask
 aligned_mask    ⊆ normalized_mask 또는 directly_comparable_mask
 ```
 
+`directly_comparable_mask`는 `EvidenceSchema`가 명시적으로 직접 비교 가능하다고 선언한 slot만 포함합니다. MVP 기본 schema는 모든 alignment를 normalizer 경유로 처리할 수 있으므로 이 mask를 `0`으로 시작해도 됩니다.
+
 ## Provenance policy
 
 MVP는 `PROVENANCE`를 독립 slot bit로 두지 않습니다.
@@ -394,9 +396,9 @@ src/evidence_toolchain/convergence/
 
 This avoids collisions with existing top-level modules such as `capabilities.py`, `runtime.py`, and `reports.py`.
 
-## First PR boundary
+## Initial documentation boundary
 
-PR1 only introduces docs.
+This scope document only introduces the intended contract.
 
 ```text
 docs/convergence/00-north-star.md
@@ -404,4 +406,4 @@ docs/convergence/01-mvp-scope.md
 docs/index.md update
 ```
 
-No runtime code, tests, schema objects, or imports are changed in PR1.
+No runtime code, tests, schema objects, or imports are changed by this document.

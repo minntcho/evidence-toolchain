@@ -48,6 +48,20 @@ unknown
 -> aligned
 ```
 
+```mermaid
+stateDiagram-v2
+    [*] --> Unknown
+    Unknown --> Present
+    Present --> Assigned
+    Assigned --> Normalized
+    Normalized --> Aligned
+
+    Assigned --> Ambiguous
+    Normalized --> Contradicted
+    Ambiguous --> Review
+    Contradicted --> Review
+```
+
 각 단계의 의미는 다음과 같습니다.
 
 ### unknown
@@ -141,6 +155,7 @@ class SlotDef:
     value_kind: str
     required: bool = True
     comparable: bool = False
+    directly_comparable: bool = False
     alignment_required: bool = True
     provenance_required: bool = True
 ```
@@ -162,6 +177,9 @@ required:
 
 comparable:
   normalized material이 필요한 slot인지
+
+directly_comparable:
+  별도 normalized payload 없이 claim과 직접 비교할 수 있는 slot인지
 
 alignment_required:
   claim과 비교되어야 하는 slot인지
@@ -186,6 +204,7 @@ Computed masks:
 ```text
 required_mask
 comparable_mask
+directly_comparable_mask
 alignment_required_mask
 provenance_required_mask
 schema_mask
@@ -201,6 +220,9 @@ required_mask:
 
 comparable_mask:
   SITE | PERIOD | ACTIVITY | QUANTITY | UNIT
+
+directly_comparable_mask:
+  0
 
 alignment_required_mask:
   SITE | PERIOD | ACTIVITY | QUANTITY | UNIT

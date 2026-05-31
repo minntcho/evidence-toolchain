@@ -2,7 +2,7 @@
 
 이 문서는 Evidence Convergence Kernel MVP의 runner, loop, trace, report contract를 정의합니다.
 
-PR3는 runtime code를 추가하지 않습니다. 이 문서는 다음 구현 PR에서 `run_convergence_cycle`이 따라야 할 contract를 고정합니다.
+이 문서는 runtime code를 추가하지 않고, 다음 구현에서 `run_convergence_cycle`이 따라야 할 contract를 고정합니다.
 
 ## Runner purpose
 
@@ -444,11 +444,11 @@ future expected behavior oracle
 
 MVP may later embed `ConvergenceRun` in `ExperimentRunTrace.run` because `ExperimentRunTrace` accepts a generic run object as long as it can be serialized.
 
-No change to the existing experiment trace contract is required in PR3.
+No change to the existing experiment trace contract is required for this runner/report contract.
 
 ## Optional EvidenceResolutionGraph projection
 
-Projection is not part of PR3 runtime contract, but report shape should not block it.
+Projection is not part of the initial runtime contract, but report shape should not block it.
 
 Future mapping example:
 

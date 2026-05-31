@@ -67,6 +67,20 @@ run_convergence_cycle     # new candidate/mask/patch convergence path
 
 나중에 필요하면 `ConvergenceReport -> EvidenceResolutionGraph` projection을 제공할 수 있습니다.
 
+```mermaid
+flowchart TD
+    I["EvidenceInventory / EvidenceUnit"] --> A["Existing EvidenceAtom path"]
+    A --> N["NormalizationResult"]
+    N --> G["EvidenceResolutionGraph"]
+
+    I --> S["EvidenceCandidate seeding"]
+    S --> B["ConvergenceBoard"]
+    B --> P["MaskPatch loop"]
+    P --> R["ConvergenceReport"]
+
+    R -. "optional projection" .-> G
+```
+
 ### 3. Candidate state는 bitmask로 표현한다
 
 복잡한 자연어 상태를 늘리지 않습니다.
@@ -240,11 +254,7 @@ run_convergence_cycle
 
 기존 `run_resolution_cycle`은 유지합니다.
 
-## 첫 문서 세트
-
-PR1은 이 북극성 문서와 MVP scope 문서만 추가합니다.
-
-다음 문서들은 이후 PR에서 추가합니다.
+## 문서 세트
 
 ```text
 02-core-concepts.md

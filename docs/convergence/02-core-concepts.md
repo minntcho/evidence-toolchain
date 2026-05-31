@@ -2,7 +2,7 @@
 
 이 문서는 Evidence Convergence Kernel MVP의 핵심 용어를 정의합니다.
 
-PR2의 목표는 runtime code를 만들지 않고, 이후 구현에서 용어가 섞이지 않도록 core contract vocabulary를 고정하는 것입니다.
+이 문서의 목표는 runtime code를 만들지 않고, 이후 구현에서 용어가 섞이지 않도록 core contract vocabulary를 고정하는 것입니다.
 
 ## 위치
 
@@ -166,6 +166,7 @@ bit
 value_kind
 required
 comparable
+directly_comparable
 alignment_required
 provenance_required
 ```
@@ -179,6 +180,7 @@ MVP schema는 bitmask를 계산할 수 있어야 합니다.
 ```text
 required_mask
 comparable_mask
+directly_comparable_mask
 alignment_required_mask
 provenance_required_mask
 ```
