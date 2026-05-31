@@ -12,6 +12,7 @@ CONVERGENCE_DOCS = (
     "06-runner-and-report.md",
     "07-integration-with-existing-architecture.md",
     "08-test-plan.md",
+    "09-ssot-and-strategy-boundary.md",
     "future-extensions.md",
 )
 
@@ -66,3 +67,18 @@ def test_convergence_docs_define_visual_and_schema_contracts_without_pr_local_te
 
     assert re.search(r"\bPR\d+\b", combined) is None
     assert re.search(r"\bPRs?\b", combined) is None
+
+
+def test_convergence_docs_define_snapshot_ssot_and_strategy_views():
+    docs_index = Path("docs/index.md").read_text(encoding="utf-8")
+    ssot_doc = Path(
+        "docs/convergence/09-ssot-and-strategy-boundary.md"
+    ).read_text(encoding="utf-8")
+
+    assert "convergence/09-ssot-and-strategy-boundary.md" in docs_index
+    assert "SSOT는 증빙 케이스 스냅샷이다." in ssot_doc
+    assert "Strategies produce views." in ssot_doc
+    assert "Views do not mutate the snapshot." in ssot_doc
+    assert "EvidenceResolutionGraph와 ConvergenceReport는 strategy-specific materialized view다." in ssot_doc
+    assert "Projection은 명시적 adapter다." in ssot_doc
+    assert "downstream verdict는 core authority가 아니다." in ssot_doc
