@@ -47,6 +47,8 @@ AttachmentBundle
 3. [Evidence Convergence Core Concepts](convergence/02-core-concepts.md)
 4. [Candidate Mask State](convergence/03-candidate-mask-state.md)
 5. [MaskPatch and PatchValidator](convergence/04-mask-patch-and-validator.md)
+6. [GapScheduler and Capabilities](convergence/05-gap-scheduler-and-capabilities.md)
+7. [Runner and Report](convergence/06-runner-and-report.md)
 
 ## 프로젝트 입장
 
