@@ -14,7 +14,9 @@ from evidence_toolchain.convergence.schemas import EvidenceSchema, SlotDef
 from evidence_toolchain.convergence.validator import (
     PatchValidationError,
     PatchValidationResult,
+    apply_patch,
     validate_candidate_state,
+    validate_patch,
 )
 
 __all__ = [
@@ -27,7 +29,9 @@ __all__ = [
     "PatchValidationError",
     "PatchValidationResult",
     "SlotDef",
+    "apply_patch",
     "mask_has_unknown_bits",
     "provenance_present_mask",
     "validate_candidate_state",
+    "validate_patch",
 ]
