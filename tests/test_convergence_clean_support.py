@@ -120,16 +120,15 @@ def test_clean_support_candidate_converges_through_validated_patches():
     gap = compute_candidate_gap(candidate, schema)
     selected = select_capabilities(candidate, gap, (assigner, aligner, normalizer))
 
-    assert gap.unnormalized_mask == all_slots
-    assert selected == (normalizer,)
+    assert gap.unnormalized_mask == PERIOD | QUANTITY | UNIT
+    assert selected[0] == normalizer
+    assert aligner in selected
 
     normalization = propose_deterministic_normalization(candidate, schema=schema)
     candidate = _apply(candidate, normalization, normalizer, schema)
 
-    assert candidate.normalized_mask == all_slots
-    assert candidate.normalized_payload_by_slot[SITE] == "OCH-01"
+    assert candidate.normalized_mask == PERIOD | QUANTITY | UNIT
     assert candidate.normalized_payload_by_slot[PERIOD] == "2025-03"
-    assert candidate.normalized_payload_by_slot[ACTIVITY] == "electricity"
     assert candidate.normalized_payload_by_slot[QUANTITY] == 6400
     assert candidate.normalized_payload_by_slot[UNIT] == "kWh"
 

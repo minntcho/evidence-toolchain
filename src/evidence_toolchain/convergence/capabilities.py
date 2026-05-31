@@ -22,9 +22,9 @@ def utility_usage_schema() -> EvidenceSchema:
     return EvidenceSchema(
         schema_id=SCHEMA_ID,
         slots=(
-            SlotDef("site", SITE, "identifier", comparable=True),
+            SlotDef("site", SITE, "identifier", directly_comparable=True),
             SlotDef("period", PERIOD, "period", comparable=True),
-            SlotDef("activity", ACTIVITY, "identifier", comparable=True),
+            SlotDef("activity", ACTIVITY, "identifier", directly_comparable=True),
             SlotDef("quantity", QUANTITY, "quantity", comparable=True),
             SlotDef("unit", UNIT, "unit", comparable=True),
         ),
