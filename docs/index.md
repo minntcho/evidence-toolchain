@@ -38,6 +38,13 @@ AttachmentBundle
 17. [계약 문서](contracts/README.md)
 18. [테스트 전략](testing/README.md)
 
+## Evidence Convergence Kernel
+
+이 문서 묶음은 기존 X-Y resolution architecture를 대체하지 않고, `EvidenceInventory`와 `EvidenceUnit` 위에 얇게 놓이는 mask-gated candidate loop MVP를 정의합니다.
+
+1. [Evidence Convergence Kernel North Star](convergence/00-north-star.md)
+2. [Evidence Convergence Kernel MVP Scope](convergence/01-mvp-scope.md)
+
 ## 프로젝트 입장
 
 `evidence-toolchain`은 Downstream consumer가 바뀌어도 계속 유용해야 합니다.
