@@ -4,6 +4,10 @@ from dataclasses import dataclass, fields, is_dataclass, replace
 from pathlib import Path
 from typing import Any, Callable
 
+from evidence_toolchain.case_snapshot import (
+    build_evidence_case_snapshot,
+    strategy_view_metadata,
+)
 from evidence_toolchain.claims import DeclaredClaim
 from evidence_toolchain.convergence.board import (
     ConvergenceBoard,
@@ -76,13 +80,25 @@ def run_convergence_cycle(
 ) -> ConvergenceRun:
     active_run_id = run_id or f"convergence_{inventory.bundle_id}"
     schema = schema_registry or utility_usage_schema()
+    active_claims = tuple(claims)
+    case_snapshot = build_evidence_case_snapshot(
+        inventory=inventory,
+        claims=active_claims,
+    )
+    view_metadata = strategy_view_metadata(
+        snapshot=case_snapshot,
+        strategy_id="convergence_mvp",
+        strategy_version="0.1.0",
+        run_id=active_run_id,
+        view_kind="ConvergenceReport",
+    )
     active_producers = _normalize_patch_producers(capabilities, schema)
     active_capabilities = tuple(producer.spec for producer in active_producers)
     producer_by_name = {
         producer.spec.name: producer
         for producer in active_producers
     }
-    board = _seed_board(active_run_id, inventory, claims, schema)
+    board = _seed_board(active_run_id, inventory, active_claims, schema)
     stop_reason = "max_steps_exhausted"
 
     for _step in range(max_steps):
@@ -116,7 +132,7 @@ def run_convergence_cycle(
             candidate_id=candidate.candidate_id,
             capability_name=capability.name,
         )
-        patch = producer.produce_patch(candidate, inventory, claims, schema)
+        patch = producer.produce_patch(candidate, inventory, active_claims, schema)
         board = _append_event(
             board,
             "patch_proposed",
@@ -178,9 +194,10 @@ def run_convergence_cycle(
     report = _finalize_report(
         run_id=active_run_id,
         inventory=inventory,
-        claims=claims,
+        claims=active_claims,
         board=board,
         schema=schema,
+        metadata=view_metadata,
     )
     board = _append_event(
         board,
@@ -190,7 +207,7 @@ def run_convergence_cycle(
     return ConvergenceRun(
         run_id=active_run_id,
         inventory=inventory,
-        claims=claims,
+        claims=active_claims,
         schema_ids=(schema.schema_id,),
         final_board=board,
         report=report,
@@ -387,6 +404,7 @@ def _finalize_report(
     claims: tuple[DeclaredClaim, ...],
     board: ConvergenceBoard,
     schema: EvidenceSchema,
+    metadata: dict[str, Any],
 ) -> ConvergenceReport:
     claim_reports = tuple(
         _claim_report(
@@ -402,6 +420,7 @@ def _finalize_report(
         run_id=run_id,
         bundle_id=inventory.bundle_id,
         claim_reports=claim_reports,
+        metadata=dict(metadata),
     )
 
 

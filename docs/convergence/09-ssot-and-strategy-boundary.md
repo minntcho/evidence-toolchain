@@ -129,7 +129,7 @@ Strategy run은 최소한 다음 metadata를 남겨야 합니다.
 
 ```json
 {
-  "case_snapshot_id": "case_001@sha256:...",
+  "case_snapshot_id": "case_snapshot:...",
   "strategy_id": "convergence_mvp",
   "strategy_version": "0.1.0",
   "run_id": "run_001",
@@ -137,8 +137,13 @@ Strategy run은 최소한 다음 metadata를 남겨야 합니다.
 }
 ```
 
-MVP code may not yet have a first-class `EvidenceCaseSnapshot` object, but the
-trace metadata should evolve in this direction.
+`EvidenceCaseSnapshot` is the code-level SSOT wrapper.
+
+`EvidenceInventory` remains the observation store. The snapshot does not
+replace inventory, readers, route decisions, safety decisions, or raw evidence
+units. It names the fixed evidence case that strategy-specific views read.
+
+Strategy outputs reference `case_snapshot_id`.
 
 ## Projection Boundary
 

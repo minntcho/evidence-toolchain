@@ -82,3 +82,6 @@ def test_convergence_docs_define_snapshot_ssot_and_strategy_views():
     assert "EvidenceResolutionGraph와 ConvergenceReport는 strategy-specific materialized view다." in ssot_doc
     assert "Projection은 명시적 adapter다." in ssot_doc
     assert "downstream verdict는 core authority가 아니다." in ssot_doc
+    assert "`EvidenceCaseSnapshot` is the code-level SSOT wrapper." in ssot_doc
+    assert "`EvidenceInventory` remains the observation store." in ssot_doc
+    assert "Strategy outputs reference `case_snapshot_id`." in ssot_doc
