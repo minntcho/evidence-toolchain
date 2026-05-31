@@ -6,6 +6,10 @@ from typing import Any
 
 from evidence_toolchain.atomizers import SimpleTextAtomizer
 from evidence_toolchain.atoms import AtomizerResult
+from evidence_toolchain.case_snapshot import (
+    build_evidence_case_snapshot,
+    strategy_view_metadata,
+)
 from evidence_toolchain.claims import DeclaredClaim, derive_need_spec
 from evidence_toolchain.ingestion import EvidenceInventory
 from evidence_toolchain.investigation import InvestigationBudget, InvestigationState
@@ -25,6 +29,7 @@ class EvidenceResolutionRun:
     run_id: str
     inventory: EvidenceInventory
     claims: tuple[DeclaredClaim, ...]
+    view_metadata: dict[str, Any]
     need_specs: tuple[Any, ...]
     initial_normalization_results: tuple[NormalizationResult, ...]
     initial_graph: EvidenceResolutionGraph
@@ -49,6 +54,7 @@ class EvidenceResolutionRun:
             "run_id": self.run_id,
             "inventory": _to_json_compatible(self.inventory),
             "claims": _to_json_compatible(self.claims),
+            "view_metadata": _to_json_compatible(self.view_metadata),
             "need_specs": _to_json_compatible(self.need_specs),
             "initial_normalization_results": _to_json_compatible(
                 self.initial_normalization_results
@@ -114,12 +120,23 @@ def run_resolution_cycle(
     """Run the deterministic local X-Y evidence resolution cycle."""
 
     active_run_id = run_id or f"{inventory.bundle_id}_resolution_cycle"
+    active_claims = tuple(claims)
+    case_snapshot = build_evidence_case_snapshot(
+        inventory=inventory,
+        claims=active_claims,
+    )
+    view_metadata = strategy_view_metadata(
+        snapshot=case_snapshot,
+        strategy_id="resolution_cycle",
+        strategy_version="0.1.0",
+        run_id=active_run_id,
+        view_kind="EvidenceResolutionGraph",
+    )
     active_normalizer = normalizer or DeterministicNormalizer()
     active_resolver = resolver or HardGateResolver()
     active_gap_planner = gap_planner or ResolutionGapPlanner()
     active_unit_retriever = unit_retriever or CandidateUnitRetriever()
     active_budget = budget or InvestigationBudget(max_iterations=max_investigation_steps)
-    active_claims = tuple(claims)
     need_specs = tuple(derive_need_spec(claim) for claim in active_claims)
     initial_normalizations = tuple(
         normalization
@@ -152,6 +169,10 @@ def run_resolution_cycle(
         metadata={
             "runner": "resolution_cycle_v0",
             "gap_planner": active_gap_planner.producer,
+            "case_snapshot_id": case_snapshot.snapshot_id,
+            "strategy_id": "resolution_cycle",
+            "strategy_version": "0.1.0",
+            "view_kind": "EvidenceResolutionGraph",
         },
     )
     runner = investigation_runner or LocalInvestigationRunner(
@@ -170,6 +191,7 @@ def run_resolution_cycle(
         run_id=active_run_id,
         inventory=inventory,
         claims=active_claims,
+        view_metadata=view_metadata,
         need_specs=need_specs,
         initial_normalization_results=initial_normalizations,
         initial_graph=initial_graph,
