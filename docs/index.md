@@ -51,7 +51,8 @@ AttachmentBundle
 7. [Runner and Report](convergence/06-runner-and-report.md)
 8. [Integration with Existing Architecture](convergence/07-integration-with-existing-architecture.md)
 9. [Evidence Convergence Kernel Test Plan](convergence/08-test-plan.md)
-10. [Evidence Convergence Future Extensions](convergence/future-extensions.md)
+10. [SSOT and Strategy Boundary](convergence/09-ssot-and-strategy-boundary.md)
+11. [Evidence Convergence Future Extensions](convergence/future-extensions.md)
 
 ## 프로젝트 입장
 
