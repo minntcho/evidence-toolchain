@@ -10,6 +10,15 @@ from evidence_toolchain.convergence.masks import (
     provenance_present_mask,
 )
 from evidence_toolchain.convergence.patches import CapabilitySpec, MaskPatch
+from evidence_toolchain.convergence.reports import (
+    ClaimConvergenceReport,
+    ConvergenceReport,
+)
+from evidence_toolchain.convergence.runner import (
+    ConvergenceRun,
+    PatchProducer,
+    run_convergence_cycle,
+)
 from evidence_toolchain.convergence.scheduler import select_capabilities
 from evidence_toolchain.convergence.schemas import EvidenceSchema, SlotDef
 from evidence_toolchain.convergence.validator import (
@@ -24,9 +33,13 @@ __all__ = [
     "CapabilitySpec",
     "CandidateGap",
     "CandidateMaskState",
+    "ClaimConvergenceReport",
+    "ConvergenceReport",
+    "ConvergenceRun",
     "EvidenceCandidate",
     "EvidenceSchema",
     "MaskPatch",
+    "PatchProducer",
     "PatchValidationError",
     "PatchValidationResult",
     "SlotDef",
@@ -34,6 +47,7 @@ __all__ = [
     "compute_candidate_gap",
     "mask_has_unknown_bits",
     "provenance_present_mask",
+    "run_convergence_cycle",
     "select_capabilities",
     "validate_candidate_state",
     "validate_patch",

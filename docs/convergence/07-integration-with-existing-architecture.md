@@ -95,6 +95,35 @@ EvidenceInventory
   -> run_convergence_cycle
 ```
 
+## Public API Boundary
+
+`evidence_toolchain.convergence` exports the kernel API.
+
+Stable imports should come from this namespace when callers need core
+convergence types and the runner:
+
+```python
+from evidence_toolchain.convergence import (
+    ConvergenceReport,
+    ConvergenceRun,
+    EvidenceCandidate,
+    MaskPatch,
+    run_convergence_cycle,
+)
+```
+
+The top-level `evidence_toolchain` package keeps the existing resolution and
+adapter harness exports. The top-level `evidence_toolchain` does not export convergence kernel symbols
+such as `run_convergence_cycle`, `ConvergenceRun`, or `ConvergenceReport`.
+
+Adapter acceptance remains a harness surface. `run_convergence_adapter_acceptance`
+may be imported from top-level `evidence_toolchain` because it returns
+`AdapterAcceptanceReport`, not a new runtime authority.
+
+Projection stays separate. `ConvergenceReport -> EvidenceResolutionGraph` must
+be implemented as an explicit adapter if needed later, not as an implicit import
+or side effect of the kernel namespace.
+
 ## Shared input: EvidenceInventory
 
 Convergence Kernel은 새 observation store를 만들지 않습니다.

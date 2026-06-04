@@ -161,6 +161,7 @@ Projection is lossy. Candidate masks, patch events, review triggers, and
 partial failures cannot always be represented faithfully in a resolution graph.
 
 Therefore projection must be explicit, named, and documented as a view adapter.
+Projection must stay an explicit adapter.
 
 ## Downstream Authority Boundary
 

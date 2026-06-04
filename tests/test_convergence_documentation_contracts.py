@@ -87,6 +87,23 @@ def test_convergence_docs_define_snapshot_ssot_and_strategy_views():
     assert "Strategy outputs reference `case_snapshot_id`." in ssot_doc
 
 
+def test_convergence_docs_define_public_api_import_boundary():
+    integration_doc = Path(
+        "docs/convergence/07-integration-with-existing-architecture.md"
+    ).read_text(encoding="utf-8")
+    ssot_doc = Path(
+        "docs/convergence/09-ssot-and-strategy-boundary.md"
+    ).read_text(encoding="utf-8")
+
+    assert "## Public API Boundary" in integration_doc
+    assert "`evidence_toolchain.convergence` exports the kernel API." in integration_doc
+    assert "`run_convergence_cycle`" in integration_doc
+    assert "`ConvergenceReport`" in integration_doc
+    assert "top-level `evidence_toolchain` does not export convergence kernel symbols" in integration_doc
+    assert "Adapter acceptance remains a harness surface." in integration_doc
+    assert "Projection must stay an explicit adapter." in ssot_doc
+
+
 def test_convergence_docs_preserve_expected_behavior_view_boundary():
     test_plan = Path("docs/convergence/08-test-plan.md").read_text(encoding="utf-8")
 
